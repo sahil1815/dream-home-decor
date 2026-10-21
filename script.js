@@ -6,7 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Current State
   let currentProduct = {
-    title: 'প্রিমিয়াম কাঠের মিনি বুকশেলফ',
+    title: 'প্রিমিয়াম কাঠের চুড়ির আলমারি (লাইটিংসহ)',
     unitPrice: 699,
     img: 'assets/product-1.jpg',
     qty: 1
