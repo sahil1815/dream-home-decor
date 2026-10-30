@@ -16,11 +16,13 @@ import {
   Clock,
   Loader2,
   Check,
+  Heart,
 } from 'lucide-react';
 import { Product, SiteSettings, DeliveryZone, PaymentMethod } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 import { useCart } from '@/context/cart-context';
+import { useWishlist } from '@/context/wishlist-context';
 import { submitOrderAction } from '@/lib/actions';
 
 interface ProductDetailClientProps {
@@ -31,6 +33,8 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product, settings }: ProductDetailClientProps) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isSaved, toggleWishlist } = useWishlist();
+  const saved = isSaved(product.id);
 
   const images = product.images && product.images.length > 0
     ? product.images
@@ -302,6 +306,20 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           >
             <ShoppingCart className="w-4 h-4 shrink-0" />
             <span className="truncate">কার্টে যোগ করুন</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleWishlist(product)}
+            className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${
+              saved
+                ? 'border-rose-300 bg-rose-50 text-rose-500 hover:bg-rose-100'
+                : 'border-stone-300 bg-white text-stone-600 hover:text-rose-500 hover:border-rose-300 hover:bg-rose-50/50'
+            }`}
+            aria-label={saved ? 'সেভ তালিকা থেকে মুছুন' : 'পছন্দে সেভ করুন'}
+            title={saved ? 'সেভ করা আছে' : 'সেভ করুন'}
+          >
+            <Heart className={`w-5 h-5 ${saved ? 'fill-rose-500 stroke-rose-500' : 'stroke-[1.75]'}`} />
           </button>
         </div>
 

@@ -6,11 +6,12 @@ import { usePathname } from 'next/navigation';
 import {
   Home,
   Grid3X3,
-  PackageCheck,
+  Heart,
   MessageCircle,
   ShoppingBag,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
+import { useWishlist } from '@/context/wishlist-context';
 import { SiteSettings } from '@/types/database';
 import { buildWhatsAppUrl } from '@/lib/utils';
 
@@ -21,6 +22,7 @@ interface BottomStickyBarProps {
 export function BottomStickyBar({ settings }: BottomStickyBarProps) {
   const pathname = usePathname();
   const { totalItems, openCart, isCartOpen } = useCart();
+  const { totalSaved } = useWishlist();
 
   // Do not render on admin dashboard pages
   if (pathname?.startsWith('/admin')) {
@@ -35,7 +37,7 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
 
   const isHomeActive = pathname === '/';
   const isExploreActive = pathname.startsWith('/products');
-  const isTrackActive = pathname.startsWith('/track-order');
+  const isSavedActive = pathname.startsWith('/saved');
   const isBagActive = isCartOpen || pathname === '/checkout';
 
   return (
@@ -92,27 +94,36 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
           </span>
         </Link>
 
-        {/* 3. TRACK ORDER (Available feature replacing SAVED) */}
+        {/* 3. SAVED */}
         <Link
-          href="/track-order"
+          href="/saved"
           className={`flex flex-col items-center justify-center gap-1 py-1 transition-colors group ${
-            isTrackActive
+            isSavedActive
               ? 'text-[#8B5A2B]'
               : 'text-stone-800 hover:text-stone-950'
           }`}
-          aria-label="অর্ডার ট্র্যাকিং"
+          aria-label={`সেভ করা তালিকা (${totalSaved} টি পণ্য)`}
         >
-          <PackageCheck
-            className={`w-5 h-5 transition-transform group-active:scale-90 ${
-              isTrackActive ? 'stroke-[2.2]' : 'stroke-[1.75]'
-            }`}
-          />
+          <div className="relative flex items-center justify-center">
+            <Heart
+              className={`w-5 h-5 transition-transform group-active:scale-90 ${
+                isSavedActive
+                  ? 'fill-[#8B5A2B] stroke-[#8B5A2B]'
+                  : 'stroke-[1.75]'
+              }`}
+            />
+            {totalSaved > 0 && (
+              <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[10px] font-bold min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center shadow-xs ring-2 ring-[#FAF8F5] animate-in zoom-in-50 duration-150">
+                {totalSaved}
+              </span>
+            )}
+          </div>
           <span
             className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none whitespace-nowrap ${
-              isTrackActive ? 'font-bold' : 'font-semibold'
+              isSavedActive ? 'font-bold' : 'font-semibold'
             }`}
           >
-            TRACK ORDER
+            SAVED
           </span>
         </Link>
 

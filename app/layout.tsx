@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/cart-context';
+import { WishlistProvider } from '@/context/wishlist-context';
 import { getSiteSettings, getCategories } from '@/lib/data';
 import { AnnouncementBar } from '@/components/storefront/AnnouncementBar';
 import { Navbar } from '@/components/storefront/Navbar';
@@ -71,27 +72,29 @@ export default async function RootLayout({
     >
       <body className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#1C1917] antialiased">
         <CartProvider>
-          {/* Top Announcement Bar */}
-          <AnnouncementBar settings={settings} />
+          <WishlistProvider>
+            {/* Top Announcement Bar */}
+            <AnnouncementBar settings={settings} />
 
-          {/* Sticky Navigation */}
-          <Navbar settings={settings} categories={categories} />
+            {/* Sticky Navigation */}
+            <Navbar settings={settings} categories={categories} />
 
-          {/* Main Content */}
-          <main className="flex-1 pb-16 lg:pb-0">{children}</main>
+            {/* Main Content */}
+            <main className="flex-1 pb-16 lg:pb-0">{children}</main>
 
-          {/* Footer */}
-          <Footer settings={settings} />
+            {/* Footer */}
+            <Footer settings={settings} />
 
-          {/* Global Drawers & Modals */}
-          <CartDrawer />
-          <QuickOrderModal />
+            {/* Global Drawers & Modals */}
+            <CartDrawer />
+            <QuickOrderModal />
 
-          {/* Floating WhatsApp / Phone Contact (Desktop) */}
-          <FloatingContact settings={settings} />
+            {/* Floating WhatsApp / Phone Contact (Desktop) */}
+            <FloatingContact settings={settings} />
 
-          {/* Bottom Sticky Navigation Bar (Mobile / Tablet) */}
-          <BottomStickyBar settings={settings} />
+            {/* Bottom Sticky Navigation Bar (Mobile / Tablet) */}
+            <BottomStickyBar settings={settings} />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

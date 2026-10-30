@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Zap, Check, MessageCircle, Ruler } from 'lucide-react';
+import { ShoppingCart, Zap, Check, MessageCircle, Ruler, Heart } from 'lucide-react';
 import { Product } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 import { useCart } from '@/context/cart-context';
+import { useWishlist } from '@/context/wishlist-context';
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +17,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product, whatsappNumber = '8801712345678' }: ProductCardProps) {
   const { addToCart, openQuickOrder } = useCart();
+  const { isSaved, toggleWishlist } = useWishlist();
+  const saved = isSaved(product.id);
 
   const primaryImage =
     product.images?.[0] ||
@@ -82,6 +85,29 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
               <span>{product.dimensions}</span>
             </div>
           )}
+
+          {/* Wishlist / Save Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            className={`absolute bottom-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-xs transition-transform active:scale-90 cursor-pointer ${
+              saved
+                ? 'bg-rose-50 text-rose-500 hover:bg-rose-100'
+                : 'bg-white/90 text-stone-600 hover:text-rose-500 hover:bg-white'
+            }`}
+            aria-label={saved ? 'সেভ তালিকা থেকে মুছুন' : 'পছন্দে সেভ করুন'}
+            title={saved ? 'Saved' : 'Save to wishlist'}
+          >
+            <Heart
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                saved ? 'fill-rose-500 stroke-rose-500' : 'stroke-[1.75]'
+              }`}
+            />
+          </button>
         </div>
 
         {/* Content Section */}
