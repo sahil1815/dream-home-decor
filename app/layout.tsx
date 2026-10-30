@@ -9,6 +9,7 @@ import { Footer } from '@/components/storefront/Footer';
 import { CartDrawer } from '@/components/storefront/CartDrawer';
 import { QuickOrderModal } from '@/components/storefront/QuickOrderModal';
 import { FloatingContact } from '@/components/storefront/FloatingContact';
+import { BottomStickyBar } from '@/components/storefront/BottomStickyBar';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -77,7 +78,7 @@ export default async function RootLayout({
           <Navbar settings={settings} categories={categories} />
 
           {/* Main Content */}
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-16 lg:pb-0">{children}</main>
 
           {/* Footer */}
           <Footer settings={settings} />
@@ -86,8 +87,11 @@ export default async function RootLayout({
           <CartDrawer />
           <QuickOrderModal />
 
-          {/* Floating WhatsApp / Phone Contact */}
+          {/* Floating WhatsApp / Phone Contact (Desktop) */}
           <FloatingContact settings={settings} />
+
+          {/* Bottom Sticky Navigation Bar (Mobile / Tablet) */}
+          <BottomStickyBar settings={settings} />
         </CartProvider>
       </body>
     </html>
