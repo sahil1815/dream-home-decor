@@ -64,7 +64,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header Banner */}
-      <div className="bg-[#1C1917] rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-[#1C1917] rounded-3xl p-5 sm:p-8 md:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 bg-[#8B5A2B] text-white px-3 py-1 rounded-full text-xs font-bn font-bold">
             <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />
@@ -73,14 +73,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <h1 className="text-2xl sm:text-4xl font-extrabold font-bn text-white">
             {currentCategory ? currentCategory.name_bn : 'সকল ফার্নিচার কালেকশন'}
           </h1>
-          <p className="text-stone-300 font-bn text-sm max-w-xl">
+          <p className="text-stone-300 font-bn text-xs sm:text-sm max-w-xl">
             উন্নত মেলামাইন বোর্ড দিয়ে নিজস্ব কারখানায় প্রস্তুত। শোরুমের অতিরিক্ত খরচ ছাড়া সরাসরি
             কারখানা রেটে কেনাকাটা করুন।
           </p>
         </div>
 
-        <div className="text-right shrink-0">
-          <span className="font-sans text-3xl font-extrabold text-amber-400">
+        <div className="text-left md:text-right shrink-0">
+          <span className="font-sans text-2xl sm:text-3xl font-extrabold text-amber-400">
             {filtered.length}
           </span>
           <span className="text-stone-400 font-bn text-xs block">টি প্রোডাক্ট উপলব্ধ</span>

@@ -34,7 +34,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } catch {
       // Ignore
     }
-    router.push('/admin/login');
+    document.cookie = 'dhd_demo_admin=; path=/; max-age=0; SameSite=Lax';
+    window.location.href = '/admin/login';
   };
 
   const navItems = [
@@ -48,43 +49,63 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-stone-100 flex flex-col md:flex-row">
       {/* Mobile Header */}
-      <div className="md:hidden bg-[#1C1917] text-white p-4 flex items-center justify-between sticky top-0 z-40 border-b border-stone-800">
+      <div className="md:hidden bg-[#1C1917] text-white p-3.5 sm:p-4 flex items-center justify-between sticky top-0 z-40 border-b border-stone-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#8B5A2B] text-white flex items-center justify-center font-bold font-serif text-sm">
+          <div className="w-8 h-8 rounded-lg bg-[#8B5A2B] text-white flex items-center justify-center font-bold font-serif text-sm shrink-0">
             DH
           </div>
-          <span className="font-serif font-bold text-base text-white">
+          <span className="font-serif font-bold text-base text-white truncate">
             Dream Home Admin
           </span>
         </div>
         <button
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          className="p-1.5 text-stone-300 hover:text-white"
+          className="p-1.5 text-stone-300 hover:text-white rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
+          aria-label={mobileNavOpen ? 'মেনু বন্ধ করুন' : 'মেনু খুলুন'}
         >
           {mobileNavOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Desktop Sidebar / Mobile Drawer */}
+      {/* Mobile Drawer Backdrop */}
+      {mobileNavOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Desktop Sidebar / Mobile Slide-Over Drawer */}
       <aside
-        className={`w-64 bg-[#1C1917] text-[#FAF8F5] flex flex-col justify-between p-5 border-r border-stone-800 shrink-0 ${
-          mobileNavOpen ? 'block' : 'hidden md:flex'
+        className={`fixed md:sticky top-0 bottom-0 left-0 z-50 md:z-30 w-72 md:w-64 bg-[#1C1917] text-[#FAF8F5] flex flex-col justify-between p-5 border-r border-stone-800 shrink-0 h-screen transition-transform duration-300 ease-in-out ${
+          mobileNavOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <div className="space-y-6">
           {/* Brand header */}
-          <div className="hidden md:flex items-center gap-3 pb-4 border-b border-stone-800">
-            <div className="w-10 h-10 rounded-xl bg-[#8B5A2B] text-white flex items-center justify-center font-bold font-serif text-base shadow-sm">
-              DH
+          <div className="flex items-center justify-between pb-4 border-b border-stone-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#8B5A2B] text-white flex items-center justify-center font-bold font-serif text-base shadow-sm shrink-0">
+                DH
+              </div>
+              <div>
+                <h2 className="font-serif font-bold text-base text-white leading-tight">
+                  Dream Home Decor
+                </h2>
+                <span className="text-[11px] font-bn text-amber-500 font-semibold">
+                  মালিক ও কর্মী প্যানেল
+                </span>
+              </div>
             </div>
-            <div>
-              <h2 className="font-serif font-bold text-base text-white leading-tight">
-                Dream Home Decor
-              </h2>
-              <span className="text-[11px] font-bn text-amber-500 font-semibold">
-                মালিক ও কর্মী প্যানেল
-              </span>
-            </div>
+
+            {/* Close button for mobile drawer */}
+            <button
+              onClick={() => setMobileNavOpen(false)}
+              className="md:hidden p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-stone-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Nav links */}
@@ -119,7 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="flex items-center justify-between px-3.5 py-2 rounded-xl text-stone-300 hover:text-white hover:bg-stone-800 text-xs font-bn transition-colors"
           >
             <span className="flex items-center gap-2">
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               <span>স্টোরফ্রন্ট ভিজিট করুন</span>
             </span>
             <span className="text-[10px] text-amber-400 font-sans">Live</span>
@@ -130,14 +151,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-3.5 py-2 rounded-xl text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-bn transition-colors cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
             <span>লগআউট করুন</span>
           </button>
         </div>
       </aside>
 
       {/* Main Admin Page Content */}
-      <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+      <main className="flex-1 p-3.5 sm:p-6 md:p-8 min-w-0 overflow-y-auto">
         <div className="max-w-6xl mx-auto">{children}</div>
       </main>
     </div>

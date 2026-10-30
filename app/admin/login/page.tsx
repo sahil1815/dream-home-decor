@@ -26,22 +26,25 @@ export default function AdminLoginPage() {
       });
 
       if (error) {
-        // If Supabase keys are default/local placeholder, provide demo access
-        if (
-          email === 'admin@dreamhome.com' ||
-          !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-          process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-        ) {
-          router.push('/admin');
-          return;
+        if (error.message?.toLowerCase().includes('email not confirmed')) {
+          setErrorMsg(
+            'ইমেইলটি এখনও কনফার্ম করা হয়নি (Email not confirmed)। অনুগ্রহ করে Supabase ড্যাশবোর্ডে Authentication > Users থেকে ইউজারটি Confirm করুন অথবা নিচের "ডেমো মোডে প্রবেশ করুন" বাটনে ক্লিক করুন।'
+          );
+        } else if (error.message?.toLowerCase().includes('invalid login credentials')) {
+          setErrorMsg(
+            'ভুল ইমেইল বা পাসওয়ার্ড (Invalid credentials)। Supabase Authentication-এ এই ইউজার তৈরি ও কনফার্ম করা আছে কি না যাচাই করুন।'
+          );
+        } else {
+          setErrorMsg(error.message || 'ভুল ইমেইল বা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।');
         }
-        setErrorMsg(error.message || 'ভুল ইমেইল বা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।');
       } else {
-        router.push('/admin');
+        // Clear any previous demo cookie and navigate
+        document.cookie = 'dhd_demo_admin=; path=/; max-age=0; SameSite=Lax';
+        window.location.href = '/admin';
       }
-    } catch {
-      // Demo bypass for testing
-      router.push('/admin');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'লগইন করতে সমস্যা হচ্ছে';
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -50,6 +53,12 @@ export default function AdminLoginPage() {
   const fillDemoCredentials = () => {
     setEmail('admin@dreamhome.com');
     setPassword('dreamhome123');
+  };
+
+  const handleDemoAccess = () => {
+    // Set 24h demo cookie for instant local access
+    document.cookie = 'dhd_demo_admin=true; path=/; max-age=86400; SameSite=Lax';
+    window.location.href = '/admin';
   };
 
   return (
@@ -129,15 +138,25 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Helper */}
-          <div className="pt-4 border-t border-stone-100 text-center space-y-2">
-            <button
-              type="button"
-              onClick={fillDemoCredentials}
-              className="text-xs font-bn font-semibold text-[#8B5A2B] hover:underline"
-            >
-              [ডেমো ক্রিডেনশিয়ালস অটো-ফিল করুন]
-            </button>
+          {/* Quick Demo Credentials & Demo Mode Helper */}
+          <div className="pt-4 border-t border-stone-100 text-center space-y-3">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={fillDemoCredentials}
+                className="text-xs font-bn font-semibold text-[#8B5A2B] hover:underline"
+              >
+                [ডেমো ক্রিডেনশিয়ালস ফিল করুন]
+              </button>
+              <span className="text-stone-300">|</span>
+              <button
+                type="button"
+                onClick={handleDemoAccess}
+                className="text-xs font-bn font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition-colors"
+              >
+                ডেমো মোডে প্রবেশ করুন →
+              </button>
+            </div>
             <p className="text-[11px] text-stone-400 font-sans">
               admin@dreamhome.com / dreamhome123
             </p>

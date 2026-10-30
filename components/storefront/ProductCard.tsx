@@ -85,31 +85,31 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
         </div>
 
         {/* Content Section */}
-        <div className="p-4 space-y-2">
+        <div className="p-3.5 sm:p-4 space-y-1.5 sm:space-y-2">
           {/* Material note */}
           {product.material && (
-            <p className="text-[11px] text-stone-500 font-bn truncate">
+            <p className="text-[10px] sm:text-[11px] text-stone-500 font-bn truncate">
               {product.material}
             </p>
           )}
 
           {/* Product Title */}
           <Link href={`/products/${product.slug}`} className="block">
-            <h3 className="font-bn font-bold text-stone-900 text-base leading-snug line-clamp-2 hover:text-[#8B5A2B] transition-colors">
+            <h3 className="font-bn font-bold text-stone-900 text-sm sm:text-base leading-snug line-clamp-2 hover:text-[#8B5A2B] transition-colors">
               {product.title_bn || product.title}
             </h3>
-            <p className="text-xs text-stone-400 font-sans truncate mt-0.5">
+            <p className="text-[11px] sm:text-xs text-stone-400 font-sans truncate mt-0.5">
               {product.title}
             </p>
           </Link>
 
           {/* Pricing */}
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-lg sm:text-xl font-extrabold text-[#8B5A2B] font-sans">
+          <div className="flex items-baseline gap-1.5 sm:gap-2 pt-0.5 sm:pt-1">
+            <span className="text-base sm:text-xl font-extrabold text-[#8B5A2B] font-sans">
               {formatBDT(currentPrice)}
             </span>
             {originalPrice && (
-              <span className="text-xs text-stone-400 line-through font-sans">
+              <span className="text-[11px] sm:text-xs text-stone-400 line-through font-sans">
                 {formatBDT(originalPrice)}
               </span>
             )}
@@ -118,26 +118,26 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
       </div>
 
       {/* Action Buttons (F-Commerce Conversion Focused) */}
-      <div className="p-4 pt-0 space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="p-3.5 sm:p-4 pt-0 space-y-1.5 sm:space-y-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
           {/* Quick Order Button */}
           <button
             type="button"
             onClick={() => openQuickOrder(product)}
-            className="flex items-center justify-center gap-1 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-2 px-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-2 px-1.5 sm:px-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
           >
-            <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-            <span>দ্রুত অর্ডার</span>
+            <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300 shrink-0" />
+            <span className="truncate">দ্রুত অর্ডার</span>
           </button>
 
           {/* Add to Cart Button */}
           <button
             type="button"
             onClick={() => addToCart(product, 1)}
-            className="flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 text-stone-800 py-2 px-3 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 text-stone-800 py-2 px-1.5 sm:px-3 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
           >
-            <ShoppingCart className="w-3.5 h-3.5 text-stone-600" />
-            <span>কার্টে যোগ</span>
+            <ShoppingCart className="w-3.5 h-3.5 text-stone-600 shrink-0" />
+            <span className="truncate">কার্টে যোগ</span>
           </button>
         </div>
 
@@ -146,10 +146,10 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-1.5 rounded-lg text-[11px] font-bn font-medium transition-colors"
+          className="w-full flex items-center justify-center gap-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bn font-medium transition-colors"
         >
-          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-          <span>হোয়াটসঅ্যাপে অর্ডার করুন</span>
+          <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span className="truncate">হোয়াটসঅ্যাপে অর্ডার করুন</span>
         </a>
       </div>
     </div>

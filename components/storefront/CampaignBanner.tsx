@@ -48,16 +48,16 @@ export function CampaignBanner({ campaigns }: CampaignBannerProps) {
 
             {/* CTA to Facebook Contest */}
             {activeCampaign.facebook_post_link && (
-              <div className="shrink-0">
+              <div className="w-full lg:w-auto shrink-0">
                 <a
                   href={activeCampaign.facebook_post_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-stone-950 font-bn font-bold text-sm sm:text-base px-7 py-4 rounded-full shadow-lg transition-all hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-stone-950 font-bn font-bold text-sm sm:text-base px-6 sm:px-7 py-3.5 sm:py-4 rounded-full shadow-lg transition-all hover:scale-105"
                 >
-                  <Gift className="w-5 h-5 text-stone-900" />
+                  <Gift className="w-5 h-5 text-stone-900 shrink-0" />
                   <span>ফেসবুক লটারিতে অংশ নিন</span>
-                  <ExternalLink className="w-4 h-4 ml-1" />
+                  <ExternalLink className="w-4 h-4 ml-1 shrink-0" />
                 </a>
               </div>
             )}

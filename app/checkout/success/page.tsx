@@ -46,11 +46,11 @@ function SuccessContent() {
   const whatsappMessage = `হ্যালো ড্রিম হোম ডেকোর, আমি অর্ডার #${orderNumber} কনফার্ম করেছি। ডেলিভারি সংক্রান্ত আপডেট জানতে চাই।`;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-stone-200/90 shadow-xl print-shadow-none text-center space-y-6">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-8 sm:py-12">
+      <div className="bg-white rounded-3xl p-5 sm:p-8 md:p-10 border border-stone-200/90 shadow-xl print-shadow-none text-center space-y-5 sm:space-y-6">
         {/* Success Icon */}
-        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-          <CheckCircle2 className="w-10 h-10" />
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+          <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
         </div>
 
         {/* Headline */}
@@ -61,30 +61,30 @@ function SuccessContent() {
           <h1 className="text-2xl sm:text-3xl font-bn font-extrabold text-stone-900">
             ধন্যবাদ, {name}!
           </h1>
-          <p className="text-stone-500 font-bn text-sm max-w-lg mx-auto">
+          <p className="text-stone-500 font-bn text-xs sm:text-sm max-w-lg mx-auto">
             আপনার অর্ডারটি ড্রিম হোম ডেকোর কারখানায় প্রক্রিয়াকরণ শুরু হয়েছে। খুব শীঘ্রই আমাদের প্রতিনিধি
             কল করে ডেলিভারি সময় জানিয়ে দেবে।
           </p>
         </div>
 
         {/* Invoice Summary Box (Printable) */}
-        <div className="p-6 bg-[#FAF8F5] rounded-2xl border border-stone-200/80 text-left space-y-4">
+        <div className="p-4 sm:p-6 bg-[#FAF8F5] rounded-2xl border border-stone-200/80 text-left space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-stone-200 gap-2">
             <div>
               <span className="text-xs text-stone-400 font-bn block">অর্ডার নাম্বার (Order ID):</span>
-              <span className="font-sans font-extrabold text-xl text-[#8B5A2B] tracking-wide">
+              <span className="font-sans font-extrabold text-lg sm:text-xl text-[#8B5A2B] tracking-wide">
                 {orderNumber}
               </span>
             </div>
             <div className="text-left sm:text-right">
               <span className="text-xs text-stone-400 font-bn block">মোট প্রদেয় মূল্য (ক্যাশ অন ডেলিভারি):</span>
-              <span className="font-sans font-extrabold text-xl text-stone-900">
+              <span className="font-sans font-extrabold text-lg sm:text-xl text-stone-900">
                 {formatBDT(Number(total))}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bn text-stone-600">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs font-bn text-stone-600">
             <div>
               <span className="text-stone-400 block">গ্রাহকের নাম:</span>
               <span className="font-semibold text-stone-900 text-sm">{name}</span>
@@ -110,29 +110,29 @@ function SuccessContent() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 no-print">
           <button
             onClick={handlePrint}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-stone-900 hover:bg-black text-white px-6 py-3 rounded-full text-xs sm:text-sm font-bn font-semibold transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-stone-900 hover:bg-black text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bn font-semibold transition-colors cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-4 h-4 shrink-0" />
             <span>ইনভয়েস প্রিন্ট / ডাউনলোড করুন</span>
           </button>
 
           <Link
             href={`/track-order?query=${encodeURIComponent(orderNumber)}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-bn font-bold transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bn font-bold transition-colors"
           >
-            <PackageCheck className="w-4 h-4" />
+            <PackageCheck className="w-4 h-4 shrink-0" />
             <span>অর্ডারের বর্তমান অবস্থা ট্র্যাক করুন</span>
           </Link>
         </div>
 
-        <div className="pt-2 no-print flex items-center justify-center gap-4 text-xs font-bn text-stone-500">
+        <div className="pt-2 no-print flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-bn text-stone-500">
           <a
             href={`https://wa.me/8801712345678?text=${encodeURIComponent(whatsappMessage)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-emerald-700 hover:underline font-semibold"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4 shrink-0" />
             <span>WhatsApp-এ যোগাযোগ করুন</span>
           </a>
           <span>•</span>

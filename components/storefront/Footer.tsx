@@ -202,15 +202,15 @@ export function Footer({ settings }: FooterProps) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-300 font-bn">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-stone-300 font-bn text-center sm:text-left">
           <p>© {new Date().getFullYear()} {settings.site_name}. সর্বস্বত্ব সংরক্ষিত।</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4">
             <Link href="/admin" className="hover:text-stone-300 transition-colors">
               অ্যাডমিন পোর্টাল
             </Link>
             <span>•</span>
             <span className="flex items-center gap-1">
-              Made with <Heart className="w-3 h-3 text-rose-500 fill-rose-500" /> for Bangladeshi Homes
+              Made with <Heart className="w-3 h-3 text-rose-500 fill-rose-500 shrink-0" /> for Bangladeshi Homes
             </span>
           </div>
         </div>

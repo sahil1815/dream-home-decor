@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Hind_Siliguri } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/cart-context';
@@ -23,6 +23,12 @@ const hindSiliguri = Hind_Siliguri({
   variable: '--font-bengali',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: 'Dream Home Decor | নিজস্ব কারখানায় তৈরি আধুনিক ফার্নিচার ও পড়ার টেবিল',

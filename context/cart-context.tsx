@@ -35,12 +35,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       if (stored) {
-        setCart(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        queueMicrotask(() => {
+          setCart(parsed);
+          setIsHydrated(true);
+        });
+        return;
       }
     } catch {
       // Ignore localStorage read errors
     }
-    setIsHydrated(true);
+    queueMicrotask(() => {
+      setIsHydrated(true);
+    });
   }, []);
 
   // Save cart to localStorage

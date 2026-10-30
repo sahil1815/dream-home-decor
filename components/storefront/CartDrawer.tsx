@@ -21,26 +21,27 @@ export function CartDrawer() {
         className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-stone-200 animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-stone-200 animate-in slide-in-from-right duration-300 h-full max-h-dvh">
           {/* Header */}
-          <div className="p-4 sm:p-5 bg-[#1C1917] text-white flex items-center justify-between">
+          <div className="p-3.5 sm:p-5 bg-[#1C1917] text-white flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-amber-400" />
-              <h2 className="font-bn font-bold text-lg text-white">
+              <ShoppingBag className="w-5 h-5 text-amber-400 shrink-0" />
+              <h2 className="font-bn font-bold text-base sm:text-lg text-white">
                 আপনার শপিং কার্ট ({totalItems})
               </h2>
             </div>
             <button
               onClick={closeCart}
-              className="p-1.5 rounded-full hover:bg-stone-800 text-stone-300 hover:text-white transition-colors"
+              className="p-1.5 rounded-full hover:bg-stone-800 text-stone-300 hover:text-white transition-colors cursor-pointer"
+              aria-label="কার্ট বন্ধ করুন"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
             {cart.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
@@ -56,7 +57,7 @@ export function CartDrawer() {
                 </div>
                 <button
                   onClick={closeCart}
-                  className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-5 py-2.5 rounded-full text-xs font-bn font-semibold transition-colors"
+                  className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-5 py-2.5 rounded-full text-xs font-bn font-semibold transition-colors cursor-pointer"
                 >
                   ফার্নিচার কালেকশন দেখুন
                 </button>
@@ -71,9 +72,9 @@ export function CartDrawer() {
                 return (
                   <div
                     key={`${item.product.id}-${item.selectedColor}`}
-                    className="p-3 bg-white rounded-2xl border border-stone-200/80 shadow-2xs flex gap-3 items-center justify-between"
+                    className="p-2.5 sm:p-3 bg-white rounded-2xl border border-stone-200/80 shadow-2xs flex gap-2.5 sm:gap-3 items-center justify-between"
                   >
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-stone-100">
+                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0 border border-stone-100">
                       <Image
                         src={getOptimizedImageUrl(image, 150)}
                         alt={item.product.title}
@@ -82,12 +83,12 @@ export function CartDrawer() {
                       />
                     </div>
 
-                    <div className="flex-1 min-w-0 pr-2">
+                    <div className="flex-1 min-w-0 pr-1.5 sm:pr-2">
                       <h4 className="font-bn font-bold text-stone-900 text-xs sm:text-sm truncate">
                         {item.product.title_bn || item.product.title}
                       </h4>
                       {item.selectedColor && (
-                        <p className="text-[11px] text-stone-500 font-bn">
+                        <p className="text-[11px] text-stone-500 font-bn truncate">
                           কালার: {item.selectedColor}
                         </p>
                       )}
@@ -97,13 +98,13 @@ export function CartDrawer() {
                     </div>
 
                     {/* Quantity & Delete */}
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-col items-end gap-1.5 sm:gap-2 shrink-0">
                       <button
                         onClick={() => removeFromCart(item.product.id, item.selectedColor)}
-                        className="text-stone-400 hover:text-rose-600 transition-colors"
+                        className="text-stone-400 hover:text-rose-600 transition-colors p-1"
                         aria-label="পণ্য মুছুন"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
 
                       <div className="flex items-center border border-stone-200 rounded-lg overflow-hidden bg-stone-50">
@@ -115,7 +116,7 @@ export function CartDrawer() {
                               item.selectedColor
                             )
                           }
-                          className="px-2 py-0.5 text-xs text-stone-600 hover:bg-stone-200"
+                          className="px-2 py-0.5 text-xs text-stone-600 hover:bg-stone-200 cursor-pointer"
                         >
                           -
                         </button>
@@ -130,7 +131,7 @@ export function CartDrawer() {
                               item.selectedColor
                             )
                           }
-                          className="px-2 py-0.5 text-xs text-stone-600 hover:bg-stone-200"
+                          className="px-2 py-0.5 text-xs text-stone-600 hover:bg-stone-200 cursor-pointer"
                         >
                           +
                         </button>
@@ -144,23 +145,23 @@ export function CartDrawer() {
 
           {/* Footer Checkout CTA */}
           {cart.length > 0 && (
-            <div className="p-4 sm:p-5 bg-white border-t border-stone-200 space-y-3">
-              <div className="flex items-center justify-between text-sm font-bn">
+            <div className="p-3.5 sm:p-5 bg-white border-t border-stone-200 space-y-2.5 sm:space-y-3 shrink-0">
+              <div className="flex items-center justify-between text-xs sm:text-sm font-bn">
                 <span className="text-stone-600">পণ্য সাবটোটাল:</span>
-                <span className="text-lg font-bold font-sans text-stone-900">
+                <span className="text-base sm:text-lg font-bold font-sans text-stone-900">
                   {formatBDT(subtotal)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-bn text-stone-500 bg-amber-50 p-2 rounded-xl border border-amber-200/60">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>ডেলিভারি চার্জ পরবর্তী ধাপে যুক্ত হবে। সারাদেশে ক্যাশ অন ডেলিভারি।</span>
+              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bn text-stone-500 bg-amber-50 p-2 rounded-xl border border-amber-200/60">
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+                <span className="leading-tight">ডেলিভারি চার্জ পরবর্তী ধাপে যুক্ত হবে। সারাদেশে ক্যাশ অন ডেলিভারি।</span>
               </div>
 
               <Link
                 href="/checkout"
                 onClick={closeCart}
-                className="w-full flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-3.5 rounded-2xl font-bn font-bold text-base shadow-lg transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-3 sm:py-3.5 rounded-2xl font-bn font-bold text-sm sm:text-base shadow-lg transition-all"
               >
                 <span>অর্ডার সম্পন্ন করুন (চেকআউট)</span>
                 <ArrowRight className="w-4 h-4" />

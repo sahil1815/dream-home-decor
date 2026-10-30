@@ -163,13 +163,13 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
 
         {/* Thumbnail Carousel / Grid */}
         {images.length > 1 && (
-          <div className="flex items-center gap-3 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto pb-2">
             {images.map((img, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setActiveImageIndex(idx)}
-                className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-all ${
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
                   activeImageIndex === idx
                     ? 'border-[#8B5A2B] scale-105 shadow-md'
                     : 'border-stone-200 hover:border-stone-400 opacity-70 hover:opacity-100'
@@ -187,9 +187,9 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
         )}
 
         {/* Workshop Guarantee Box */}
-        <div className="p-5 bg-white rounded-2xl border border-stone-200 space-y-3">
-          <h4 className="font-bn font-bold text-stone-900 text-sm flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-stone-200 space-y-3">
+          <h4 className="font-bn font-bold text-stone-900 text-xs sm:text-sm flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>ড্রিম হোম ডেকোর কারখানার বিশেষ নিশ্চয়তা:</span>
           </h4>
           <ul className="text-xs font-bn text-stone-600 space-y-1.5 list-disc list-inside">
@@ -202,7 +202,7 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
       </div>
 
       {/* Right Column: Details & Direct In-Page Checkout */}
-      <div className="lg:col-span-5 space-y-6">
+      <div className="lg:col-span-5 space-y-5 sm:space-y-6">
         {/* Title & Pricing */}
         <div className="space-y-2">
           <span className="text-xs font-bn font-semibold text-[#8B5A2B] bg-[#8B5A2B]/10 px-2.5 py-1 rounded-full inline-block">
@@ -213,36 +213,36 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           </h1>
           <p className="text-xs text-stone-400 font-sans">{product.title}</p>
 
-          <div className="flex items-baseline gap-3 pt-2">
-            <span className="text-3xl font-extrabold text-[#8B5A2B] font-sans">
+          <div className="flex flex-wrap items-baseline gap-2 sm:gap-3 pt-2">
+            <span className="text-2xl sm:text-3xl font-extrabold text-[#8B5A2B] font-sans">
               {formatBDT(currentPrice)}
             </span>
             {originalPrice && (
-              <span className="text-base text-stone-400 line-through font-sans">
+              <span className="text-sm sm:text-base text-stone-400 line-through font-sans">
                 {formatBDT(originalPrice)}
               </span>
             )}
-            <span className="text-xs font-bn text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold">
+            <span className="text-xs font-bn text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold whitespace-nowrap">
               সরাসরি কারখানা মূল্য
             </span>
           </div>
         </div>
 
         {/* Specifications Pills */}
-        <div className="grid grid-cols-2 gap-2 text-xs font-bn bg-white p-3.5 rounded-2xl border border-stone-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bn bg-white p-3 sm:p-3.5 rounded-2xl border border-stone-200">
           {product.dimensions && (
             <div className="flex items-center gap-2">
               <Ruler className="w-4 h-4 text-amber-600 shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <span className="text-stone-400 block text-[10px]">পরিমাপ (Dimensions):</span>
-                <span className="font-sans font-bold text-stone-800">{product.dimensions}</span>
+                <span className="font-sans font-bold text-stone-800 truncate block">{product.dimensions}</span>
               </div>
             </div>
           )}
           {product.material && (
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#8B5A2B] shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <span className="text-stone-400 block text-[10px]">ম্যাটেরিয়াল:</span>
                 <span className="font-semibold text-stone-800 truncate block">{product.material}</span>
               </div>
@@ -256,13 +256,13 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
             <label className="block text-xs font-bn font-bold text-stone-800">
               কালার নির্বাচন করুন:
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {product.color_options.map((col) => (
                 <button
                   key={col}
                   type="button"
                   onClick={() => setSelectedColor(col)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bn font-medium transition-all ${
+                  className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-xl text-xs font-bn font-medium transition-all cursor-pointer ${
                     selectedColor === col
                       ? 'bg-[#8B5A2B] text-white shadow-sm ring-2 ring-[#8B5A2B]/40'
                       : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-50'
@@ -276,20 +276,20 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
         )}
 
         {/* Quantity Adjuster & Quick Buttons */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center border border-stone-300 rounded-xl bg-white overflow-hidden">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center border border-stone-300 rounded-xl bg-white overflow-hidden shrink-0">
             <button
               type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="px-3 py-2 text-stone-700 hover:bg-stone-100 font-bold"
+              className="px-2.5 sm:px-3 py-2 text-stone-700 hover:bg-stone-100 font-bold text-xs sm:text-sm cursor-pointer"
             >
               -
             </button>
-            <span className="px-4 py-2 font-bold text-sm">{quantity}</span>
+            <span className="px-3 sm:px-4 py-2 font-bold text-xs sm:text-sm">{quantity}</span>
             <button
               type="button"
               onClick={() => setQuantity((q) => q + 1)}
-              className="px-3 py-2 text-stone-700 hover:bg-stone-100 font-bold"
+              className="px-2.5 sm:px-3 py-2 text-stone-700 hover:bg-stone-100 font-bold text-xs sm:text-sm cursor-pointer"
             >
               +
             </button>
@@ -298,10 +298,10 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           <button
             type="button"
             onClick={() => addToCart(product, quantity, selectedColor)}
-            className="flex-1 flex items-center justify-center gap-2 bg-stone-900 hover:bg-black text-white py-2.5 px-4 rounded-xl font-bn font-bold text-sm shadow-xs transition-colors cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 bg-stone-900 hover:bg-black text-white py-2.5 px-3 sm:px-4 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
           >
-            <ShoppingCart className="w-4 h-4" />
-            <span>কার্টে যোগ করুন</span>
+            <ShoppingCart className="w-4 h-4 shrink-0" />
+            <span className="truncate">কার্টে যোগ করুন</span>
           </button>
         </div>
 
@@ -310,16 +310,16 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 bg-[#16A34A] hover:bg-emerald-700 text-white py-3 rounded-xl font-bn font-bold text-sm shadow-xs transition-all hover:scale-[1.01]"
+          className="w-full flex items-center justify-center gap-2 bg-[#16A34A] hover:bg-emerald-700 text-white py-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-all hover:scale-[1.01]"
         >
-          <MessageCircle className="w-4 h-4" />
-          <span>হোয়াটসঅ্যাপে সরাসরি অর্ডার করুন</span>
+          <MessageCircle className="w-4 h-4 shrink-0" />
+          <span className="truncate">হোয়াটসঅ্যাপে সরাসরি অর্ডার করুন</span>
         </a>
 
         {/* IN-PAGE FAST CHECKOUT FORM (F-Commerce Conversion) */}
-        <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-[#8B5A2B]/30 shadow-md space-y-4">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-[#8B5A2B]/30 shadow-md space-y-4">
           <div className="border-b border-stone-100 pb-3">
-            <span className="bg-[#8B5A2B] text-white text-[11px] font-bn font-semibold px-2 py-0.5 rounded uppercase">
+            <span className="bg-[#8B5A2B] text-white text-[10px] sm:text-[11px] font-bn font-semibold px-2 py-0.5 rounded uppercase">
               সরাসরি অর্ডার ফর্ম
             </span>
             <h3 className="text-base sm:text-lg font-bn font-bold text-stone-900 mt-1">
@@ -384,11 +384,11 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
               <label className="block text-xs font-bn font-semibold text-stone-700 mb-1">
                 ডেলিভারি এরিয়া:
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setDeliveryZone('inside')}
-                  className={`p-2.5 rounded-xl border text-left text-xs font-bn flex justify-between items-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-left text-xs font-bn flex justify-between items-center transition-all cursor-pointer ${
                     deliveryZone === 'inside'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 font-bold'
                       : 'border-stone-200 bg-stone-50'
@@ -403,7 +403,7 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
                 <button
                   type="button"
                   onClick={() => setDeliveryZone('outside')}
-                  className={`p-2.5 rounded-xl border text-left text-xs font-bn flex justify-between items-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-left text-xs font-bn flex justify-between items-center transition-all cursor-pointer ${
                     deliveryZone === 'outside'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 font-bold'
                       : 'border-stone-200 bg-stone-50'
@@ -424,43 +424,43 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
               </label>
               <div className="space-y-1.5">
                 <label
-                  className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer text-xs font-bn ${
+                  className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer text-xs font-bn gap-2 ${
                     paymentMethod === 'cod'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 font-bold'
                       : 'border-stone-200'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <input
                       type="radio"
                       name="pdp_payment"
                       checked={paymentMethod === 'cod'}
                       onChange={() => setPaymentMethod('cod')}
-                      className="accent-[#8B5A2B]"
+                      className="accent-[#8B5A2B] shrink-0"
                     />
                     <span>ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা দিন)</span>
                   </div>
-                  <Truck className="w-4 h-4 text-emerald-600" />
+                  <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
                 </label>
 
                 <label
-                  className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer text-xs font-bn ${
+                  className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer text-xs font-bn gap-2 ${
                     paymentMethod === 'bkash_manual'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 font-bold'
                       : 'border-stone-200'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <input
                       type="radio"
                       name="pdp_payment"
                       checked={paymentMethod === 'bkash_manual'}
                       onChange={() => setPaymentMethod('bkash_manual')}
-                      className="accent-[#8B5A2B]"
+                      className="accent-[#8B5A2B] shrink-0"
                     />
                     <span>বিকাশ / নগদ (অগ্রিম সেন্ড মানি)</span>
                   </div>
-                  <span className="text-[10px] bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-semibold">
+                  <span className="text-[10px] bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-semibold shrink-0">
                     01712-345678
                   </span>
                 </label>
@@ -489,23 +489,23 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
               </div>
               <div className="flex justify-between text-sm font-bold text-stone-900 pt-1 border-t border-stone-200">
                 <span>সর্বমোট:</span>
-                <span className="font-sans text-lg text-[#8B5A2B]">{formatBDT(totalAmount)}</span>
+                <span className="font-sans text-base sm:text-lg text-[#8B5A2B]">{formatBDT(totalAmount)}</span>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 bg-[#8B5A2B] hover:bg-[#6D431F] disabled:bg-stone-400 text-white rounded-2xl font-bn font-bold text-base shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 sm:py-3.5 bg-[#8B5A2B] hover:bg-[#6D431F] disabled:bg-stone-400 text-white rounded-2xl font-bn font-bold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin shrink-0" />
                   <span>অর্ডার প্রসেসিং...</span>
                 </>
               ) : (
                 <>
-                  <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 fill-amber-300 shrink-0" />
                   <span>এখনই অর্ডার কনফার্ম করুন ({formatBDT(totalAmount)})</span>
                 </>
               )}

@@ -106,8 +106,8 @@ export default async function HomePage() {
 
       {/* 5. Special Spotlight: Signature Reading Table (পড়ার টেবিল - ৳৩,৮০০) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-stone-900 via-stone-900 to-[#643D1A] rounded-3xl overflow-hidden shadow-2xl p-6 sm:p-10 text-white relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="bg-gradient-to-r from-stone-900 via-stone-900 to-[#643D1A] rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-8 lg:p-10 text-white relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
             <div className="lg:col-span-7 space-y-4">
               <span className="bg-[#8B5A2B] text-white text-xs font-bn font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                 হট ডিল • কারখানা স্পেশাল
@@ -121,25 +121,25 @@ export default async function HomePage() {
                 হোম ডেলিভারি।
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-2">
-                <div className="bg-white/10 backdrop-blur-xs px-3.5 py-2 rounded-xl text-xs font-bn border border-white/10">
+              <div className="flex flex-wrap gap-2.5 sm:gap-4 pt-2">
+                <div className="bg-white/10 backdrop-blur-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bn border border-white/10">
                   <span className="text-amber-400 font-bold block">বোর্ড সাইজ:</span>
                   <span>৩.৫ ফুট x ২ ফুট x ৪.৫ ফুট</span>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs px-3.5 py-2 rounded-xl text-xs font-bn border border-white/10">
+                <div className="bg-white/10 backdrop-blur-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bn border border-white/10">
                   <span className="text-emerald-400 font-bold block">ডেলিভারি:</span>
                   <span>সারাদেশে ক্যাশ অন ডেলিভারি</span>
                 </div>
               </div>
 
-              <div className="pt-4 flex flex-wrap gap-4 items-center">
+              <div className="pt-3 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
                 <Link
                   href="/products/smart-ergonomic-reading-table"
-                  className="bg-amber-400 hover:bg-amber-300 text-stone-950 px-7 py-3 rounded-full font-bn font-bold text-base shadow-lg transition-transform hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-amber-400 hover:bg-amber-300 text-stone-950 px-7 py-3 rounded-full font-bn font-bold text-sm sm:text-base shadow-lg transition-transform hover:scale-105"
                 >
                   বিস্তারিত দেখুন ও অর্ডার করুন
                 </Link>
-                <span className="text-stone-300 text-sm font-bn">
+                <span className="text-stone-300 text-xs sm:text-sm font-bn">
                   বাটন ক্লিক করলেই ক্যাশ অন ডেলিভারি ফর্ম খুলবে
                 </span>
               </div>

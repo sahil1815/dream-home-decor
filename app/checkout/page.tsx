@@ -214,20 +214,23 @@ export default function CheckoutPage() {
               <label className="block text-xs font-bn font-bold text-stone-700 mb-2">
                 ডেলিভারি এলাকা নির্বাচন করুন:
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setDeliveryZone('inside')}
-                  className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                  className={`p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                     deliveryZone === 'inside'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 ring-2 ring-[#8B5A2B]/30'
                       : 'border-stone-200 bg-[#FAF8F5] hover:bg-stone-100'
                   }`}
                 >
-                  <span className="font-bn text-xs font-bold text-stone-900">
-                    ঢাকার ভেতরে (Inside Dhaka)
-                  </span>
-                  <span className="text-sm font-sans font-bold text-[#8B5A2B] mt-1">
+                  <div>
+                    <span className="font-bn text-xs font-bold text-stone-900 block">
+                      ঢাকার ভেতরে (Inside Dhaka)
+                    </span>
+                    <span className="text-[11px] text-stone-500 font-bn">২৪-৪৮ ঘণ্টার মধ্যে ডেলিভারি</span>
+                  </div>
+                  <span className="text-sm font-sans font-bold text-[#8B5A2B] shrink-0">
                     ৳১২০
                   </span>
                 </button>
@@ -235,16 +238,19 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setDeliveryZone('outside')}
-                  className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                  className={`p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                     deliveryZone === 'outside'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 ring-2 ring-[#8B5A2B]/30'
                       : 'border-stone-200 bg-[#FAF8F5] hover:bg-stone-100'
                   }`}
                 >
-                  <span className="font-bn text-xs font-bold text-stone-900">
-                    ঢাকার বাইরে (All Bangladesh)
-                  </span>
-                  <span className="text-sm font-sans font-bold text-[#8B5A2B] mt-1">
+                  <div>
+                    <span className="font-bn text-xs font-bold text-stone-900 block">
+                      ঢাকার বাইরে (All Bangladesh)
+                    </span>
+                    <span className="text-[11px] text-stone-500 font-bn">কুরিয়ারে হোম ডেলিভারি</span>
+                  </div>
+                  <span className="text-sm font-sans font-bold text-[#8B5A2B] shrink-0">
                     ৳২০০
                   </span>
                 </button>
@@ -258,19 +264,19 @@ export default function CheckoutPage() {
               </label>
               <div className="space-y-2.5">
                 <label
-                  className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                  className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border cursor-pointer transition-all gap-3 ${
                     paymentMethod === 'cod'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 ring-1 ring-[#8B5A2B]'
                       : 'border-stone-200 bg-[#FAF8F5]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <input
                       type="radio"
                       name="payment_opt"
                       checked={paymentMethod === 'cod'}
                       onChange={() => setPaymentMethod('cod')}
-                      className="accent-[#8B5A2B] w-4 h-4"
+                      className="accent-[#8B5A2B] w-4 h-4 shrink-0"
                     />
                     <div>
                       <span className="font-bn font-bold text-sm text-stone-900 block">
@@ -281,23 +287,23 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                   </div>
-                  <Truck className="w-5 h-5 text-emerald-600" />
+                  <Truck className="w-5 h-5 text-emerald-600 shrink-0" />
                 </label>
 
                 <label
-                  className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                  className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border cursor-pointer transition-all gap-3 ${
                     paymentMethod === 'bkash_manual'
                       ? 'border-[#8B5A2B] bg-[#8B5A2B]/10 ring-1 ring-[#8B5A2B]'
                       : 'border-stone-200 bg-[#FAF8F5]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <input
                       type="radio"
                       name="payment_opt"
                       checked={paymentMethod === 'bkash_manual'}
                       onChange={() => setPaymentMethod('bkash_manual')}
-                      className="accent-[#8B5A2B] w-4 h-4"
+                      className="accent-[#8B5A2B] w-4 h-4 shrink-0"
                     />
                     <div>
                       <span className="font-bn font-bold text-sm text-stone-900 block">
@@ -308,7 +314,7 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                   </div>
-                  <CreditCard className="w-5 h-5 text-pink-600" />
+                  <CreditCard className="w-5 h-5 text-pink-600 shrink-0" />
                 </label>
               </div>
             </div>
@@ -385,7 +391,7 @@ export default function CheckoutPage() {
                         {item.quantity} x {formatBDT(price)}
                       </p>
                     </div>
-                    <span className="font-sans font-bold text-xs text-stone-900">
+                    <span className="font-sans font-bold text-xs text-stone-900 shrink-0">
                       {formatBDT(price * item.quantity)}
                     </span>
                   </div>
@@ -403,9 +409,9 @@ export default function CheckoutPage() {
                 <span>ডেলিভারি চার্জ:</span>
                 <span className="font-sans font-bold text-stone-900">{formatBDT(deliveryCharge)}</span>
               </div>
-              <div className="flex justify-between text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
+              <div className="flex justify-between text-sm sm:text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
                 <span>সর্বমোট প্রদেয়:</span>
-                <span className="font-sans text-xl text-[#8B5A2B]">{formatBDT(totalAmount)}</span>
+                <span className="font-sans text-lg sm:text-xl text-[#8B5A2B]">{formatBDT(totalAmount)}</span>
               </div>
             </div>
 
@@ -414,16 +420,16 @@ export default function CheckoutPage() {
               type="submit"
               form="checkout-form"
               disabled={isSubmitting}
-              className="w-full py-4 bg-[#8B5A2B] hover:bg-[#6D431F] disabled:bg-stone-400 text-white rounded-2xl font-bn font-bold text-base shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 sm:py-4 bg-[#8B5A2B] hover:bg-[#6D431F] disabled:bg-stone-400 text-white rounded-2xl font-bn font-bold text-sm sm:text-base shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin shrink-0" />
                   <span>অর্ডার তৈরি হচ্ছে...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-5 h-5" />
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                   <span>অর্ডার নিশ্চিত করুন ({formatBDT(totalAmount)})</span>
                 </>
               )}

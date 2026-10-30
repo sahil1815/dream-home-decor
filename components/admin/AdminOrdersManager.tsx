@@ -124,9 +124,9 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-bn">
+          <table className="w-full min-w-[780px] text-left text-xs font-bn">
             <thead className="bg-stone-50 text-stone-500 uppercase tracking-wider text-[11px] border-b border-stone-200">
               <tr>
                 <th className="py-3.5 px-4">অর্ডার আইডি</th>
@@ -270,27 +270,27 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
 
       {/* Order Details / Printable Courier Invoice Slip Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-6">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-auto max-h-[92dvh] flex flex-col">
             {/* Header */}
-            <div className="p-4 sm:p-5 bg-[#1C1917] text-white flex items-center justify-between no-print">
+            <div className="p-3.5 sm:p-5 bg-[#1C1917] text-white flex items-center justify-between no-print shrink-0">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bn font-bold text-base text-white">
+                <FileText className="w-5 h-5 text-amber-400 shrink-0" />
+                <h3 className="font-bn font-bold text-sm sm:text-base text-white truncate">
                   কুরিয়ার ডেলিভারি চালান / ইনভয়েস স্লিপ
                 </h3>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => window.print()}
-                  className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-3.5 py-1.5 rounded-lg text-xs font-bn font-bold flex items-center gap-1 cursor-pointer"
+                  className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bn font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>প্রিন্ট করুন</span>
+                  <span>প্রিন্ট</span>
                 </button>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="p-1.5 rounded-full hover:bg-stone-800 text-stone-400 hover:text-white"
+                  className="p-1.5 rounded-full hover:bg-stone-800 text-stone-400 hover:text-white cursor-pointer"
                 >
                   ✕
                 </button>
@@ -298,7 +298,7 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
             </div>
 
             {/* Printable Invoice Slip Content */}
-            <div className="p-6 sm:p-8 space-y-6 text-stone-900 bg-white" id="printable-courier-slip">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 text-stone-900 bg-white" id="printable-courier-slip">
               {/* Slip Header */}
               <div className="flex justify-between items-start border-b-2 border-stone-900 pb-4">
                 <div>

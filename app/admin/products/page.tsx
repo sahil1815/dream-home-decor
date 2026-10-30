@@ -37,9 +37,9 @@ export default async function AdminProductsPage() {
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-bn">
+          <table className="w-full min-w-[680px] text-left text-xs font-bn">
             <thead className="bg-stone-50 text-stone-500 uppercase tracking-wider text-[11px] border-b border-stone-200">
               <tr>
                 <th className="py-3.5 px-4">ছবি</th>

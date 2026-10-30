@@ -106,7 +106,7 @@ export function WorkshopShowcase({
             href={facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center gap-2 bg-white hover:bg-stone-100 text-stone-900 font-bn font-bold text-sm px-6 py-3.5 rounded-full shadow-lg transition-all hover:scale-105"
+            className="w-full md:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-100 text-stone-900 font-bn font-bold text-sm px-6 py-3.5 rounded-full shadow-lg transition-all hover:scale-105"
           >
             <span>ফেসবুকে ভিডিও দেখুন</span>
             <ExternalLink className="w-4 h-4 text-[#8B5A2B]" />

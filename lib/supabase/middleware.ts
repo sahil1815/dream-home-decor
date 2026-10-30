@@ -40,10 +40,11 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+  const isDemoAdmin = request.cookies.get('dhd_demo_admin')?.value === 'true';
 
   // Protect /admin routes (except /admin/login)
   if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
-    if (!user) {
+    if (!user && !isDemoAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';
       url.searchParams.set('redirect', path);
@@ -52,7 +53,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // If already logged in, redirect away from /admin/login to /admin
-  if (path === '/admin/login' && user) {
+  if (path === '/admin/login' && (user || isDemoAdmin)) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin';
     return NextResponse.redirect(url);

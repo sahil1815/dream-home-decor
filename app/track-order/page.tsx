@@ -70,8 +70,8 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
       </div>
 
       {/* Search Input Box */}
-      <div className="bg-white rounded-3xl p-4 sm:p-6 border border-stone-200/90 shadow-sm max-w-2xl mx-auto">
-        <form method="GET" action="/track-order" className="flex items-center gap-2">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-stone-200/90 shadow-sm max-w-2xl mx-auto">
+        <form method="GET" action="/track-order" className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <div className="relative flex-1">
             <input
               type="text"
@@ -79,13 +79,13 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
               defaultValue={query || ''}
               placeholder="অর্ডার নাম্বার বা মোবাইল নাম্বার লিখুন..."
               required
-              className="w-full pl-10 pr-4 py-3 bg-[#FAF8F5] border border-stone-300 rounded-2xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-bn text-stone-800"
+              className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-[#FAF8F5] border border-stone-300 rounded-xl sm:rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-bn text-stone-800"
             />
-            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3 sm:top-3.5" />
           </div>
           <button
             type="submit"
-            className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-6 py-3 rounded-2xl font-bn font-bold text-sm shadow-md transition-colors whitespace-nowrap cursor-pointer"
+            className="bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-bn font-bold text-xs sm:text-sm shadow-md transition-colors whitespace-nowrap cursor-pointer"
           >
             সার্চ করুন
           </button>
@@ -153,12 +153,12 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
                   </div>
 
                   {/* Visual 5-Step Stepper */}
-                  <div className="py-4">
-                    <h3 className="text-xs font-bn font-bold text-stone-500 uppercase tracking-wider mb-6">
+                  <div className="py-3 sm:py-4">
+                    <h3 className="text-xs font-bn font-bold text-stone-500 uppercase tracking-wider mb-4 sm:mb-6">
                       অর্ডার অগ্রগতি (Order Timeline):
                     </h3>
 
-                    <div className="relative flex flex-col md:flex-row justify-between gap-4">
+                    <div className="relative flex flex-col md:flex-row justify-between gap-3.5 md:gap-2">
                       {[
                         { key: 'pending', label: 'অর্ডার গৃহীত', sub: 'Placed' },
                         { key: 'confirmed', label: 'কনফার্ম হয়েছে', sub: 'Confirmed' },
@@ -171,10 +171,10 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
                         return (
                           <div
                             key={step.key}
-                            className="flex md:flex-col items-center gap-3 text-left md:text-center flex-1"
+                            className="flex md:flex-col items-center gap-3 md:gap-2 text-left md:text-center flex-1 relative"
                           >
                             <div
-                              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
+                              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
                                 stepState === 'completed'
                                   ? 'bg-emerald-600 text-white'
                                   : stepState === 'current'
@@ -183,14 +183,14 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
                               }`}
                             >
                               {stepState === 'completed' ? (
-                                <CheckCircle className="w-5 h-5" />
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                               ) : (
                                 idx + 1
                               )}
                             </div>
-                            <div>
+                            <div className="min-w-0">
                               <p
-                                className={`font-bn text-xs sm:text-sm font-bold ${
+                                className={`font-bn text-xs sm:text-sm font-bold truncate ${
                                   stepState === 'current'
                                     ? 'text-[#8B5A2B]'
                                     : stepState === 'completed'
@@ -211,11 +211,11 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
                   </div>
 
                   {/* Customer & Items Summary */}
-                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-stone-200/80 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bn text-stone-700">
+                  <div className="p-3.5 sm:p-4 bg-[#FAF8F5] rounded-2xl border border-stone-200/80 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs font-bn text-stone-700">
                     <div>
                       <span className="text-stone-400 block">গ্রাহকের নাম ও ঠিকানা:</span>
                       <p className="font-bold text-stone-900 text-sm mt-0.5">{order.customer_name}</p>
-                      <p className="text-stone-600 mt-0.5">{order.customer_address}</p>
+                      <p className="text-stone-600 mt-0.5 break-words">{order.customer_address}</p>
                       <p className="text-stone-500 font-sans mt-0.5">{order.customer_phone}</p>
                     </div>
 
@@ -223,11 +223,11 @@ export default async function TrackOrderPage({ searchParams }: TrackOrderPagePro
                       <span className="text-stone-400 block">অর্ডার পণ্যের বিবরণ:</span>
                       <div className="mt-1 space-y-1">
                         {order.order_items?.map((item, idx) => (
-                          <div key={idx} className="flex justify-between">
-                            <span className="font-semibold text-stone-800">
+                          <div key={idx} className="flex justify-between items-start gap-2">
+                            <span className="font-semibold text-stone-800 truncate">
                               {item.product_title} {item.selected_color && `(${item.selected_color})`}
                             </span>
-                            <span className="font-sans font-bold">
+                            <span className="font-sans font-bold shrink-0">
                               {item.quantity} x {formatBDT(item.unit_price)}
                             </span>
                           </div>
