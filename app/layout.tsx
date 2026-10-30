@@ -4,12 +4,10 @@ import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { WishlistProvider } from '@/context/wishlist-context';
 import { getSiteSettings, getCategories } from '@/lib/data';
-import { AnnouncementBar } from '@/components/storefront/AnnouncementBar';
 import { Navbar } from '@/components/storefront/Navbar';
 import { Footer } from '@/components/storefront/Footer';
 import { CartDrawer } from '@/components/storefront/CartDrawer';
 import { QuickOrderModal } from '@/components/storefront/QuickOrderModal';
-import { FloatingContact } from '@/components/storefront/FloatingContact';
 import { BottomStickyBar } from '@/components/storefront/BottomStickyBar';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -73,9 +71,6 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#1C1917] antialiased">
         <CartProvider>
           <WishlistProvider>
-            {/* Top Announcement Bar */}
-            <AnnouncementBar settings={settings} />
-
             {/* Sticky Navigation */}
             <Navbar settings={settings} categories={categories} />
 
@@ -88,9 +83,6 @@ export default async function RootLayout({
             {/* Global Drawers & Modals */}
             <CartDrawer />
             <QuickOrderModal />
-
-            {/* Floating WhatsApp / Phone Contact (Desktop) */}
-            <FloatingContact settings={settings} />
 
             {/* Bottom Sticky Navigation Bar (Mobile / Tablet) */}
             <BottomStickyBar settings={settings} />
