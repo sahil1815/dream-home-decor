@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { getPublicClient } from '@/lib/supabase/public';
 import {
   MOCK_SITE_SETTINGS,
   MOCK_CATEGORIES,
@@ -12,12 +12,34 @@ import {
   Product,
   CampaignGiveaway,
   Order,
-  OrderStatus,
-  DeliveryZone,
-  PaymentMethod,
 } from '@/types/database';
 
 export const revalidate = 3600; // 1-hour ISR cache default
+
+// Helper to ensure database queries never hang past a timeout threshold
+async function withTimeout<T>(
+  promise: Promise<T>,
+  fallback: T,
+  timeoutMs = 3500
+): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      resolve(fallback);
+    }, timeoutMs);
+  });
+
+  return Promise.race([
+    promise.then((res) => {
+      clearTimeout(timer);
+      return res;
+    }),
+    timeoutPromise,
+  ]).catch(() => {
+    clearTimeout(timer);
+    return fallback;
+  });
+}
 
 // Check if valid Supabase connection is available
 export function isSupabaseConfigured(): boolean {
@@ -42,23 +64,26 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     return MOCK_SITE_SETTINGS;
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('site_settings')
-      .select('*')
-      .eq('id', 1)
-      .maybeSingle();
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
 
-    if (error || !data) {
-      console.warn('Error fetching site settings, falling back to mock:', error?.message);
+      if (error || !data) {
+        return MOCK_SITE_SETTINGS;
+      }
+
+      return data as SiteSettings;
+    } catch {
       return MOCK_SITE_SETTINGS;
     }
+  })();
 
-    return data as SiteSettings;
-  } catch {
-    return MOCK_SITE_SETTINGS;
-  }
+  return withTimeout(query, MOCK_SITE_SETTINGS);
 }
 
 /**
@@ -69,22 +94,26 @@ export async function getCategories(): Promise<Category[]> {
     return MOCK_CATEGORIES;
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return MOCK_CATEGORIES;
+      }
+
+      return data as Category[];
+    } catch {
       return MOCK_CATEGORIES;
     }
+  })();
 
-    return data as Category[];
-  } catch {
-    return MOCK_CATEGORIES;
-  }
+  return withTimeout(query, MOCK_CATEGORIES);
 }
 
 /**
@@ -95,7 +124,7 @@ export async function getProducts(options?: {
   featured?: boolean;
   limit?: number;
 }): Promise<Product[]> {
-  if (!isSupabaseConfigured()) {
+  const fallbackProducts = () => {
     let list = [...MOCK_PRODUCTS];
     if (options?.featured) {
       list = list.filter((p) => p.is_featured);
@@ -110,75 +139,86 @@ export async function getProducts(options?: {
       list = list.slice(0, options.limit);
     }
     return list;
+  };
+
+  if (!isSupabaseConfigured()) {
+    return fallbackProducts();
   }
 
-  try {
-    const supabase = await createClient();
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      let q = supabase
+        .from('products')
+        .select('*, category:categories(*)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-    if (options?.featured) {
-      query = query.eq('is_featured', true);
+      if (options?.featured) {
+        q = q.eq('is_featured', true);
+      }
+
+      if (options?.limit) {
+        q = q.limit(options.limit);
+      }
+
+      const { data, error } = await q;
+
+      if (error || !data || data.length === 0) {
+        return fallbackProducts();
+      }
+
+      if (options?.categorySlug) {
+        return (data as Product[]).filter(
+          (p) => p.category?.slug === options.categorySlug
+        );
+      }
+
+      return data as Product[];
+    } catch {
+      return fallbackProducts();
     }
+  })();
 
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-
-    const { data, error } = await query;
-
-    if (error || !data || data.length === 0) {
-      return MOCK_PRODUCTS;
-    }
-
-    if (options?.categorySlug) {
-      return (data as Product[]).filter(
-        (p) => p.category?.slug === options.categorySlug
-      );
-    }
-
-    return data as Product[];
-  } catch {
-    return MOCK_PRODUCTS;
-  }
+  return withTimeout(query, fallbackProducts());
 }
 
 /**
  * Fetch single product by slug
  */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  if (!isSupabaseConfigured()) {
+  const getMockProduct = () => {
     const found = MOCK_PRODUCTS.find((p) => p.slug === slug);
     if (!found) return null;
     const cat = MOCK_CATEGORIES.find((c) => c.id === found.category_id);
     return { ...found, category: cat };
+  };
+
+  if (!isSupabaseConfigured()) {
+    return getMockProduct();
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .maybeSingle();
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, category:categories(*)')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .maybeSingle();
 
-    if (error || !data) {
-      const mockFound = MOCK_PRODUCTS.find((p) => p.slug === slug);
-      if (mockFound) {
-        const cat = MOCK_CATEGORIES.find((c) => c.id === mockFound.category_id);
-        return { ...mockFound, category: cat };
+      if (error || !data) {
+        return getMockProduct();
       }
-      return null;
-    }
 
-    return data as Product;
-  } catch {
-    return MOCK_PRODUCTS.find((p) => p.slug === slug) || null;
-  }
+      return data as Product;
+    } catch {
+      return getMockProduct();
+    }
+  })();
+
+  return withTimeout(query, getMockProduct());
 }
 
 /**
@@ -189,22 +229,26 @@ export async function getCampaigns(): Promise<CampaignGiveaway[]> {
     return MOCK_CAMPAIGNS;
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('campaigns_giveaways')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('campaigns_giveaways')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return MOCK_CAMPAIGNS;
+      }
+
+      return data as CampaignGiveaway[];
+    } catch {
       return MOCK_CAMPAIGNS;
     }
+  })();
 
-    return data as CampaignGiveaway[];
-  } catch {
-    return MOCK_CAMPAIGNS;
-  }
+  return withTimeout(query, MOCK_CAMPAIGNS);
 }
 
 /**
@@ -214,32 +258,35 @@ export async function trackOrderQuery(query: string): Promise<Order[]> {
   const cleaned = query.trim();
   if (!cleaned) return [];
 
-  if (!isSupabaseConfigured()) {
-    return MOCK_SAMPLE_ORDERS.filter(
+  const getMockOrder = () =>
+    MOCK_SAMPLE_ORDERS.filter(
       (o) =>
         o.order_number.toLowerCase().includes(cleaned.toLowerCase()) ||
         o.customer_phone.includes(cleaned)
     );
+
+  if (!isSupabaseConfigured()) {
+    return getMockOrder();
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .or(`order_number.ilike.%${cleaned}%,customer_phone.ilike.%${cleaned}%`)
-      .order('created_at', { ascending: false });
+  const q = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .or(`order_number.ilike.%${cleaned}%,customer_phone.ilike.%${cleaned}%`)
+        .order('created_at', { ascending: false });
 
-    if (error || !data) {
-      return MOCK_SAMPLE_ORDERS.filter(
-        (o) =>
-          o.order_number.toLowerCase().includes(cleaned.toLowerCase()) ||
-          o.customer_phone.includes(cleaned)
-      );
+      if (error || !data) {
+        return getMockOrder();
+      }
+
+      return data as Order[];
+    } catch {
+      return [];
     }
+  })();
 
-    return data as Order[];
-  } catch {
-    return [];
-  }
+  return withTimeout(q, getMockOrder());
 }

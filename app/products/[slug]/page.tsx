@@ -8,6 +8,13 @@ import { ProductCard } from '@/components/storefront/ProductCard';
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  const products = await getProducts();
+  return products.map((p) => ({
+    slug: p.slug,
+  }));
+}
+
 interface ProductDetailPageProps {
   params: Promise<{
     slug: string;
