@@ -42,11 +42,11 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
 
   return (
     <nav
-      aria-label="মোবাইল নেভিগেশন (Mobile Bottom Navigation)"
+      aria-label="মোবাইল নেভিগেশন"
       className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-[#FAF8F5]/95 backdrop-blur-md border-t border-stone-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] select-none pb-[env(safe-area-inset-bottom,0px)]"
     >
       <div className="grid grid-cols-5 items-center h-15 sm:h-16 max-w-lg mx-auto px-1">
-        {/* 1. HOME */}
+        {/* 1. হোম (HOME) */}
         <Link
           href="/"
           className={`flex flex-col items-center justify-center gap-1 py-1 transition-colors group ${
@@ -62,15 +62,15 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
             }`}
           />
           <span
-            className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none ${
+            className={`text-[10px] sm:text-[11px] font-bn leading-none ${
               isHomeActive ? 'font-bold' : 'font-semibold'
             }`}
           >
-            HOME
+            হোম
           </span>
         </Link>
 
-        {/* 2. EXPLORE ALL */}
+        {/* 2. সকল পণ্য (EXPLORE ALL) */}
         <Link
           href="/products"
           className={`flex flex-col items-center justify-center gap-1 py-1 transition-colors group ${
@@ -86,15 +86,15 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
             }`}
           />
           <span
-            className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none whitespace-nowrap ${
+            className={`text-[10px] sm:text-[11px] font-bn leading-none whitespace-nowrap ${
               isExploreActive ? 'font-bold' : 'font-semibold'
             }`}
           >
-            EXPLORE ALL
+            সকল পণ্য
           </span>
         </Link>
 
-        {/* 3. SAVED */}
+        {/* 3. সেভ করা (SAVED) */}
         <Link
           href="/saved"
           className={`flex flex-col items-center justify-center gap-1 py-1 transition-colors group ${
@@ -119,15 +119,15 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
             )}
           </div>
           <span
-            className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none whitespace-nowrap ${
+            className={`text-[10px] sm:text-[11px] font-bn leading-none whitespace-nowrap ${
               isSavedActive ? 'font-bold' : 'font-semibold'
             }`}
           >
-            SAVED
+            পছন্দ
           </span>
         </Link>
 
-        {/* 4. WHATSAPP */}
+        {/* 4. হোয়াটসঅ্যাপ (WHATSAPP) */}
         <a
           href={whatsappUrl}
           target="_blank"
@@ -140,12 +140,12 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
             {/* Green accent badge dot matching reference image */}
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#25D366] ring-1.5 ring-[#FAF8F5]" />
           </div>
-          <span className="text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none font-semibold">
-            WHATSAPP
+          <span className="text-[10px] sm:text-[11px] font-bn leading-none font-semibold">
+            হোয়াটসঅ্যাপ
           </span>
         </a>
 
-        {/* 5. BAG */}
+        {/* 5. কার্ট (BAG) */}
         <button
           type="button"
           onClick={openCart}
@@ -172,11 +172,11 @@ export function BottomStickyBar({ settings }: BottomStickyBarProps) {
             )}
           </div>
           <span
-            className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase font-sans leading-none ${
+            className={`text-[10px] sm:text-[11px] font-bn leading-none ${
               isBagActive ? 'font-bold' : 'font-semibold'
             }`}
           >
-            BAG
+            কার্ট
           </span>
         </button>
       </div>

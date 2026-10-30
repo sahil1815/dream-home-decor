@@ -41,7 +41,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
 
   const moreRef = useRef<HTMLDivElement>(null);
 
-  // Close 'MORE' dropdown when clicking outside
+  // Close 'আরও' dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
@@ -90,68 +90,68 @@ export function Navbar({ settings, categories }: NavbarProps) {
           </div>
 
           {/* ========================================================= */}
-          {/* DESKTOP LEFT: Navigation Links (Inspired by reference)     */}
+          {/* DESKTOP LEFT: Navigation Links (সবকিছু বাংলায়)             */}
           {/* ========================================================= */}
           <nav
             aria-label="মূল নেভিগেশন"
             className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0"
           >
-            {/* 1. EXPLORE ALL */}
+            {/* ১. সকল ফার্নিচার */}
             <Link
               href="/products"
-              className={`text-[11px] xl:text-xs font-semibold tracking-wider uppercase transition-colors select-none ${
+              className={`text-xs xl:text-sm font-bn transition-colors select-none ${
                 isExploreActive
                   ? 'text-[#8B5A2B] font-bold'
-                  : 'text-stone-800 hover:text-stone-950'
+                  : 'text-stone-800 hover:text-stone-950 font-semibold'
               }`}
             >
-              EXPLORE ALL
+              সকল ফার্নিচার
             </Link>
 
-            {/* 2. READING TABLES */}
+            {/* ২. পড়ার টেবিল */}
             <Link
               href="/products?category=reading-tables"
-              className={`text-[11px] xl:text-xs font-semibold tracking-wider uppercase transition-colors select-none ${
+              className={`text-xs xl:text-sm font-bn transition-colors select-none ${
                 isReadingActive
                   ? 'text-[#8B5A2B] font-bold'
-                  : 'text-stone-800 hover:text-stone-950'
+                  : 'text-stone-800 hover:text-stone-950 font-semibold'
               }`}
             >
-              READING TABLES
+              পড়ার টেবিল
             </Link>
 
-            {/* 3. BOOKSHELVES */}
+            {/* ৩. বুকশেলফ */}
             <Link
               href="/products?category=bookshelves"
-              className={`text-[11px] xl:text-xs font-semibold tracking-wider uppercase transition-colors select-none ${
+              className={`text-xs xl:text-sm font-bn transition-colors select-none ${
                 isBookshelfActive
                   ? 'text-[#8B5A2B] font-bold'
-                  : 'text-stone-800 hover:text-stone-950'
+                  : 'text-stone-800 hover:text-stone-950 font-semibold'
               }`}
             >
-              BOOKSHELVES
+              বুকশেলফ
             </Link>
 
-            {/* 4. COMPUTER DESKS */}
+            {/* ৪. কম্পিউটার টেবিল */}
             <Link
               href="/products?category=computer-tables"
-              className={`hidden xl:inline-block text-[11px] xl:text-xs font-semibold tracking-wider uppercase transition-colors select-none ${
+              className={`hidden xl:inline-block text-xs xl:text-sm font-bn transition-colors select-none ${
                 isComputerActive
                   ? 'text-[#8B5A2B] font-bold'
-                  : 'text-stone-800 hover:text-stone-950'
+                  : 'text-stone-800 hover:text-stone-950 font-semibold'
               }`}
             >
-              COMPUTER DESKS
+              কম্পিউটার টেবিল
             </Link>
 
-            {/* 5. MORE (Dropdown) */}
+            {/* ৫. আরও (Dropdown) */}
             <div className="relative" ref={moreRef}>
               <button
                 type="button"
                 onClick={() => setMoreOpen(!moreOpen)}
-                className="flex items-center gap-1 text-[11px] xl:text-xs font-semibold tracking-wider uppercase text-stone-800 hover:text-stone-950 transition-colors cursor-pointer select-none"
+                className="flex items-center gap-1 text-xs xl:text-sm font-bn font-semibold text-stone-800 hover:text-stone-950 transition-colors cursor-pointer select-none"
               >
-                <span>MORE</span>
+                <span>আরও</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 transition-transform duration-200 ${
                     moreOpen ? 'rotate-180' : ''
@@ -160,13 +160,13 @@ export function Navbar({ settings, categories }: NavbarProps) {
               </button>
 
               {moreOpen && (
-                <div className="absolute top-full left-0 mt-2.5 w-56 bg-[#FAF8F5] border border-stone-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute top-full left-0 mt-2.5 w-60 bg-[#FAF8F5] border border-stone-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <Link
                     href="/products?category=computer-tables"
                     onClick={() => setMoreOpen(false)}
                     className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
                   >
-                    <span>কম্পিউটার টেবিল (Computer Desks)</span>
+                    <span>কম্পিউটার টেবিল</span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
                   </Link>
                   <Link
@@ -176,7 +176,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
                   >
                     <span className="flex items-center gap-2">
                       <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>অর্ডার ট্র্যাকিং (Track Order)</span>
+                      <span>অর্ডার ট্র্যাকিং</span>
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
                   </Link>
@@ -187,7 +187,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
                   >
                     <span className="flex items-center gap-2">
                       <Hammer className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                      <span>আমাদের কারখানা (Workshop)</span>
+                      <span>আমাদের কারখানা</span>
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
                   </Link>
@@ -209,22 +209,22 @@ export function Navbar({ settings, categories }: NavbarProps) {
               )}
             </div>
 
-            {/* 6. WORKSHOP (Highlighted link matching LOOKBOOK style) */}
+            {/* ৬. আমাদের কারখানা */}
             <Link
               href="/#workshop"
-              className="text-[11px] xl:text-xs font-bold tracking-widest uppercase text-[#8B5A2B] hover:text-[#6D431F] transition-colors select-none"
+              className="text-xs xl:text-sm font-bn font-bold text-[#8B5A2B] hover:text-[#6D431F] transition-colors select-none"
             >
-              WORKSHOP
+              আমাদের কারখানা
             </Link>
           </nav>
 
           {/* ========================================================= */}
-          {/* CENTER: Brand Logo & Editorial Typography                 */}
+          {/* CENTER: Brand Logo & Typography (বাংলা ব্র্যান্ডিং)       */}
           {/* ========================================================= */}
           <Link
             href="/"
             className="flex items-center gap-2 sm:gap-2.5 group select-none min-w-0"
-            aria-label={settings.site_name}
+            aria-label={settings.site_name_bn || settings.site_name}
           >
             {settings.logo_url && settings.logo_url.startsWith('http') ? (
               <div className="relative w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden bg-stone-900 border border-amber-900/30 shadow-xs flex items-center justify-center shrink-0">
@@ -243,32 +243,32 @@ export function Navbar({ settings, categories }: NavbarProps) {
             )}
 
             <div className="flex flex-col min-w-0">
-              <span className="font-serif text-base sm:text-lg xl:text-xl font-bold tracking-[0.16em] text-[#1C1917] group-hover:text-[#8B5A2B] transition-colors leading-none truncate uppercase">
-                {settings.site_name || 'DREAM HOME'}
+              <span className="font-bn text-base sm:text-lg xl:text-xl font-bold tracking-tight text-[#1C1917] group-hover:text-[#8B5A2B] transition-colors leading-none truncate">
+                {settings.site_name_bn || 'ড্রিম হোম ডেকোর'}
               </span>
-              <span className="text-[8px] sm:text-[9px] xl:text-[9.5px] tracking-[0.24em] font-sans font-medium text-stone-500 uppercase leading-none mt-1 truncate">
-                FURNITURE & WORKSHOP
+              <span className="text-[10px] sm:text-[11px] font-bn font-medium text-stone-500 leading-none mt-1 truncate flex items-center gap-1">
+                <span>নিজস্ব কারখানা ও ফার্নিচার</span>
               </span>
             </div>
           </Link>
 
           {/* ========================================================= */}
-          {/* RIGHT: Actions Cluster (WhatsApp, Account, Search, Saved, Bag) */}
+          {/* RIGHT: Actions Cluster (হোয়াটসঅ্যাপ, প্রোফাইল, সার্চ, পছন্দ, কার্ট) */}
           {/* ========================================================= */}
           <div className="flex items-center gap-1 sm:gap-2 xl:gap-3 shrink-0">
-            {/* 1. WHATSAPP Pill Button (Matches reference image style) */}
+            {/* ১. হোয়াটসঅ্যাপ পিল বাটন */}
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 bg-[#F2ECE4] hover:bg-[#EAE2D7] text-stone-800 px-3 py-1.5 rounded-full text-[10.5px] font-bold tracking-wider uppercase transition-colors border border-stone-200/70 select-none"
+              className="hidden sm:inline-flex items-center gap-1.5 bg-[#F2ECE4] hover:bg-[#EAE2D7] text-stone-800 px-3 py-1.5 rounded-full text-xs font-bn font-bold transition-colors border border-stone-200/70 select-none"
               aria-label="হোয়াটসঅ্যাপে যোগাযোগ"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-              <span>WHATSAPP</span>
+              <span>হোয়াটসঅ্যাপ</span>
             </a>
 
-            {/* 2. User / Account (Admin / Owner login) */}
+            {/* ২. অ্যাকাউন্ট / অ্যাডমিন */}
             <Link
               href="/admin"
               className="hidden sm:inline-flex p-1.5 sm:p-2 text-stone-800 hover:text-[#8B5A2B] transition-colors rounded-full hover:bg-stone-100"
@@ -278,24 +278,25 @@ export function Navbar({ settings, categories }: NavbarProps) {
               <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.6]" />
             </Link>
 
-            {/* 3. Search Trigger */}
+            {/* ৩. সার্চ বাটন */}
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
               className="p-1.5 sm:p-2 text-stone-800 hover:text-[#8B5A2B] transition-colors rounded-full hover:bg-stone-100 cursor-pointer"
               aria-label="পণ্য সার্চ করুন"
+              title="পণ্য খুঁজুন"
             >
               <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.6]" />
             </button>
 
-            {/* 4. Heart (Saved / Wishlist) */}
+            {/* ৪. পছন্দের তালিকা (Heart) */}
             <Link
               href="/saved"
               className={`relative p-1.5 sm:p-2 transition-colors rounded-full hover:bg-stone-100 ${
                 isSavedActive ? 'text-[#8B5A2B]' : 'text-stone-800 hover:text-[#8B5A2B]'
               }`}
-              title={`সেভ করা তালিকা (${totalSaved} টি)`}
-              aria-label="সেভ করা ফার্নিচার"
+              title={`পছন্দের তালিকা (${totalSaved} টি)`}
+              aria-label="পছন্দের ফার্নিচার"
             >
               <Heart
                 className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${
@@ -307,15 +308,15 @@ export function Navbar({ settings, categories }: NavbarProps) {
               )}
             </Link>
 
-            {/* 5. Bag (Shopping Bag with tan/amber badge counter) */}
+            {/* ৫. কার্ট (Shopping Bag with tan badge counter) */}
             <button
               type="button"
               onClick={openCart}
               className="relative p-1.5 sm:p-2 text-stone-800 hover:text-[#8B5A2B] transition-colors rounded-full hover:bg-stone-100 cursor-pointer"
-              aria-label={`শপিং ব্যাগ (${totalItems} টি পণ্য)`}
+              aria-label={`শপিং কার্ট (${totalItems} টি পণ্য)`}
+              title="শপিং কার্ট"
             >
               <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.6]" />
-              {/* Tan/caramel circular badge matching reference image */}
               <span className="absolute -top-0.5 -right-1 bg-[#C4A47C] text-stone-950 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center font-sans leading-none shadow-2xs">
                 {totalItems}
               </span>
@@ -361,60 +362,60 @@ export function Navbar({ settings, categories }: NavbarProps) {
             aria-hidden="true"
           />
           <div className="lg:hidden absolute top-full inset-x-0 bg-[#FAF8F5] border-b border-stone-300 shadow-xl p-4 sm:p-5 z-50 animate-in slide-in-from-top-2 duration-200 max-h-[calc(100dvh-5rem)] overflow-y-auto">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 font-bn">
               <Link
                 href="/products"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-900 font-sans uppercase tracking-wider text-xs font-bold transition-colors"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-900 text-sm font-bold transition-colors"
               >
-                <span>EXPLORE ALL (সকল ফার্নিচার)</span>
+                <span>সকল ফার্নিচার</span>
                 <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
               <Link
                 href="/products?category=reading-tables"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 font-sans uppercase tracking-wider text-xs font-semibold transition-colors"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
               >
-                <span>READING TABLES (পড়ার টেবিল)</span>
+                <span>পড়ার টেবিল</span>
                 <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
               <Link
                 href="/products?category=bookshelves"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 font-sans uppercase tracking-wider text-xs font-semibold transition-colors"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
               >
-                <span>BOOKSHELVES (বুকশেলফ)</span>
+                <span>বুকশেলফ</span>
                 <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
               <Link
                 href="/products?category=computer-tables"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 font-sans uppercase tracking-wider text-xs font-semibold transition-colors"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
               >
-                <span>COMPUTER DESKS (কম্পিউটার টেবিল)</span>
+                <span>কম্পিউটার টেবিল</span>
                 <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
               <Link
                 href="/#workshop"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-[#8B5A2B] font-sans uppercase tracking-wider text-xs font-bold transition-colors"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-[#8B5A2B] text-sm font-bold transition-colors"
               >
-                <span>WORKSHOP (আমাদের কারখানা)</span>
+                <span>আমাদের কারখানা</span>
                 <ChevronRight className="w-4 h-4 text-[#8B5A2B]" />
               </Link>
 
               <Link
                 href="/track-order"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 text-emerald-800 font-sans uppercase tracking-wider text-xs font-bold transition-colors border border-emerald-200/50"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 text-emerald-800 text-sm font-bold transition-colors border border-emerald-200/50"
               >
                 <div className="flex items-center gap-2">
                   <PackageCheck className="w-4 h-4 text-emerald-600" />
-                  <span>TRACK ORDER (অর্ডার ট্র্যাকিং)</span>
+                  <span>অর্ডার ট্র্যাকিং</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-emerald-600" />
               </Link>
@@ -424,15 +425,15 @@ export function Navbar({ settings, categories }: NavbarProps) {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shadow-xs"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 rounded-xl font-bold text-sm transition-colors shadow-xs"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp এ মেসেজ দিন</span>
+                  <span>হোয়াটসঅ্যাপে মেসেজ দিন</span>
                 </a>
 
                 <a
                   href={`tel:${settings.phone}`}
-                  className="flex items-center justify-center gap-2 bg-stone-900 text-white py-2.5 rounded-xl font-medium text-xs transition-colors"
+                  className="flex items-center justify-center gap-2 bg-stone-900 text-white py-2.5 rounded-xl font-medium text-sm transition-colors"
                 >
                   <Phone className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>হটলাইন কল: {settings.phone}</span>
@@ -443,7 +444,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-center text-xs text-stone-400 hover:text-stone-600 py-1"
                 >
-                  অ্যাডমিন লগইন (Owner Portal)
+                  অ্যাডমিন লগইন (মালিকের পোর্টাল)
                 </Link>
               </div>
             </div>

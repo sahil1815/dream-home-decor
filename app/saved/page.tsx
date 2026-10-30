@@ -23,7 +23,7 @@ export default function SavedPage() {
             <span>আপনার পছন্দের ফার্নিচার তালিকা</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold font-bn text-[#1C1917]">
-            সেভ করা পণ্যসমূহ (Saved Items)
+            সেভ করা পছন্দের পণ্যসমূহ
           </h1>
           <p className="text-stone-500 text-xs sm:text-sm font-bn mt-1">
             পছন্দের ফার্নিচারগুলো এক জায়গায় সেভ করে রাখুন এবং সুবিধাজনক সময়ে অর্ডার করুন।
