@@ -42,6 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'ওভারভিউ', href: '/admin', icon: LayoutDashboard },
     { label: 'অর্ডার তালিকা', href: '/admin/orders', icon: ShoppingBag },
     { label: 'পণ্য ম্যানেজমেন্ট', href: '/admin/products', icon: Package },
+    { label: 'ওয়ার্কশপ সেকশন', href: '/admin/workshop', icon: Hammer },
     { label: 'সাইট ও লোগো সেটিংস', href: '/admin/settings', icon: Settings },
     { label: 'ক্যাম্পেইন ও লটারি', href: '/admin/campaigns', icon: Gift },
   ];

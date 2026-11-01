@@ -19,6 +19,7 @@ import {
   getCategories,
   getProducts,
   getCampaigns,
+  getWorkshopData,
 } from '@/lib/data';
 import { HeroSlider } from '@/components/storefront/HeroSlider';
 import { TrustBadges } from '@/components/storefront/TrustBadges';
@@ -30,11 +31,12 @@ import { getOptimizedImageUrl } from '@/lib/imagekit';
 export const revalidate = 3600; // 1-hour ISR
 
 export default async function HomePage() {
-  const [settings, categories, products, campaigns] = await Promise.all([
+  const [settings, categories, products, campaigns, workshopData] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getProducts({ limit: 12 }),
     getCampaigns(),
+    getWorkshopData(),
   ]);
 
   const featuredProducts = products.filter((p) => p.is_featured);
@@ -197,7 +199,7 @@ export default async function HomePage() {
       </section>
 
       {/* 7. Inside Our Workshop Section */}
-      <WorkshopShowcase facebookUrl={settings.facebook_url} />
+      <WorkshopShowcase workshopData={workshopData} facebookUrl={settings.facebook_url} />
 
       {/* 8. Comparison: Why Buy from Factory Direct (Dream Home Decor) vs Traditional Retail */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -108,3 +108,28 @@ export interface CartItem {
   quantity: number;
   selectedColor?: string;
 }
+
+export interface WorkshopStep {
+  id: string;
+  title: string;
+  desc: string;
+  image: string;
+}
+
+export interface WorkshopVideoCard {
+  enabled: boolean;
+  badge: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+}
+
+export interface WorkshopData {
+  badge: string;
+  title: string;
+  description: string;
+  steps: WorkshopStep[];
+  videoCard: WorkshopVideoCard;
+  updated_at?: string;
+}

@@ -105,6 +105,18 @@ CREATE TABLE IF NOT EXISTS campaigns_giveaways (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 9. WORKSHOP SETTINGS TABLE (Factory Tour, Steps & Live Video Banner)
+CREATE TABLE IF NOT EXISTS workshop_settings (
+  id INT PRIMARY KEY DEFAULT 1,
+  badge TEXT NOT NULL DEFAULT 'সরাসরি কারখানার অন্দরমহল • Inside Our Workshop',
+  title TEXT NOT NULL DEFAULT 'আমরা কীভাবে তৈরি করি আপনার পছন্দের ফার্নিচার?',
+  description TEXT NOT NULL DEFAULT 'কোনো থার্ড-পার্টি বা মধ্যস্বত্বভোগী নয় — বোর্ড কেনা থেকে শুরু করে কাটিং, সাইজিং ও ডেলিভারি প্যাকেজিং পর্যন্ত সবকিছু সম্পন্ন হয় আমাদের নিজস্ব মিরপুরের ওয়ার্কশপে। তাই পাচ্ছেন সেরা ফিনিশিং ও অবিশ্বাস্য সাশ্রয়ী রেট।',
+  steps JSONB NOT NULL DEFAULT '[]'::JSONB,
+  video_card JSONB NOT NULL DEFAULT '{}'::JSONB,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  CONSTRAINT single_workshop_row CHECK (id = 1)
+);
+
 -- ==============================================================================
 -- INDEXES FOR FAST QUERY PERFORMANCE
 -- ==============================================================================
@@ -127,6 +139,7 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE campaigns_giveaways ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workshop_settings ENABLE ROW LEVEL SECURITY;
 
 -- SITE SETTINGS POLICIES:
 -- Public can read site settings
@@ -212,6 +225,19 @@ CREATE POLICY "Public can view active campaigns"
 -- Admin can manage all campaigns
 CREATE POLICY "Admin can manage campaigns"
   ON campaigns_giveaways FOR ALL
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- WORKSHOP SETTINGS POLICIES:
+-- Public can view workshop settings
+CREATE POLICY "Public can view workshop settings"
+  ON workshop_settings FOR SELECT
+  USING (true);
+
+-- Admin can update workshop settings
+CREATE POLICY "Admin can manage workshop settings"
+  ON workshop_settings FOR ALL
   TO authenticated
   USING (true)
   WITH CHECK (true);

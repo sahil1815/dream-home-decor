@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Save,
   CheckCircle2,
@@ -13,6 +14,7 @@ import {
   MapPin,
   Bell,
   CreditCard,
+  Hammer,
 } from 'lucide-react';
 import { SiteSettings } from '@/types/database';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
@@ -127,6 +129,31 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
           <span>{feedback.text}</span>
         </div>
       )}
+
+      {/* Workshop Section Quick Access Card */}
+      <div className="bg-gradient-to-r from-stone-900 to-stone-800 text-white p-5 rounded-3xl border border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#8B5A2B] text-white flex items-center justify-center shrink-0">
+            <Hammer className="w-5 h-5 text-amber-300" />
+          </div>
+          <div>
+            <h3 className="font-bn font-bold text-sm text-white">
+              কারখানা ও ওয়ার্কশপ সেকশন এডিটর
+            </h3>
+            <p className="font-bn text-stone-300 text-xs">
+              হোমপেজের &ldquo;সরাসরি কারখানার অন্দরমহল&rdquo; সেকশনের টেক্সট, ছবি ও ভিডিও লিঙ্ক পরিবর্তন করতে চান?
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/admin/workshop"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#8B5A2B] hover:bg-[#6D431F] text-white text-xs font-bn font-bold transition-colors shrink-0 self-start sm:self-auto"
+        >
+          <span>ওয়ার্কশপ এডিটরে যান</span>
+          <span>→</span>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Section 1: Logo & Cover Banners (ImageKit URL Preview) */}

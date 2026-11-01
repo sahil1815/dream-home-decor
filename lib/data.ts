@@ -5,6 +5,7 @@ import {
   MOCK_PRODUCTS,
   MOCK_CAMPAIGNS,
   MOCK_SAMPLE_ORDERS,
+  DEFAULT_WORKSHOP_DATA,
 } from '@/lib/mock-data';
 import {
   SiteSettings,
@@ -12,6 +13,7 @@ import {
   Product,
   CampaignGiveaway,
   Order,
+  WorkshopData,
 } from '@/types/database';
 
 export const revalidate = 3600; // 1-hour ISR cache default
@@ -289,4 +291,59 @@ export async function trackOrderQuery(query: string): Promise<Order[]> {
   })();
 
   return withTimeout(q, getMockOrder());
+}
+
+/**
+ * Fetch Workshop Showcase Data (steps, video banner, badge, texts)
+ */
+export async function getWorkshopData(): Promise<WorkshopData> {
+  const getFromFileOrMock = async (): Promise<WorkshopData> => {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'data', 'workshop.json');
+      const content = await fs.readFile(filePath, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (parsed && Array.isArray(parsed.steps) && parsed.steps.length > 0) {
+        return parsed as WorkshopData;
+      }
+    } catch {
+      // Fallback
+    }
+    return DEFAULT_WORKSHOP_DATA;
+  };
+
+  if (!isSupabaseConfigured()) {
+    return getFromFileOrMock();
+  }
+
+  const query = (async () => {
+    try {
+      const supabase = getPublicClient();
+      const { data, error } = await supabase
+        .from('workshop_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error || !data) {
+        return getFromFileOrMock();
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row = data as any;
+      return {
+        badge: row.badge || DEFAULT_WORKSHOP_DATA.badge,
+        title: row.title || DEFAULT_WORKSHOP_DATA.title,
+        description: row.description || DEFAULT_WORKSHOP_DATA.description,
+        steps: Array.isArray(row.steps) && row.steps.length > 0 ? row.steps : DEFAULT_WORKSHOP_DATA.steps,
+        videoCard: row.video_card && typeof row.video_card === 'object' ? row.video_card : DEFAULT_WORKSHOP_DATA.videoCard,
+        updated_at: row.updated_at,
+      } as WorkshopData;
+    } catch {
+      return getFromFileOrMock();
+    }
+  })();
+
+  return withTimeout(query, DEFAULT_WORKSHOP_DATA);
 }

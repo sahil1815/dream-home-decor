@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { OrderStatus, DeliveryZone, PaymentMethod } from '@/types/database';
+import { OrderStatus, DeliveryZone, PaymentMethod, WorkshopData } from '@/types/database';
 import { isSupabaseConfigured } from '@/lib/data';
 import { validateBangladeshiPhone } from '@/lib/utils';
+import { DEFAULT_WORKSHOP_DATA } from '@/lib/mock-data';
 
 export interface CreateOrderPayload {
   customer_name: string;
@@ -356,4 +356,91 @@ export async function deleteCampaignAction(campaignId: string) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: msg };
   }
+}
+
+/**
+ * Server Action: Save Workshop Showcase Content (Admin)
+ */
+export async function saveWorkshopDataAction(payload: WorkshopData) {
+  try {
+    if (!payload.title?.trim()) {
+      return { success: false, error: 'সেকশনের প্রধান শিরোনাম প্রদান আবশ্যক' };
+    }
+    if (!payload.steps || payload.steps.length === 0) {
+      return { success: false, error: 'কমপক্ষে ১টি উৎপাদন ধাপ থাকা প্রয়োজন' };
+    }
+
+    const cleanData: WorkshopData = {
+      badge: payload.badge?.trim() || DEFAULT_WORKSHOP_DATA.badge,
+      title: payload.title.trim(),
+      description: payload.description?.trim() || '',
+      steps: payload.steps.map((step, idx) => ({
+        id: step.id || `step-${idx + 1}-${Date.now()}`,
+        title: step.title?.trim() || `ধাপ ${idx + 1}`,
+        desc: step.desc?.trim() || '',
+        image: step.image?.trim() || DEFAULT_WORKSHOP_DATA.steps[0].image,
+      })),
+      videoCard: {
+        enabled: payload.videoCard?.enabled !== false,
+        badge: payload.videoCard?.badge?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.badge,
+        title: payload.videoCard?.title?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.title,
+        description: payload.videoCard?.description?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.description,
+        buttonText: payload.videoCard?.buttonText?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.buttonText,
+        buttonUrl: payload.videoCard?.buttonUrl?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.buttonUrl,
+      },
+      updated_at: new Date().toISOString(),
+    };
+
+    // 1. Write to data/workshop.json for guaranteed local & static persistence
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const dirPath = path.join(process.cwd(), 'data');
+      await fs.mkdir(dirPath, { recursive: true });
+      const filePath = path.join(dirPath, 'workshop.json');
+      await fs.writeFile(filePath, JSON.stringify(cleanData, null, 2), 'utf-8');
+    } catch (fsErr) {
+      console.error('File write error for workshop.json:', fsErr);
+    }
+
+    // 2. If Supabase is configured, attempt to save to workshop_settings
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = await createClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from('workshop_settings' as any) as any)
+          .upsert({
+            id: 1,
+            badge: cleanData.badge,
+            title: cleanData.title,
+            description: cleanData.description,
+            steps: cleanData.steps,
+            video_card: cleanData.videoCard,
+            updated_at: cleanData.updated_at,
+          });
+      } catch (sbErr) {
+        // Warning only, table may not exist yet in Supabase
+        console.warn('Supabase workshop sync warning:', sbErr);
+      }
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin/workshop');
+
+    return {
+      success: true,
+      message: 'ওয়ার্কশপ সেকশন সফলভাবে সংরক্ষিত হয়েছে! হোমপেজে পরিবর্তন কার্যকর হয়েছে।',
+      data: cleanData,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: `সংরক্ষণ ব্যর্থ হয়েছে: ${msg}` };
+  }
+}
+
+/**
+ * Server Action: Reset Workshop Showcase to Default Factory Data
+ */
+export async function resetWorkshopDataAction() {
+  return await saveWorkshopDataAction(DEFAULT_WORKSHOP_DATA);
 }
