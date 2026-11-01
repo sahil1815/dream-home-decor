@@ -18,8 +18,6 @@ import {
   ArrowDown,
   Sparkles,
   Image as ImageIcon,
-  Copy,
-  Check,
   Loader2,
   Sliders,
   PlayCircle,
@@ -99,13 +97,12 @@ export function WorkshopManager({
 
   // Active view tab
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-  const [editorSection, setEditorSection] = useState<'header' | 'steps' | 'video' | 'sql'>('header');
+  const [editorSection, setEditorSection] = useState<'header' | 'steps' | 'video'>('header');
 
   // UI status
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [copiedSql, setCopiedSql] = useState(false);
 
   // Helper: Construct current data payload
   const currentPayload: WorkshopData = {
@@ -235,36 +232,6 @@ export function WorkshopManager({
     } finally {
       setIsResetting(false);
     }
-  };
-
-  const sqlSnippet = `-- Optional: Supabase Table for Workshop Settings
-CREATE TABLE IF NOT EXISTS workshop_settings (
-  id INT PRIMARY KEY DEFAULT 1,
-  badge TEXT NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  steps JSONB NOT NULL DEFAULT '[]'::JSONB,
-  video_card JSONB NOT NULL DEFAULT '{}'::JSONB,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  CONSTRAINT single_workshop_row CHECK (id = 1)
-);
-
-ALTER TABLE workshop_settings ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public can view workshop settings"
-  ON workshop_settings FOR SELECT
-  USING (true);
-
-CREATE POLICY "Admin can update workshop settings"
-  ON workshop_settings FOR ALL
-  TO authenticated
-  USING (true)
-  WITH CHECK (true);`;
-
-  const copySql = () => {
-    navigator.clipboard.writeText(sqlSnippet);
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 2000);
   };
 
   return (
@@ -458,21 +425,6 @@ CREATE POLICY "Admin can update workshop settings"
                   }`}
                 >
                   {videoCardEnabled ? 'চালু' : 'বন্ধ'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setEditorSection('sql')}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bn text-xs font-bold transition-all text-left cursor-pointer ${
-                  editorSection === 'sql'
-                    ? 'bg-[#8B5A2B] text-white shadow-xs'
-                    : 'text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Copy className="w-4 h-4" />
-                  <span>৪. ডাটাবেজ সিঙ্ক তথ্য (SQL)</span>
                 </span>
               </button>
             </div>
@@ -890,57 +842,6 @@ CREATE POLICY "Admin can update workshop settings"
                       <ExternalLink className="w-3.5 h-3.5 text-[#8B5A2B]" />
                     </span>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* SUB-SECTION 4: DATABASE & SQL INFO */}
-            {editorSection === 'sql' && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-2xs space-y-6">
-                <div className="border-b border-stone-100 pb-4">
-                  <h2 className="text-base font-bold font-bn text-stone-900 flex items-center gap-2">
-                    <Copy className="w-5 h-5 text-[#8B5A2B]" />
-                    <span>ডাটাবেজ সিঙ্ক ও ব্যাকআপ আর্কিটেকচার</span>
-                  </h2>
-                  <p className="text-xs font-bn text-stone-500 mt-0.5">
-                    আপনার এই ওয়ার্কশপ সেকশনটি ফাইল সিস্টেমে সেভ হয় এবং Supabase এ টেবিল থাকলে স্বয়ংক্রিয়ভাবে ক্লাউডেও সিঙ্ক হয়ে যায়
-                  </p>
-                </div>
-
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs font-bn text-amber-900 space-y-2">
-                  <p className="font-bold flex items-center gap-1.5 text-amber-800">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>স্বয়ংক্রিয় ডুয়েল-স্টোরেজ সিস্টেম সক্রিয়!</span>
-                  </p>
-                  <p className="text-[12px] leading-relaxed text-amber-800/90">
-                    আপনি যখন ওপরের &ldquo;পরিবর্তন সেভ করুন&rdquo; বাটনে চাপ দেন, তখন এটি সরাসরি <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-amber-950">data/workshop.json</code> ফাইলে সংরক্ষিত হয় এবং সাথে সাথে হোমপেজে তাৎক্ষণিক কার্যকর হয়ে যায়। যদি আপনি চান আপনার ক্লাউড Supabase ডাটাবেজেও এই সেকশনের টেবিল থাকুক, তবে নিচের SQL স্ক্রিপ্টটি Supabase SQL Editor এ একবার রান করে নিতে পারেন (এটি ঐচ্ছিক):
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-stone-500">workshop_settings.sql</span>
-                    <button
-                      type="button"
-                      onClick={copySql}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bn font-semibold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors cursor-pointer"
-                    >
-                      {copiedSql ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          <span className="text-emerald-700">কপি হয়েছে!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>SQL কপি করুন</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <pre className="p-4 rounded-2xl bg-stone-900 text-amber-300 font-mono text-xs overflow-x-auto leading-relaxed">
-                    {sqlSnippet}
-                  </pre>
                 </div>
               </div>
             )}
