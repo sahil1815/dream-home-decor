@@ -368,10 +368,16 @@ export async function saveCampaignAction(campaign: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { error } = await (supabase.from('campaigns_giveaways' as any) as any).upsert(cleanCampaign);
         if (error) {
-          console.warn('Supabase campaign upsert error:', error.message);
+          console.error('Supabase campaign upsert error:', error.message);
+          return {
+            success: false,
+            error: `ডাটাবেজ পারমিশন সমস্যা: ${error.message}`,
+          };
         }
-      } catch (sbErr) {
-        console.warn('Supabase campaign sync warning:', sbErr);
+      } catch (sbErr: unknown) {
+        const msg = sbErr instanceof Error ? sbErr.message : 'Database error';
+        console.error('Supabase campaign sync error:', msg);
+        return { success: false, error: `ডাটাবেজ কানেকশন সমস্যা: ${msg}` };
       }
     }
 

@@ -230,53 +230,35 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function getCampaigns(options?: { onlyActive?: boolean }): Promise<CampaignGiveaway[]> {
   const onlyActive = options?.onlyActive ?? true;
 
-  const getFromFileOrMock = async (): Promise<CampaignGiveaway[]> => {
-    try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'data', 'campaigns.json');
-      const content = await fs.readFile(filePath, 'utf-8');
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed)) {
-        return onlyActive ? parsed.filter((c: CampaignGiveaway) => c.is_active) : parsed;
-      }
-    } catch {
-      // Fallback to mock
-    }
-    return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
-  };
-
   if (!isSupabaseConfigured()) {
-    return getFromFileOrMock();
+    return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
   }
 
   const query = (async () => {
     try {
       const supabase = getPublicClient();
-      let req = supabase
+
+      // Query all campaigns from Supabase
+      const { data, error } = await supabase
         .from('campaigns_giveaways')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (onlyActive) {
-        req = req.eq('is_active', true);
+      if (error) {
+        console.warn('Supabase getCampaigns warning:', error.message);
+        return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
       }
 
-      const { data, error } = await req.order('created_at', { ascending: false });
-
-      if (error || !data) {
-        return getFromFileOrMock();
+      // If Supabase has records
+      if (data && data.length > 0) {
+        const list = data as CampaignGiveaway[];
+        return onlyActive ? list.filter((c) => c.is_active) : list;
       }
 
-      // If data is returned from Supabase
-      if (data.length > 0) {
-        return data as CampaignGiveaway[];
-      }
-
-      // If data is empty in Supabase, check local file
-      const fileCampaigns = await getFromFileOrMock();
-      return onlyActive ? fileCampaigns.filter((c) => c.is_active) : fileCampaigns;
+      // If database has 0 rows, return initial mock
+      return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
     } catch {
-      return getFromFileOrMock();
+      return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
     }
   })();
 

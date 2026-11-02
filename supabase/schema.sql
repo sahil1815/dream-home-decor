@@ -237,7 +237,6 @@ CREATE POLICY "Public can view workshop settings"
 -- Admin can update workshop settings
 CREATE POLICY "Admin can manage workshop settings"
   ON workshop_settings FOR ALL
-  TO authenticated
   USING (true)
   WITH CHECK (true);
 
