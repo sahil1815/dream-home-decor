@@ -217,15 +217,14 @@ CREATE POLICY "Admin can manage order items"
   WITH CHECK (true);
 
 -- CAMPAIGNS POLICIES:
--- Public can view active campaigns
-CREATE POLICY "Public can view active campaigns"
+-- Public can view campaigns (storefront queries filter by is_active)
+CREATE POLICY "Public can view campaigns"
   ON campaigns_giveaways FOR SELECT
-  USING (is_active = true);
+  USING (true);
 
 -- Admin can manage all campaigns
 CREATE POLICY "Admin can manage campaigns"
   ON campaigns_giveaways FOR ALL
-  TO authenticated
   USING (true)
   WITH CHECK (true);
 

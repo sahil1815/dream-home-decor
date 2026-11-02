@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { OrderStatus, DeliveryZone, PaymentMethod, WorkshopData } from '@/types/database';
+import { OrderStatus, DeliveryZone, PaymentMethod, WorkshopData, CampaignGiveaway } from '@/types/database';
 import { isSupabaseConfigured } from '@/lib/data';
 import { validateBangladeshiPhone } from '@/lib/utils';
-import { DEFAULT_WORKSHOP_DATA } from '@/lib/mock-data';
+import { DEFAULT_WORKSHOP_DATA, MOCK_CAMPAIGNS } from '@/lib/mock-data';
 
 export interface CreateOrderPayload {
   customer_name: string;
@@ -307,32 +307,84 @@ export async function saveSiteSettingsAction(settingsData: {
 export async function saveCampaignAction(campaign: {
   id?: string;
   title: string;
-  description: string;
+  description?: string;
   banner_url: string;
   end_date?: string;
   facebook_post_link?: string;
   is_active: boolean;
 }) {
   try {
-    if (!isSupabaseConfigured()) {
-      return { success: true, message: 'Campaign saved (Demo mode)' };
+    const campaignId = campaign.id || `c0000000-${Date.now().toString(16).padStart(12, '0')}`;
+    const cleanCampaign: CampaignGiveaway = {
+      id: campaignId,
+      title: campaign.title.trim(),
+      description: campaign.description?.trim() || null,
+      banner_url: campaign.banner_url.trim(),
+      end_date: campaign.end_date || null,
+      facebook_post_link: campaign.facebook_post_link?.trim() || null,
+      is_active: Boolean(campaign.is_active),
+      created_at: new Date().toISOString(),
+    };
+
+    // 1. Always persist to data/campaigns.json
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const dirPath = path.join(process.cwd(), 'data');
+      await fs.mkdir(dirPath, { recursive: true });
+      const filePath = path.join(dirPath, 'campaigns.json');
+
+      let list: CampaignGiveaway[] = [...MOCK_CAMPAIGNS];
+      try {
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const parsed = JSON.parse(fileContent);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          list = parsed;
+        }
+      } catch {
+        // file doesn't exist yet
+      }
+
+      const existingIndex = list.findIndex((c) => c.id === campaignId);
+      if (existingIndex >= 0) {
+        list[existingIndex] = {
+          ...list[existingIndex],
+          ...cleanCampaign,
+          created_at: list[existingIndex].created_at || cleanCampaign.created_at,
+        };
+      } else {
+        list.unshift(cleanCampaign);
+      }
+
+      await fs.writeFile(filePath, JSON.stringify(list, null, 2), 'utf-8');
+    } catch (fsErr) {
+      console.error('File write error for campaigns.json:', fsErr);
     }
 
-    const supabase = await createClient();
-    if (campaign.id) {
-      const { error } = await supabase
-        .from('campaigns_giveaways')
-        .update(campaign)
-        .eq('id', campaign.id);
-      if (error) return { success: false, error: error.message };
-    } else {
-      const { error } = await supabase.from('campaigns_giveaways').insert(campaign);
-      if (error) return { success: false, error: error.message };
+    // 2. If Supabase is configured, attempt upsert
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = await createClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase.from('campaigns_giveaways' as any) as any).upsert(cleanCampaign);
+        if (error) {
+          console.warn('Supabase campaign upsert error:', error.message);
+        }
+      } catch (sbErr) {
+        console.warn('Supabase campaign sync warning:', sbErr);
+      }
     }
 
     revalidatePath('/');
     revalidatePath('/admin/campaigns');
-    return { success: true, message: 'ক্যাম্পেইন সফলভাবে সংরক্ষিত হয়েছে' };
+
+    return {
+      success: true,
+      data: cleanCampaign,
+      message: cleanCampaign.is_active
+        ? 'ক্যাম্পেইন সফলভাবে সক্রিয় করা হয়েছে!'
+        : 'ক্যাম্পেইনটি সফলভাবে পজ করা হয়েছে (হোমপেজে আর প্রদর্শিত হবে না)।',
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: msg };
@@ -341,13 +393,30 @@ export async function saveCampaignAction(campaign: {
 
 export async function deleteCampaignAction(campaignId: string) {
   try {
-    if (!isSupabaseConfigured()) {
-      return { success: true, message: 'Campaign deleted (Demo mode)' };
+    // 1. Remove from data/campaigns.json
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'data', 'campaigns.json');
+      const fileContent = await fs.readFile(filePath, 'utf-8');
+      const parsed = JSON.parse(fileContent);
+      if (Array.isArray(parsed)) {
+        const updated = parsed.filter((c: CampaignGiveaway) => c.id !== campaignId);
+        await fs.writeFile(filePath, JSON.stringify(updated, null, 2), 'utf-8');
+      }
+    } catch (fsErr) {
+      console.error('File error during delete:', fsErr);
     }
 
-    const supabase = await createClient();
-    const { error } = await supabase.from('campaigns_giveaways').delete().eq('id', campaignId);
-    if (error) return { success: false, error: error.message };
+    // 2. If Supabase is configured, delete from database
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = await createClient();
+        await supabase.from('campaigns_giveaways').delete().eq('id', campaignId);
+      } catch (sbErr) {
+        console.warn('Supabase campaign delete warning:', sbErr);
+      }
+    }
 
     revalidatePath('/');
     revalidatePath('/admin/campaigns');

@@ -224,33 +224,71 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 /**
- * Fetch active promotional campaigns/lotteries
+ * Fetch promotional campaigns/lotteries
+ * @param options.onlyActive - If true (default), returns only active campaigns for storefront. If false, returns all for admin.
  */
-export async function getCampaigns(): Promise<CampaignGiveaway[]> {
+export async function getCampaigns(options?: { onlyActive?: boolean }): Promise<CampaignGiveaway[]> {
+  const onlyActive = options?.onlyActive ?? true;
+
+  const getFromFileOrMock = async (): Promise<CampaignGiveaway[]> => {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'data', 'campaigns.json');
+      const content = await fs.readFile(filePath, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        return onlyActive ? parsed.filter((c: CampaignGiveaway) => c.is_active) : parsed;
+      }
+    } catch {
+      // Fallback to mock
+    }
+    return onlyActive ? MOCK_CAMPAIGNS.filter((c) => c.is_active) : MOCK_CAMPAIGNS;
+  };
+
   if (!isSupabaseConfigured()) {
-    return MOCK_CAMPAIGNS;
+    return getFromFileOrMock();
   }
 
   const query = (async () => {
     try {
       const supabase = getPublicClient();
-      const { data, error } = await supabase
+      let req = supabase
         .from('campaigns_giveaways')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .select('*');
 
-      if (error || !data || data.length === 0) {
-        return MOCK_CAMPAIGNS;
+      if (onlyActive) {
+        req = req.eq('is_active', true);
       }
 
-      return data as CampaignGiveaway[];
+      const { data, error } = await req.order('created_at', { ascending: false });
+
+      if (error || !data) {
+        return getFromFileOrMock();
+      }
+
+      // If data is returned from Supabase
+      if (data.length > 0) {
+        return data as CampaignGiveaway[];
+      }
+
+      // If data is empty in Supabase, check local file
+      const fileCampaigns = await getFromFileOrMock();
+      return onlyActive ? fileCampaigns.filter((c) => c.is_active) : fileCampaigns;
     } catch {
-      return MOCK_CAMPAIGNS;
+      return getFromFileOrMock();
     }
   })();
 
-  return withTimeout(query, MOCK_CAMPAIGNS);
+  const fallback = onlyActive ? [] : MOCK_CAMPAIGNS;
+  return withTimeout(query, fallback);
+}
+
+/**
+ * Fetch all campaigns for Admin management (both active and inactive)
+ */
+export async function getAllCampaigns(): Promise<CampaignGiveaway[]> {
+  return getCampaigns({ onlyActive: false });
 }
 
 /**

@@ -31,6 +31,7 @@ export function AdminCampaignManager({ initialCampaigns }: AdminCampaignManagerP
   const [isActive, setIsActive] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -49,51 +50,74 @@ export function AdminCampaignManager({ initialCampaigns }: AdminCampaignManagerP
         is_active: isActive,
       });
 
-      if (res.success) {
-        setCampaigns((prev) => [
-          {
-            id: `camp-${Date.now()}`,
-            title,
-            description,
-            banner_url: bannerUrl,
-            facebook_post_link: fbLink,
-            is_active: isActive,
-            end_date: null,
-          },
-          ...prev,
-        ]);
+      if (res.success && res.data) {
+        setCampaigns((prev) => [res.data as CampaignGiveaway, ...prev]);
         setTitle('');
         setDescription('');
         setBannerUrl('');
-        setFeedback('ক্যাম্পেইন সফলভাবে চালু করা হয়েছে!');
+        setFeedback('ক্যাম্পেইন সফলভাবে চালু ও সংরক্ষিত হয়েছে!');
+      } else {
+        setFeedback(res.error || 'ক্যাম্পেইন তৈরি ব্যর্থ হয়েছে');
       }
     } catch {
-      // Error
+      setFeedback('নেটওয়ার্ক সমস্যা, পুনরায় চেষ্টা করুন');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleToggle = async (camp: CampaignGiveaway) => {
+    if (togglingId) return;
     const updatedStatus = !camp.is_active;
+    setTogglingId(camp.id);
+    setFeedback(null);
+
+    // Optimistically update UI
     setCampaigns((prev) =>
       prev.map((c) => (c.id === camp.id ? { ...c, is_active: updatedStatus } : c))
     );
 
-    await saveCampaignAction({
-      id: camp.id,
-      title: camp.title,
-      description: camp.description || '',
-      banner_url: camp.banner_url,
-      facebook_post_link: camp.facebook_post_link || undefined,
-      is_active: updatedStatus,
-    });
+    try {
+      const res = await saveCampaignAction({
+        id: camp.id,
+        title: camp.title,
+        description: camp.description || '',
+        banner_url: camp.banner_url,
+        facebook_post_link: camp.facebook_post_link || undefined,
+        is_active: updatedStatus,
+      });
+
+      if (res.success) {
+        setFeedback(
+          updatedStatus
+            ? 'ক্যাম্পেইন সফলভাবে চালু করা হয়েছে (হোমপেজে প্রদর্শিত হচ্ছে)!'
+            : 'ক্যাম্পেইনটি সফলভাবে পজ করা হয়েছে (হোমপেজে আর প্রদর্শিত হবে না)!'
+        );
+      } else {
+        // Revert on error
+        setCampaigns((prev) =>
+          prev.map((c) => (c.id === camp.id ? { ...c, is_active: camp.is_active } : c))
+        );
+        setFeedback(`স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে: ${res.error || 'অজানা সমস্যা'}`);
+      }
+    } catch {
+      // Revert on network exception
+      setCampaigns((prev) =>
+        prev.map((c) => (c.id === camp.id ? { ...c, is_active: camp.is_active } : c))
+      );
+      setFeedback('নেটওয়ার্ক ত্রুটি, পুনরায় চেষ্টা করুন');
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('আপনি কি এই ক্যাম্পেইনটি মুছে ফেলতে চান?')) return;
     setCampaigns((prev) => prev.filter((c) => c.id !== id));
-    await deleteCampaignAction(id);
+    const res = await deleteCampaignAction(id);
+    if (res.success) {
+      setFeedback('ক্যাম্পেইনটি সফলভাবে ডিলিট করা হয়েছে!');
+    }
   };
 
   return (
@@ -109,9 +133,23 @@ export function AdminCampaignManager({ initialCampaigns }: AdminCampaignManagerP
       </div>
 
       {feedback && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bn rounded-2xl flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
-          <span>{feedback}</span>
+        <div
+          className={`p-3.5 border text-xs font-bn rounded-2xl flex items-center justify-between gap-2 ${
+            feedback.includes('ব্যর্থ') || feedback.includes('ত্রুটি') || feedback.includes('সমস্যা')
+              ? 'bg-rose-50 border-rose-200 text-rose-800'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{feedback}</span>
+          </div>
+          <button
+            onClick={() => setFeedback(null)}
+            className="text-stone-400 hover:text-stone-700 text-xs px-2 py-0.5 rounded cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -245,13 +283,13 @@ export function AdminCampaignManager({ initialCampaigns }: AdminCampaignManagerP
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-[10px] font-bn font-bold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] font-bn font-bold px-2.5 py-0.5 rounded-full border ${
                         camp.is_active
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-stone-100 text-stone-500'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                          : 'bg-stone-100 text-stone-600 border-stone-200'
                       }`}
                     >
-                      {camp.is_active ? 'লাইভ সক্রিয়' : 'নিষ্ক্রিয়'}
+                      {camp.is_active ? 'সাইটে সক্রিয়' : 'পজ করা (নিষ্ক্রিয়)'}
                     </span>
                   </div>
                   <h3 className="font-bn font-bold text-stone-900 text-sm mt-1 truncate">
@@ -276,14 +314,24 @@ export function AdminCampaignManager({ initialCampaigns }: AdminCampaignManagerP
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                   <button
                     type="button"
+                    disabled={togglingId === camp.id}
                     onClick={() => handleToggle(camp)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bn font-semibold border transition-colors cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bn font-semibold border transition-all cursor-pointer disabled:opacity-50 ${
                       camp.is_active
-                        ? 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300'
+                        ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300'
+                        : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
                     }`}
                   >
-                    {camp.is_active ? 'পজ করুন' : 'চালু করুন'}
+                    {togglingId === camp.id ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>আপডেট হচ্ছে...</span>
+                      </>
+                    ) : camp.is_active ? (
+                      <span>পজ করুন</span>
+                    ) : (
+                      <span>চালু করুন</span>
+                    )}
                   </button>
 
                   <button
