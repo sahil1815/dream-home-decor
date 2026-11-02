@@ -24,16 +24,16 @@ export function CartDrawer() {
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-stone-200 animate-in slide-in-from-right duration-300 h-full max-h-dvh">
           {/* Header */}
-          <div className="p-3.5 sm:p-5 bg-[#1C1917] text-white flex items-center justify-between shrink-0">
+          <div className="p-3.5 sm:p-5 bg-[#5C3615] text-white flex items-center justify-between shrink-0 border-b border-[#44250C]">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-amber-400 shrink-0" />
+              <ShoppingBag className="w-5 h-5 text-amber-300 shrink-0" />
               <h2 className="font-bn font-bold text-base sm:text-lg text-white">
                 আপনার শপিং কার্ট ({totalItems})
               </h2>
             </div>
             <button
               onClick={closeCart}
-              className="p-1.5 rounded-full hover:bg-stone-800 text-stone-300 hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded-full hover:bg-white/10 text-amber-100 hover:text-white transition-colors cursor-pointer"
               aria-label="কার্ট বন্ধ করুন"
             >
               <X className="w-5 h-5" />

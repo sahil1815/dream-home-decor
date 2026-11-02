@@ -29,14 +29,14 @@ export function FloatingContact({ settings }: FloatingContactProps) {
     <div className="hidden lg:flex fixed bottom-6 right-5 z-40 flex-col items-end gap-3 pointer-events-auto">
       {/* Tooltip bubble */}
       {showTooltip && (
-        <div className="flex items-center gap-2 bg-[#1C1917] text-white py-2 px-3.5 rounded-2xl shadow-xl border border-stone-700 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xs">
-          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-          <p className="text-xs font-bn text-stone-200">
+        <div className="flex items-center gap-2 bg-[#5C3615] text-white py-2 px-3.5 rounded-2xl shadow-xl border border-amber-900/30 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xs">
+          <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+          <p className="text-xs font-bn text-amber-100/90">
             যেকোনো কাস্টমাইজেশন বা অর্ডার সহযোগিতায় সরাসরি নক দিন!
           </p>
           <button
             onClick={() => setShowTooltip(false)}
-            className="text-stone-400 hover:text-white p-0.5 cursor-pointer"
+            className="text-amber-200/70 hover:text-white p-0.5 cursor-pointer"
             aria-label="বার্তা বন্ধ করুন"
           >
             <X className="w-3.5 h-3.5" />
@@ -49,7 +49,7 @@ export function FloatingContact({ settings }: FloatingContactProps) {
         {/* Call Button */}
         <a
           href={`tel:${settings.phone}`}
-          className="w-12 h-12 rounded-full bg-[#1C1917] hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-lg border border-stone-700 transition-all hover:scale-105"
+          className="w-12 h-12 rounded-full bg-[#8B5A2B] hover:bg-[#6D431F] text-amber-100 flex items-center justify-center shadow-lg border border-amber-900/30 transition-all hover:scale-105"
           aria-label="হটলাইনে কল করুন"
           title={`Call ${settings.phone}`}
         >

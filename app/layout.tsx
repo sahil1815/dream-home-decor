@@ -4,6 +4,7 @@ import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { WishlistProvider } from '@/context/wishlist-context';
 import { getSiteSettings, getCategories } from '@/lib/data';
+import { AnnouncementBar } from '@/components/storefront/AnnouncementBar';
 import { Navbar } from '@/components/storefront/Navbar';
 import { Footer } from '@/components/storefront/Footer';
 import { CartDrawer } from '@/components/storefront/CartDrawer';
@@ -71,6 +72,9 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#1C1917] antialiased">
         <CartProvider>
           <WishlistProvider>
+            {/* Top Announcement Bar */}
+            <AnnouncementBar settings={settings} />
+
             {/* Sticky Navigation */}
             <Navbar settings={settings} categories={categories} />
 

@@ -108,47 +108,51 @@ export default async function HomePage() {
 
       {/* 5. Special Spotlight: Signature Reading Table (পড়ার টেবিল - ৳৩,৮০০) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-stone-900 via-stone-900 to-[#643D1A] rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-8 lg:p-10 text-white relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+        <div className="bg-gradient-to-br from-[#F7F3EC] via-[#FAF6F0] to-[#EFE7DC] rounded-3xl overflow-hidden shadow-xl border-2 border-[#8B5A2B]/20 p-5 sm:p-8 lg:p-10 relative">
+          {/* Subtle Warm Decorative Glow */}
+          <div className="absolute top-0 right-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-10 w-80 h-80 bg-[#8B5A2B]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
             <div className="lg:col-span-7 space-y-4">
-              <span className="bg-[#8B5A2B] text-white text-xs font-bn font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+              <span className="bg-[#8B5A2B] text-white text-xs font-bn font-bold px-3.5 py-1 rounded-full uppercase tracking-wider inline-block shadow-2xs">
                 হট ডিল • কারখানা স্পেশাল
               </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold font-bn leading-tight text-white">
+              <h2 className="text-2xl sm:text-4xl font-extrabold font-bn leading-tight text-[#2E1E14]">
                 স্মার্ট বুকশেলফ সহ পড়ার টেবিল — মাত্র ৳৩,৮০০!
               </h2>
-              <p className="text-stone-300 font-bn text-sm sm:text-base leading-relaxed">
+              <p className="text-stone-700 font-bn text-sm sm:text-base leading-relaxed">
                 শিক্ষার্থী ও বইপ্রেমীদের জন্য আমাদের সর্বোচ্চ বিক্রিত মডেল। পর্যাপ্ত বই রাখার খোপ,
                 ল্যাপটপ স্পেস ও মসৃণ ওয়াটারপ্রুফ মেলামাইন কোটিং। সরাসরি কারখানা থেকে দ্রুততম সময়ে
                 হোম ডেলিভারি।
               </p>
 
               <div className="flex flex-wrap gap-2.5 sm:gap-4 pt-2">
-                <div className="bg-white/10 backdrop-blur-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bn border border-white/10">
-                  <span className="text-amber-400 font-bold block">বোর্ড সাইজ:</span>
-                  <span>৩.৫ ফুট x ২ ফুট x ৪.৫ ফুট</span>
+                <div className="bg-white/95 backdrop-blur-xs px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bn border border-stone-200 shadow-2xs">
+                  <span className="text-[#8B5A2B] font-bold block">বোর্ড সাইজ:</span>
+                  <span className="text-stone-800 font-medium">৩.৫ ফুট x ২ ফুট x ৪.৫ ফুট</span>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bn border border-white/10">
-                  <span className="text-emerald-400 font-bold block">ডেলিভারি:</span>
-                  <span>সারাদেশে ক্যাশ অন ডেলিভারি</span>
+                <div className="bg-white/95 backdrop-blur-xs px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bn border border-stone-200 shadow-2xs">
+                  <span className="text-emerald-700 font-bold block">ডেলিভারি:</span>
+                  <span className="text-stone-800 font-medium">সারাদেশে ক্যাশ অন ডেলিভারি</span>
                 </div>
               </div>
 
               <div className="pt-3 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
                 <Link
                   href="/products/smart-ergonomic-reading-table"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-amber-400 hover:bg-amber-300 text-stone-950 px-7 py-3 rounded-full font-bn font-bold text-sm sm:text-base shadow-lg transition-transform hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-7 py-3.5 rounded-full font-bn font-bold text-sm sm:text-base shadow-lg shadow-[#8B5A2B]/25 transition-all hover:scale-105"
                 >
                   বিস্তারিত দেখুন ও অর্ডার করুন
                 </Link>
-                <span className="text-stone-300 text-xs sm:text-sm font-bn">
+                <span className="text-stone-600 text-xs sm:text-sm font-bn font-medium">
                   বাটন ক্লিক করলেই ক্যাশ অন ডেলিভারি ফর্ম খুলবে
                 </span>
               </div>
             </div>
 
             <div className="lg:col-span-5 relative">
-              <div className="relative aspect-4/3 rounded-2xl overflow-hidden shadow-xl border-2 border-white/20">
+              <div className="relative aspect-4/3 rounded-2xl overflow-hidden shadow-xl border-2 border-[#8B5A2B]/25">
                 <Image
                   src="https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80"
                   alt="Smart Reading Table"
@@ -156,7 +160,7 @@ export default async function HomePage() {
                   sizes="(max-width: 1024px) 100vw, 40vw"
                   className="object-cover"
                 />
-                <div className="absolute top-3 right-3 bg-rose-600 text-white font-bold text-xs px-3 py-1 rounded-full font-sans">
+                <div className="absolute top-3 right-3 bg-rose-600 text-white font-bold text-xs px-3 py-1 rounded-full font-sans shadow-xs">
                   ১৬% সেভ
                 </div>
               </div>

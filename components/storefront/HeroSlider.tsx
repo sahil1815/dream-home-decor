@@ -119,7 +119,7 @@ export function HeroSlider({ settings }: HeroSliderProps) {
               </div>
 
               {/* Floating Bottom Card */}
-              <div className="absolute bottom-3 sm:bottom-4 inset-x-3 sm:inset-x-4 bg-stone-900/90 backdrop-blur-md text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 shadow-lg">
+              <div className="absolute bottom-3 sm:bottom-4 inset-x-3 sm:inset-x-4 bg-[#2B1B12]/90 backdrop-blur-md text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-900/30 shadow-lg">
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-[10px] sm:text-xs text-amber-400 font-bn font-semibold truncate">

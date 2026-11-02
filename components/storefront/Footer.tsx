@@ -21,14 +21,14 @@ interface FooterProps {
 
 export function Footer({ settings }: FooterProps) {
   return (
-    <footer className="bg-[#1C1917] text-[#FAF8F5] pt-14 pb-24 lg:pb-8 border-t border-stone-800">
+    <footer className="bg-[#2B1B12] text-[#F5EFE6] pt-14 pb-24 lg:pb-8 border-t border-[#3E281C]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#3E281C]">
           {/* Col 1: Brand & Factory Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               {settings.logo_url && settings.logo_url.startsWith('http') ? (
-                <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-stone-900 border border-stone-700">
+                <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-gradient-to-br from-[#8B5A2B] to-[#543214] border border-[#543214]">
                   <Image
                     src={getOptimizedImageUrl(settings.logo_url, 120)}
                     alt={settings.site_name}
@@ -46,7 +46,7 @@ export function Footer({ settings }: FooterProps) {
                 <h3 className="font-serif text-xl font-bold tracking-tight text-white">
                   {settings.site_name}
                 </h3>
-                <p className="text-xs text-amber-500 font-bn font-semibold">
+                <p className="text-xs text-amber-400 font-bn font-semibold">
                   সরাসরি নিজস্ব কারখানায় তৈরি
                 </p>
               </div>
@@ -90,48 +90,48 @@ export function Footer({ settings }: FooterProps) {
 
           {/* Col 2: Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider font-sans border-b border-stone-800 pb-2">
+            <h4 className="text-sm font-semibold text-amber-200/90 uppercase tracking-wider font-sans border-b border-[#3E281C] pb-2">
               পপুলার ক্যাটাগরি
             </h4>
             <ul className="space-y-2.5 text-sm font-bn text-stone-300">
               <li>
                 <Link
                   href="/products?category=reading-tables"
-                  className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
-                  <span className="text-amber-600">›</span> পড়ার টেবিল (Reading Tables)
+                  <span className="text-amber-500">›</span> পড়ার টেবিল (Reading Tables)
                 </Link>
               </li>
               <li>
                 <Link
                   href="/products?category=bookshelves"
-                  className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
-                  <span className="text-amber-600">›</span> আধুনিক বুকশেলফ ও র‍্যাক
+                  <span className="text-amber-500">›</span> আধুনিক বুকশেলফ ও র‍্যাক
                 </Link>
               </li>
               <li>
                 <Link
                   href="/products?category=computer-tables"
-                  className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
-                  <span className="text-amber-600">›</span> কম্পিউটার ও ওয়ার্কস্টেশন ডেস্ক
+                  <span className="text-amber-500">›</span> কম্পিউটার ও ওয়ার্কস্টেশন ডেস্ক
                 </Link>
               </li>
               <li>
                 <Link
                   href="/products?category=wall-shelves"
-                  className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
-                  <span className="text-amber-600">›</span> ওয়াল সেলফ ও ডেকোরেশন
+                  <span className="text-amber-500">›</span> ওয়াল সেলফ ও ডেকোরেশন
                 </Link>
               </li>
               <li>
                 <Link
                   href="/products?category=dressing-tables"
-                  className="hover:text-amber-400 transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
-                  <span className="text-amber-600">›</span> সৌখিন ড্রেসিং টেবিল
+                  <span className="text-amber-500">›</span> সৌখিন ড্রেসিং টেবিল
                 </Link>
               </li>
             </ul>
@@ -139,7 +139,7 @@ export function Footer({ settings }: FooterProps) {
 
           {/* Col 3: Customer Service & Trust */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider font-sans border-b border-stone-800 pb-2">
+            <h4 className="text-sm font-semibold text-amber-200/90 uppercase tracking-wider font-sans border-b border-[#3E281C] pb-2">
               গ্রাহক সেবা ও পলিসি
             </h4>
             <ul className="space-y-2.5 text-sm font-bn text-stone-300">
@@ -169,7 +169,7 @@ export function Footer({ settings }: FooterProps) {
 
           {/* Col 4: Contact & Factory Address */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider font-sans border-b border-stone-800 pb-2">
+            <h4 className="text-sm font-semibold text-amber-200/90 uppercase tracking-wider font-sans border-b border-[#3E281C] pb-2">
               কারখানা ও যোগাযোগ
             </h4>
             <div className="space-y-3 text-sm font-bn text-stone-300">
@@ -192,7 +192,7 @@ export function Footer({ settings }: FooterProps) {
                 href={settings.facebook_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 w-full bg-[#1877F2] hover:bg-blue-600 text-white py-2.5 px-4 rounded-xl text-xs font-semibold font-bn transition-colors"
+                className="inline-flex items-center justify-center gap-2 w-full bg-[#1877F2] hover:bg-blue-600 text-white py-2.5 px-4 rounded-xl text-xs font-semibold font-bn transition-colors shadow-xs"
               >
                 <FacebookIcon className="w-4 h-4" />
                 <span>আমাদের ফেসবুক পেজ ভিজিট করুন</span>
@@ -202,10 +202,10 @@ export function Footer({ settings }: FooterProps) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-stone-300 font-bn text-center sm:text-left">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-stone-400 font-bn text-center sm:text-left">
           <p>© {new Date().getFullYear()} {settings.site_name}. সর্বস্বত্ব সংরক্ষিত।</p>
           <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4">
-            <Link href="/admin" className="hover:text-stone-300 transition-colors">
+            <Link href="/admin" className="hover:text-amber-300 transition-colors">
               অ্যাডমিন পোর্টাল
             </Link>
             <span>•</span>

@@ -108,9 +108,9 @@ export function QuickOrderModal() {
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
       <div className="relative w-full max-w-lg bg-[#FAF8F5] rounded-2xl sm:rounded-3xl shadow-2xl border border-stone-200 overflow-hidden my-auto max-h-[92dvh] flex flex-col">
         {/* Header */}
-        <div className="bg-[#1C1917] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
+        <div className="bg-[#5C3615] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0 border-b border-[#44250C]">
           <div>
-            <span className="text-[10px] sm:text-[11px] bg-[#8B5A2B] text-white px-2 py-0.5 rounded font-bn font-semibold uppercase">
+            <span className="text-[10px] sm:text-[11px] bg-amber-400 text-stone-950 px-2 py-0.5 rounded font-bn font-bold uppercase shadow-2xs">
               ১ মিনিটে দ্রুত অর্ডার
             </span>
             <h3 className="font-bn font-bold text-base sm:text-xl text-white mt-1">
@@ -119,7 +119,7 @@ export function QuickOrderModal() {
           </div>
           <button
             onClick={closeQuickOrder}
-            className="p-1.5 rounded-full bg-stone-800 text-stone-300 hover:text-white hover:bg-stone-700 transition-colors cursor-pointer shrink-0"
+            className="p-1.5 rounded-full bg-white/15 text-amber-100 hover:text-white hover:bg-white/25 transition-colors cursor-pointer shrink-0"
             aria-label="ফর্ম বন্ধ করুন"
           >
             <X className="w-5 h-5" />

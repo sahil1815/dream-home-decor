@@ -63,7 +63,7 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
           {/* Stock Status Badge */}
           <div className="absolute top-2.5 right-2.5">
             {isOutOfStock ? (
-              <span className="bg-stone-900/80 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-full">
+              <span className="bg-[#5C3615]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-full">
                 স্টক আউট
               </span>
             ) : isMadeToOrder ? (
@@ -80,7 +80,7 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
 
           {/* Dimensions tag */}
           {product.dimensions && (
-            <div className="absolute bottom-2 left-2 bg-stone-900/70 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1 font-sans">
+            <div className="absolute bottom-2 left-2 bg-[#2B1B12]/80 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1 font-sans border border-white/10">
               <Ruler className="w-2.5 h-2.5 text-amber-300" />
               <span>{product.dimensions}</span>
             </div>

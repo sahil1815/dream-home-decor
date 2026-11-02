@@ -227,7 +227,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
             aria-label={settings.site_name_bn || settings.site_name}
           >
             {settings.logo_url && settings.logo_url.startsWith('http') ? (
-              <div className="relative w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden bg-stone-900 border border-amber-900/30 shadow-xs flex items-center justify-center shrink-0">
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#8B5A2B] to-[#643D1A] border border-amber-900/20 shadow-xs flex items-center justify-center shrink-0">
                 <Image
                   src={getOptimizedImageUrl(settings.logo_url, 120)}
                   alt={settings.site_name}
@@ -237,7 +237,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
                 />
               </div>
             ) : (
-              <div className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-stone-900 border border-amber-900/30 text-amber-200 font-serif font-bold text-xs sm:text-sm flex items-center justify-center tracking-wider shrink-0 shadow-xs">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-gradient-to-br from-[#8B5A2B] to-[#643D1A] border border-amber-900/30 text-amber-100 font-serif font-bold text-xs sm:text-sm flex items-center justify-center tracking-wider shrink-0 shadow-xs">
                 DH
               </div>
             )}
@@ -433,7 +433,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
 
                 <a
                   href={`tel:${settings.phone}`}
-                  className="flex items-center justify-center gap-2 bg-stone-900 text-white py-2.5 rounded-xl font-medium text-sm transition-colors"
+                  className="flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-2.5 rounded-xl font-medium text-sm transition-colors shadow-xs"
                 >
                   <Phone className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>হটলাইন কল: {settings.phone}</span>

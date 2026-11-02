@@ -110,7 +110,7 @@ function SuccessContent() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 no-print">
           <button
             onClick={handlePrint}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-stone-900 hover:bg-black text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bn font-semibold transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#5C3615] hover:bg-[#45270D] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bn font-semibold transition-colors cursor-pointer shadow-xs"
           >
             <Printer className="w-4 h-4 shrink-0" />
             <span>ইনভয়েস প্রিন্ট / ডাউনলোড করুন</span>

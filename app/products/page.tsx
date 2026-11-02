@@ -64,7 +64,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header Banner */}
-      <div className="bg-[#1C1917] rounded-3xl p-5 sm:p-8 md:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+      <div className="bg-gradient-to-r from-[#5C3615] via-[#7A481E] to-[#4A290E] rounded-3xl p-5 sm:p-8 md:p-10 text-white shadow-lg border border-amber-900/20 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 bg-[#8B5A2B] text-white px-3 py-1 rounded-full text-xs font-bn font-bold">
             <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />

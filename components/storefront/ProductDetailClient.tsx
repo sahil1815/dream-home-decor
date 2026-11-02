@@ -156,7 +156,7 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
             </div>
           )}
 
-          <div className="absolute top-4 right-4 bg-stone-900/80 backdrop-blur-xs text-white text-xs font-bn font-semibold px-3 py-1 rounded-full">
+          <div className="absolute top-4 right-4 bg-[#5C3615]/80 backdrop-blur-xs text-white text-xs font-bn font-semibold px-3 py-1 rounded-full border border-white/10">
             {product.stock_status === 'in_stock'
               ? 'রেডি স্টক'
               : product.stock_status === 'made_to_order'
@@ -302,7 +302,7 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           <button
             type="button"
             onClick={() => addToCart(product, quantity, selectedColor)}
-            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 bg-stone-900 hover:bg-black text-white py-2.5 px-3 sm:px-4 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#5C3615] hover:bg-[#45270D] text-white py-2.5 px-3 sm:px-4 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
           >
             <ShoppingCart className="w-4 h-4 shrink-0" />
             <span className="truncate">কার্টে যোগ করুন</span>
