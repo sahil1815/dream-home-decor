@@ -203,7 +203,7 @@ export function ProductCatalogClient({
               : 'bg-white text-[#2B1D14] border border-[#E8E2D9] hover:bg-[#FAF8F5]'
           }`}
         >
-          সবগুলো ফার্নিচার ({products.length})
+          সবগুলো ফার্নিচার
         </button>
 
         {categories.map((cat) => {
@@ -327,7 +327,7 @@ export function ProductCatalogClient({
                 onClick={() => setDisplayCount((c) => c + 12)}
                 className="inline-flex items-center gap-2 bg-white hover:bg-[#FAF8F5] text-[#2B1D14] border border-[#E8E2D9] px-8 py-3 rounded-xl font-bn font-semibold text-sm shadow-2xs hover:shadow-xs transition-all cursor-pointer"
               >
-                <span>আরও ফার্নিচার দেখুন ({filteredProducts.length - visibleProducts.length} টি বাকি)</span>
+                <span>আরও ফার্নিচার দেখুন</span>
               </button>
             </div>
           )}
@@ -468,7 +468,7 @@ export function ProductCatalogClient({
                 onClick={() => setMobileFilterOpen(false)}
                 className="flex-1 bg-[#8A5A3B] hover:bg-[#6E442B] text-white py-3 rounded-xl font-bn font-bold text-sm shadow-xs transition-colors"
               >
-                ফলাফল দেখুন ({filteredProducts.length} টি)
+                ফলাফল দেখুন
               </button>
               {hasActiveFilters && (
                 <button

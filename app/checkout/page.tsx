@@ -552,7 +552,7 @@ export default function CheckoutPage() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D9] shadow-xs space-y-5">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <h2 className="font-serif font-bold text-base text-[#2B1D14]">
-                অর্ডার সারাংশ ({cart.length} টি ফার্নিচার)
+                অর্ডার সারাংশ
               </h2>
             </div>
 

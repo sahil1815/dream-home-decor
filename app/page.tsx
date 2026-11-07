@@ -188,7 +188,7 @@ export default async function HomePage() {
             href="/products"
             className="inline-flex items-center gap-1.5 text-sm font-bn font-semibold text-[#8A5A3B] hover:text-[#6E442B]"
           >
-            <span>সবগুলো ফার্নিচার ({products.length}+)</span>
+            <span>সবগুলো ফার্নিচার দেখুন</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
