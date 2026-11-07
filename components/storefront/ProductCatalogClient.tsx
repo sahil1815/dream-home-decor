@@ -148,33 +148,35 @@ export function ProductCatalogClient({
           )}
         </div>
 
-        {/* Controls Cluster */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-          {/* Mobile Filter Sheet Button */}
-          <button
-            type="button"
-            onClick={() => setMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#E8E2D9] text-xs font-bn font-semibold text-[#2B1D14] hover:bg-[#F4ECE1] transition-colors cursor-pointer"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-[#8A5A3B]" />
-            <span>ফিল্টার ({hasActiveFilters ? 'সক্রিয়' : 'সব'})</span>
-          </button>
-
-          {/* Desktop Sort Dropdown */}
-          <div className="flex items-center gap-2 bg-[#FAF8F5] px-3.5 py-1.5 rounded-xl border border-[#E8E2D9]">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#8A5A3B] shrink-0" />
-            <span className="text-xs font-bn text-stone-500 hidden sm:inline">সাজান:</span>
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="bg-transparent text-xs font-bn font-semibold text-[#2B1D14] focus:outline-hidden cursor-pointer"
-              aria-label="প্রোডাক্ট সাজান"
+        {/* Controls Cluster: 1 row, 2 columns on mobile */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-3">
+            {/* Mobile Filter Sheet Button */}
+            <button
+              type="button"
+              onClick={() => setMobileFilterOpen(true)}
+              className="lg:hidden flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#E8E2D9] text-xs font-bn font-semibold text-[#2B1D14] hover:bg-[#F4ECE1] transition-colors cursor-pointer w-full"
             >
-              <option value="newest">সর্বশেষ সংযোজিত</option>
-              <option value="price_asc">মূল্য: কম থেকে বেশি</option>
-              <option value="price_desc">মূল্য: বেশি থেকে কম</option>
-              <option value="name_asc">নাম অনুযায়ী (অ-ক্ষ)</option>
-            </select>
+              <SlidersHorizontal className="w-4 h-4 text-[#8A5A3B] shrink-0" />
+              <span className="truncate">ফিল্টার ({hasActiveFilters ? 'সক্রিয়' : 'সব'})</span>
+            </button>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#FAF8F5] px-3 py-2.5 rounded-xl border border-[#E8E2D9] w-full sm:w-auto">
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#8A5A3B] shrink-0" />
+              <span className="text-xs font-bn text-stone-500 hidden sm:inline shrink-0">সাজান:</span>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="bg-transparent text-xs font-bn font-semibold text-[#2B1D14] focus:outline-hidden cursor-pointer w-full truncate"
+                aria-label="প্রোডাক্ট সাজান"
+              >
+                <option value="newest">সর্বশেষ সংযোজিত</option>
+                <option value="price_asc">মূল্য: কম থেকে বেশি</option>
+                <option value="price_desc">মূল্য: বেশি থেকে কম</option>
+                <option value="name_asc">নাম অনুযায়ী (অ-ক্ষ)</option>
+              </select>
+            </div>
           </div>
 
           {/* Reset Filters Button */}
@@ -182,7 +184,7 @@ export function ProductCatalogClient({
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bn font-semibold text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bn font-semibold text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer shrink-0"
               title="সকল ফিল্টার রিসেট করুন"
             >
               <RotateCcw className="w-3.5 h-3.5" />
