@@ -65,17 +65,10 @@ export function FloatingContact({ settings }: FloatingContactProps) {
 
   const whatsappUrl = buildWhatsAppUrl(cleanNumber, message);
 
-  // Determine bottom positioning:
-  // On mobile product detail pages, there's a sticky bar at bottom-0, so we lift the button to bottom-20
-  const isProductDetail = pathname?.startsWith('/products/') && pathname !== '/products';
-  const bottomClasses = isProductDetail
-    ? 'bottom-22 lg:bottom-6 right-4 sm:right-6'
-    : 'bottom-20 lg:bottom-6 right-4 sm:right-6';
-
   return (
     <aside
       aria-label="সরাসরি হোয়াটসঅ্যাপ যোগাযোগ"
-      className={`fixed ${bottomClasses} z-40 flex flex-col items-end gap-2 pointer-events-auto`}
+      className="hidden md:flex fixed bottom-6 right-6 z-40 flex-col items-end gap-2 pointer-events-auto"
     >
       {/* Tooltip bubble */}
       {showTooltip && (
