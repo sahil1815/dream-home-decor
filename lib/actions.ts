@@ -83,19 +83,27 @@ export interface CreateOrderPayload {
  * ----------------------------------------------------
  */
 
-export async function loginAdminAction(data: { email: string; password?: string; pass?: string }) {
+export async function loginAdminAction(data: {
+  email?: string;
+  name?: string;
+  username?: string;
+  identifier?: string;
+  password?: string;
+  pass?: string;
+}) {
+  const identifier = (data.name ?? data.username ?? data.identifier ?? data.email ?? '').trim();
   try {
     const password = data.password ?? data.pass ?? '';
-    const result = await authenticateAdmin(data.email, password);
+    const result = await authenticateAdmin(identifier, password);
     if (result.success && result.user) {
-      logger.info('Admin login successful', { email: result.user.email, role: result.user.role });
+      logger.info('Admin login successful', { name: result.user.name, role: result.user.role });
     } else {
-      logger.warn('Admin login failed', { email: data.email, error: result.error });
+      logger.warn('Admin login failed', { identifier, error: result.error });
     }
     return result;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'লগইন ব্যর্থ হয়েছে';
-    logger.error('Admin login exception', err, { email: data.email });
+    logger.error('Admin login exception', err, { identifier });
     return { success: false, error: msg };
   }
 }

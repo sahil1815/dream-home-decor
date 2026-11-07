@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, User, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { loginAdminAction } from '@/lib/actions';
 
 function AdminLoginForm() {
@@ -11,7 +11,7 @@ function AdminLoginForm() {
   const searchParams = useSearchParams();
   const redirectTarget = searchParams.get('redirect') || '/admin';
 
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -23,12 +23,13 @@ function AdminLoginForm() {
 
     try {
       const res = await loginAdminAction({
-        email: email.trim(),
+        name: name.trim(),
+        email: name.trim(),
         password,
       });
 
       if (!res.success) {
-        setErrorMsg(res.error || 'লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+        setErrorMsg(res.error || 'লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক নাম ও পাসওয়ার্ড দিন।');
       } else {
         router.push(redirectTarget);
         router.refresh();
@@ -52,19 +53,19 @@ function AdminLoginForm() {
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
           <label className="block text-xs font-bn font-bold text-stone-700 mb-1.5">
-            অ্যাডমিন ইমেইল (Admin Email)
+            অ্যাডমিন নাম (Admin Name)
           </label>
           <div className="relative">
             <input
-              type="email"
+              type="text"
               required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="আপনার অনুমোদিত ইমেইল দিন"
-              className="w-full pl-10 pr-4 py-3 bg-[#FAF8F5] border border-stone-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-sans text-stone-900"
+              autoComplete="username"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="আপনার অনুমোদিত নাম দিন (যেমন: admin)"
+              className="w-full pl-10 pr-4 py-3 bg-[#FAF8F5] border border-stone-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-bn text-stone-900"
             />
-            <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+            <User className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
           </div>
         </div>
 

@@ -192,11 +192,19 @@ export function UserManager({ currentSession }: UserManagerProps) {
                 <ShieldCheck className="w-4 h-4 text-stone-400" />
               </div>
 
-              <div className="mt-3">
-                <span className="text-[11px] font-bn text-stone-500 block">ডিফল্ট ইমেইল</span>
-                <span className="text-xs font-sans font-semibold text-stone-800 break-all">
-                  {tier.email}
-                </span>
+              <div className="mt-3 space-y-1">
+                <div>
+                  <span className="text-[11px] font-bn text-stone-500 block">লগইন নাম (Username)</span>
+                  <span className="text-xs font-mono font-bold text-[#8B5A2B]">
+                    {tier.role === 'owner' ? 'admin / owner / sahil' : tier.role}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-bn text-stone-500 block">ইমেইল</span>
+                  <span className="text-xs font-sans text-stone-700 break-all">
+                    {tier.email}
+                  </span>
+                </div>
               </div>
 
               <p className="mt-3 text-xs font-bn text-stone-600 leading-relaxed">
