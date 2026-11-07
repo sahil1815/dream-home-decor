@@ -569,8 +569,8 @@ export async function addOrderNoteAction(orderId: string, noteText: string) {
       const supabase = createAdminClient();
       const { error } = await supabase.from('order_notes').insert({
         order_id: orderId,
-        staff_id: session.userId || 'staff_01',
-        staff_name: session.name,
+        author_name: session.name || 'অ্যাডমিন স্টাফ',
+        author_email: session.email || 'staff@dreamhomedecor.com',
         note: noteText.trim(),
       });
 
@@ -1325,24 +1325,77 @@ export async function cancelOrderAction(orderId: string, reason: string) {
     }
 
     const supabase = createAdminClient();
-    const { error } = await supabase
-      .from('orders')
-      .update({
-        status: 'cancelled',
-        cancel_reason: reason.trim(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+
+    let { error } = isUuid
+      ? await supabase
+          .from('orders')
+          .update({
+            status: 'cancelled',
+            cancel_reason: reason.trim(),
+            staff_notes: `বাতিলের কারণ: ${reason.trim()}`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId)
+      : await supabase
+          .from('orders')
+          .update({
+            status: 'cancelled',
+            cancel_reason: reason.trim(),
+            staff_notes: `বাতিলের কারণ: ${reason.trim()}`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('order_number', orderId);
+
+    // Fallback if cancel_reason column does not exist in schema cache
+    if (error && (error.code === 'PGRST204' || error.message.includes('cancel_reason'))) {
+      const fallbackRes = isUuid
+        ? await supabase
+            .from('orders')
+            .update({
+              status: 'cancelled',
+              staff_notes: `বাতিলের কারণ: ${reason.trim()}`,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orderId)
+        : await supabase
+            .from('orders')
+            .update({
+              status: 'cancelled',
+              staff_notes: `বাতিলের কারণ: ${reason.trim()}`,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('order_number', orderId);
+      error = fallbackRes.error;
+    }
 
     if (error) return { success: false, error: error.message };
 
-    // Record in history
-    await supabase.from('order_status_history').insert({
-      order_id: orderId,
-      status: 'cancelled',
-      note: `অর্ডার বাতিল করেছেন: ${session.name}। কারণ: ${reason.trim()}`,
-      changed_by: session.name,
-    });
+    // Record in history if UUID
+    if (isUuid) {
+      try {
+        await supabase.from('order_status_history').insert({
+          order_id: orderId,
+          status: 'cancelled',
+          note: `অর্ডার বাতিল করেছেন: ${session.name}। কারণ: ${reason.trim()}`,
+          changed_by: session.name,
+        });
+      } catch {
+        // non-fatal
+      }
+
+      // Also record as internal order note
+      try {
+        await supabase.from('order_notes').insert({
+          order_id: orderId,
+          author_name: session.name || 'অ্যাডমিন',
+          author_email: session.email || null,
+          note: `অর্ডার বাতিলের কারণ: ${reason.trim()}`,
+        });
+      } catch {
+        // non-fatal
+      }
+    }
 
     revalidatePath('/admin/orders');
     revalidatePath('/admin');
@@ -1379,17 +1432,65 @@ export async function verifyPaymentAction(
     const advance = advanceAmount !== undefined ? Number(advanceAmount) : 0;
     const due = Math.max(0, total - advance);
 
-    const { error } = await supabase
-      .from('orders')
-      .update({
-        payment_verified: verified,
-        advance_payment_amount: advance,
-        due_amount: due,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+
+    let { error } = isUuid
+      ? await supabase
+          .from('orders')
+          .update({
+            payment_verified: verified,
+            advance_payment_amount: advance,
+            due_amount: due,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId)
+      : await supabase
+          .from('orders')
+          .update({
+            payment_verified: verified,
+            advance_payment_amount: advance,
+            due_amount: due,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('order_number', orderId);
+
+    // Fallback if payment_verified column does not exist in schema cache
+    if (error && (error.code === 'PGRST204' || error.message.includes('payment_verified'))) {
+      const fallbackRes = isUuid
+        ? await supabase
+            .from('orders')
+            .update({
+              advance_payment_amount: advance,
+              due_amount: due,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orderId)
+        : await supabase
+            .from('orders')
+            .update({
+              advance_payment_amount: advance,
+              due_amount: due,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('order_number', orderId);
+      error = fallbackRes.error;
+    }
 
     if (error) return { success: false, error: error.message };
+
+    // Record internal note about verification
+    if (isUuid) {
+      try {
+        await supabase.from('order_notes').insert({
+          order_id: orderId,
+          author_name: session.name || 'অ্যাডমিন',
+          author_email: session.email || null,
+          note: `পেমেন্ট ভেরিফিকেশন: ${verified ? 'অনুমোদিত' : 'অপেক্ষমাণ'}। অগ্রিম জমা: ৳${advance}, বকেয়া: ৳${due}`,
+        });
+      } catch {
+        // non-fatal
+      }
+    }
 
     await supabase.from('audit_log').insert({
       admin_email: session.email,
@@ -1611,18 +1712,35 @@ export async function bulkUpdateOrderStatusAction(orderIds: string[], status: Or
     }
 
     const supabase = createAdminClient();
-    await supabase
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
-      .in('id', orderIds);
+    const uuidIds = orderIds.filter((id) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    );
+    const nonUuidIds = orderIds.filter((id) => !uuidIds.includes(id));
 
-    for (const id of orderIds) {
-      await supabase.from('order_status_history').insert({
-        order_id: id,
-        status,
-        note: `বাল্ক আপডেটে স্ট্যাটাস পরিবর্তন: ${session.name}`,
-        changed_by: session.name,
-      });
+    if (uuidIds.length > 0) {
+      await supabase
+        .from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .in('id', uuidIds);
+    }
+    if (nonUuidIds.length > 0) {
+      await supabase
+        .from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .in('order_number', nonUuidIds);
+    }
+
+    for (const id of uuidIds) {
+      try {
+        await supabase.from('order_status_history').insert({
+          order_id: id,
+          status,
+          note: `বাল্ক আপডেটে স্ট্যাটাস পরিবর্তন: ${session.name}`,
+          changed_by: session.name,
+        });
+      } catch {
+        // non-fatal
+      }
     }
 
     revalidatePath('/admin/orders');

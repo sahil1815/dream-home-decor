@@ -15,6 +15,7 @@ import {
   Truck,
   Loader2,
   AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 import { Order, OrderStatus, DeliveryZone, OrderNote } from '@/types/database';
 import { formatBDT, getStatusBadgeInfo, buildWhatsAppUrl } from '@/lib/utils';
@@ -40,6 +41,16 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'>('date_desc');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Toast Notification State
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (text: string, type: 'success' | 'error') => {
+    setToastMessage({ text, type });
+    setTimeout(() => {
+      setToastMessage((cur) => (cur?.text === text ? null : cur));
+    }, 4500);
+  };
 
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -116,19 +127,44 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
   });
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    const currentOrder = orders.find((o) => o.id === orderId);
+    if (currentOrder && currentOrder.status === newStatus) return;
+
+    const orderNum = currentOrder?.order_number || 'অর্ডার';
+    const newBadge = getStatusBadgeInfo(newStatus);
+
     setUpdatingId(orderId);
+    // Optimistic UI update
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+    );
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+    }
+
     try {
       const res = await updateOrderStatusAction(orderId, newStatus);
       if (res.success) {
-        setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-        );
-        if (selectedOrder && selectedOrder.id === orderId) {
-          setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+        showToast(`✓ ${orderNum}-এর স্ট্যাটাস '${newBadge.labelBn}' করা হয়েছে`, 'success');
+      } else {
+        // Revert on failure
+        if (currentOrder) {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === orderId ? { ...o, status: currentOrder.status } : o))
+          );
+          if (selectedOrder && selectedOrder.id === orderId) {
+            setSelectedOrder((prev) => (prev ? { ...prev, status: currentOrder.status } : null));
+          }
         }
+        showToast(res.error || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে', 'error');
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      if (currentOrder) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: currentOrder.status } : o))
+        );
+      }
+      showToast(err instanceof Error ? err.message : 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে', 'error');
     } finally {
       setUpdatingId(null);
     }
@@ -137,6 +173,8 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
   const handleBulkStatusUpdate = async () => {
     if (selectedIds.length === 0) return;
     setIsBulkUpdating(true);
+    const count = selectedIds.length;
+    const badge = getStatusBadgeInfo(bulkStatus);
     try {
       const res = await bulkUpdateOrderStatusAction(selectedIds, bulkStatus);
       if (res.success) {
@@ -144,7 +182,12 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
           prev.map((o) => (selectedIds.includes(o.id) ? { ...o, status: bulkStatus } : o))
         );
         setSelectedIds([]);
+        showToast(`✓ ${count}টি অর্ডারের স্ট্যাটাস সফলভাবে '${badge.labelBn}' করা হয়েছে`, 'success');
+      } else {
+        showToast(res.error || 'বাল্ক স্ট্যাটাস আপডেট ব্যর্থ হয়েছে', 'error');
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'বাল্ক আপডেট ব্যর্থ হয়েছে', 'error');
     } finally {
       setIsBulkUpdating(false);
     }
@@ -154,21 +197,27 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
     e.preventDefault();
     if (!selectedOrder || !newNote.trim()) return;
     setIsAddingNote(true);
+    const noteText = newNote.trim();
     try {
-      const res = await addOrderNoteAction(selectedOrder.id, newNote.trim());
+      const res = await addOrderNoteAction(selectedOrder.id, noteText);
       if (res.success) {
         const createdNote: OrderNote = {
           id: `note-${Date.now()}`,
           order_id: selectedOrder.id,
           staff_id: 'current_staff',
           staff_name: 'অ্যাডমিন স্টাফ',
-          note: newNote.trim(),
+          note: noteText,
           created_at: new Date().toISOString(),
         };
-        const updatedNotes = [...(selectedOrder.notes_history || []), createdNote];
+        const updatedNotes = [createdNote, ...(selectedOrder.notes_history || [])];
         setSelectedOrder({ ...selectedOrder, notes_history: updatedNotes });
         setNewNote('');
+        showToast('✓ অভ্যন্তরীণ নোট সফলভাবে যুক্ত হয়েছে', 'success');
+      } else {
+        showToast(res.error || 'নোট যোগ করতে সমস্যা হয়েছে', 'error');
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'নোট যোগ করতে সমস্যা হয়েছে', 'error');
     } finally {
       setIsAddingNote(false);
     }
@@ -177,21 +226,27 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
   const handleConfirmCancel = async () => {
     if (!selectedOrder || !cancelReason.trim()) return;
     setIsCancelling(true);
+    const reason = cancelReason.trim();
     try {
-      const res = await cancelOrderAction(selectedOrder.id, cancelReason.trim());
+      const res = await cancelOrderAction(selectedOrder.id, reason);
       if (res.success) {
         setOrders((prev) =>
           prev.map((o) =>
             o.id === selectedOrder.id
-              ? { ...o, status: 'cancelled', cancel_reason: cancelReason.trim() }
+              ? { ...o, status: 'cancelled', cancel_reason: reason }
               : o
           )
         );
         setSelectedOrder((prev) =>
-          prev ? { ...prev, status: 'cancelled', cancel_reason: cancelReason.trim() } : null
+          prev ? { ...prev, status: 'cancelled', cancel_reason: reason } : null
         );
         setShowCancelPrompt(false);
+        showToast(`✓ অর্ডার ${selectedOrder.order_number} সফলভাবে বাতিল করা হয়েছে`, 'success');
+      } else {
+        showToast(res.error || 'অর্ডার বাতিল করতে সমস্যা হয়েছে', 'error');
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'অর্ডার বাতিল ব্যর্থ হয়েছে', 'error');
     } finally {
       setIsCancelling(false);
     }
@@ -213,7 +268,12 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
         };
         setSelectedOrder(updated);
         setOrders((prev) => prev.map((o) => (o.id === selectedOrder.id ? updated : o)));
+        showToast('✓ পেমেন্ট ও অগ্রিম জমার তথ্য সফলভাবে সংরক্ষিত হয়েছে', 'success');
+      } else {
+        showToast(res.error || 'পেমেন্ট সংরক্ষণ ব্যর্থ হয়েছে', 'error');
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'পেমেন্ট সংরক্ষণ ব্যর্থ হয়েছে', 'error');
     } finally {
       setIsUpdatingPayment(false);
     }
@@ -247,6 +307,7 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
           0
         );
         const total = subtotal + Number(editCharge);
+        const due = Math.max(0, total - Number(selectedOrder.advance_payment_amount || 0));
         const updated: Order = {
           ...selectedOrder,
           customer_name: editName,
@@ -256,11 +317,17 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
           delivery_charge: Number(editCharge),
           subtotal,
           total_amount: total,
+          due_amount: due,
         };
         setSelectedOrder(updated);
         setOrders((prev) => prev.map((o) => (o.id === selectedOrder.id ? updated : o)));
         setActiveModalTab('details');
+        showToast('✓ অর্ডারের তথ্য সফলভাবে সংরক্ষিত হয়েছে', 'success');
+      } else {
+        showToast(res.error || 'তথ্য সংরক্ষণ ব্যর্থ হয়েছে', 'error');
       }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'তথ্য সংরক্ষণ ব্যর্থ হয়েছে', 'error');
     } finally {
       setIsSavingEdit(false);
     }
@@ -307,6 +374,7 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast(`✓ ${filteredOrders.length}টি অর্ডারের CSV ফাইল সফলভাবে ডাউনলোড হয়েছে`, 'success');
   };
 
   // Duplicate phone history detection for an order
@@ -326,6 +394,25 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-bn flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 max-w-md ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-950/95 border-emerald-500/50 text-emerald-100'
+              : 'bg-rose-950/95 border-rose-500/50 text-rose-100'
+          }`}
+        >
+          {toastMessage.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+          )}
+          <span className="leading-snug">{toastMessage.text}</span>
+        </div>
+      )}
       {/* 1. Search, Filters & Bulk Actions Card */}
       <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-2xs space-y-4">
         {/* Search, Zone, Payment, Sort Controls */}
@@ -981,13 +1068,13 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
                         try {
                           const res = await createCourierBookingAction(selectedOrder.id);
                           if (res.success) {
-                            alert(res.message);
+                            showToast(`✓ ${res.message || 'কুরিয়ার বুকিং সফল হয়েছে'}`, 'success');
                             handleStatusChange(selectedOrder.id, 'shipped');
                           } else {
-                            alert(res.error || 'কুরিয়ার বুকিং ব্যর্থ হয়েছে');
+                            showToast(res.error || 'কুরিয়ার বুকিং ব্যর্থ হয়েছে', 'error');
                           }
-                        } catch {
-                          alert('কুরিয়ার বুকিং ব্যর্থ হয়েছে');
+                        } catch (err) {
+                          showToast(err instanceof Error ? err.message : 'কুরিয়ার বুকিং ব্যর্থ হয়েছে', 'error');
                         } finally {
                           setCourierLoading(false);
                         }

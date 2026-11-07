@@ -293,6 +293,14 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS utm_medium TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS utm_campaign TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_zone TEXT DEFAULT 'inside';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_charge NUMERIC DEFAULT 120;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_verified BOOLEAN DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
+
+-- Order Notes Evolution
+ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS author_name TEXT;
+ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS author_email TEXT;
+ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS staff_id TEXT;
+ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS staff_name TEXT;
 
 -- Products Evolution
 ALTER TABLE products ADD COLUMN IF NOT EXISTS title_bn TEXT;
