@@ -6,7 +6,6 @@ import {
   SlidersHorizontal,
   X,
   RotateCcw,
-  ShoppingBag,
   ArrowUpDown,
   Filter,
 } from 'lucide-react';
@@ -120,29 +119,11 @@ export function ProductCatalogClient({
   const currentCategoryObj = categories.find((c) => c.slug === selectedCategory);
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner Header */}
-      <div className="bg-[#2B1D14] rounded-3xl p-6 sm:p-8 md:p-10 text-white shadow-md border border-[#8A5A3B]/30 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 bg-[#B08D57]/20 border border-[#B08D57]/30 text-[#FAF3E8] px-3.5 py-1 rounded-full text-xs font-bn font-semibold uppercase tracking-wider">
-            <ShoppingBag className="w-3.5 h-3.5 text-[#B08D57]" />
-            <span>সরাসরি কারখানা ক্যাটালগ</span>
-          </div>
-          <h1 className="text-2xl sm:text-4xl font-bold font-serif text-white">
-            {currentCategoryObj ? currentCategoryObj.name_bn || currentCategoryObj.name : 'সকল ফার্নিচার কালেকশন'}
-          </h1>
-          <p className="text-stone-300 font-bn text-xs sm:text-sm max-w-xl leading-relaxed">
-            ১৬ মিমি মেলামাইন বোর্ড ও ১ মিমি পিভিসি এজ ব্যান্ডিং দিয়ে প্রস্তুতকৃত। শোরুমের অতিরিক্ত কমিশন ছাড়া সরাসরি ফ্যাক্টরি মূল্যে সরবরাহ।
-          </p>
-        </div>
-
-        <div className="text-left md:text-right shrink-0">
-          <span className="font-sans text-3xl sm:text-4xl font-bold text-amber-300">
-            {filteredProducts.length}
-          </span>
-          <span className="text-stone-300 font-bn text-xs block mt-0.5">টি ফার্নিচার পাওয়া গেছে</span>
-        </div>
-      </div>
+    <div className="space-y-6 sm:space-y-8">
+      {/* Accessible Title */}
+      <h1 className="sr-only">
+        {currentCategoryObj ? currentCategoryObj.name_bn || currentCategoryObj.name : 'সকল ফার্নিচার কালেকশন'}
+      </h1>
 
       {/* Search, Filter Triggers & Sort Bar */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8E2D9] shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
