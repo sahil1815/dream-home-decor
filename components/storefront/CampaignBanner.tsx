@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { Gift, ExternalLink, Sparkles, Clock } from 'lucide-react';
+import { Gift, ExternalLink } from 'lucide-react';
 import { CampaignGiveaway } from '@/types/database';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 
@@ -14,12 +14,11 @@ export function CampaignBanner({ campaigns }: CampaignBannerProps) {
   if (!activeCampaign) return null;
 
   return (
-    <section className="py-10 bg-gradient-to-b from-[#FAF8F5] via-[#F6EFE6] to-[#FAF8F5] border-y border-amber-900/10">
+    <section className="py-10 bg-[#F7F3EE]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#9E4A19] via-[#853B12] to-[#6E2E0A] text-white shadow-xl shadow-amber-950/15 p-6 sm:p-10 border border-amber-500/20">
-          {/* Ambient Warm Glow */}
-          <div className="absolute -top-12 -right-12 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-amber-600/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative rounded-3xl overflow-hidden bg-[#2B1D14] text-white shadow-xl p-6 sm:p-10 border border-[#8A5A3B]/30">
+          {/* Subtle Warm Amber Glow */}
+          <div className="absolute -top-12 -right-12 w-80 h-80 bg-[#B08D57]/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Background image tint */}
           {activeCampaign.banner_url && (
@@ -35,16 +34,16 @@ export function CampaignBanner({ campaigns }: CampaignBannerProps) {
 
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-amber-100 border border-white/25 px-3.5 py-1 rounded-full text-xs font-bn font-bold uppercase tracking-wider shadow-xs">
-                <Gift className="w-4 h-4 text-amber-300" />
-                <span>স্পেশাল ক্যাম্পেইন ও লটারি অফার</span>
+              <div className="inline-flex items-center gap-2 bg-[#B08D57]/20 backdrop-blur-md text-[#FAF3E8] border border-[#B08D57]/30 px-3.5 py-1 rounded-full text-xs font-bn font-semibold uppercase tracking-wider">
+                <Gift className="w-4 h-4 text-[#B08D57]" />
+                <span>স্পেশাল অফার ও লটারি</span>
               </div>
 
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-bn text-white leading-tight">
+              <h3 className="text-2xl sm:text-3xl font-bold font-serif text-white leading-tight">
                 {activeCampaign.title}
               </h3>
 
-              <p className="text-amber-100/90 text-sm font-bn leading-relaxed">
+              <p className="text-stone-300 text-sm font-bn leading-relaxed">
                 {activeCampaign.description ||
                   'আমাদের ফেসবুক পেজে যুক্ত হয়ে জিতে নিন আকর্ষণীয় ফার্নিচার উপহার ও স্পেশাল ডিসকাউন্ট ভাউচার!'}
               </p>
@@ -57,11 +56,11 @@ export function CampaignBanner({ campaigns }: CampaignBannerProps) {
                   href={activeCampaign.facebook_post_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-amber-50 text-[#6E2E0A] font-bn font-bold text-sm sm:text-base px-6 sm:px-7 py-3.5 sm:py-4 rounded-full shadow-lg shadow-black/15 transition-all hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8A5A3B] hover:bg-[#6E442B] text-white font-bn font-semibold text-sm sm:text-base px-6 sm:px-7 py-3 rounded-xl shadow-xs transition-colors"
                 >
-                  <Gift className="w-5 h-5 text-[#853B12] shrink-0" />
-                  <span>ফেসবুক লটারিতে অংশ নিন</span>
-                  <ExternalLink className="w-4 h-4 ml-1 shrink-0 text-[#853B12]" />
+                  <Gift className="w-5 h-5 text-amber-200 shrink-0" />
+                  <span>লটারিতে অংশ নিন</span>
+                  <ExternalLink className="w-4 h-4 ml-1 shrink-0 text-amber-200" />
                 </a>
               </div>
             )}

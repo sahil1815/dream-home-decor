@@ -21,12 +21,38 @@ export function validateBangladeshiPhone(phone: string): { isValid: boolean; for
 
 /**
  * Format currency into Bangladeshi Taka (e.g. ৳3,800)
+ * Uses standard Latin digits with the Taka sign for consistent numeral rendering
  */
 export function formatBDT(amount: number | null | undefined): string {
   if (amount === null || amount === undefined || isNaN(amount)) {
-    return '৳০';
+    return '৳0';
   }
   return `৳${Number(amount).toLocaleString('en-IN')}`;
+}
+
+/**
+ * Convert Latin numerals to Bengali numerals when needed for editorial text
+ */
+export function toBanglaDigits(num: number | string): string {
+  const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return String(num).replace(/[0-9]/g, (w) => banglaDigits[+w]);
+}
+
+/**
+ * Format date consistently in Bengali locale
+ */
+export function formatBanglaDate(dateString: string): string {
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    return d.toLocaleDateString('bn-BD', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
 }
 
 /**
@@ -48,6 +74,12 @@ export function getStatusBadgeInfo(status: string) {
         labelBn: 'অপেক্ষমাণ',
         className: 'bg-amber-100 text-amber-800 border-amber-300',
       };
+    case 'confirmation_call':
+      return {
+        label: 'Call Done',
+        labelBn: 'কনফার্মেশন কল সম্পন্ন',
+        className: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+      };
     case 'confirmed':
       return {
         label: 'Confirmed',
@@ -59,6 +91,12 @@ export function getStatusBadgeInfo(status: string) {
         label: 'In Production',
         labelBn: 'কারখানায় তৈরি হচ্ছে',
         className: 'bg-purple-100 text-purple-800 border-purple-300',
+      };
+    case 'ready':
+      return {
+        label: 'Ready to Ship',
+        labelBn: 'প্যাকিং সম্পন্ন / প্রস্তুত',
+        className: 'bg-teal-100 text-teal-800 border-teal-300',
       };
     case 'shipped':
       return {
@@ -77,6 +115,12 @@ export function getStatusBadgeInfo(status: string) {
         label: 'Cancelled',
         labelBn: 'বাতিল',
         className: 'bg-rose-100 text-rose-800 border-rose-300',
+      };
+    case 'returned':
+      return {
+        label: 'Returned',
+        labelBn: 'পণ্য ফেরত',
+        className: 'bg-stone-200 text-stone-800 border-stone-400',
       };
     default:
       return {

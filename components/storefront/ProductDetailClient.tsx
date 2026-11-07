@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ShoppingCart,
@@ -11,12 +12,15 @@ import {
   ShieldCheck,
   Ruler,
   Layers,
-  CheckCircle2,
-  Phone,
-  Clock,
   Loader2,
-  Check,
   Heart,
+  Camera,
+  ChevronDown,
+  Wrench,
+  HelpCircle,
+  FileText,
+  Sparkles,
+  PhoneCall,
 } from 'lucide-react';
 import { Product, SiteSettings, DeliveryZone, PaymentMethod } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
@@ -24,6 +28,8 @@ import { getOptimizedImageUrl } from '@/lib/imagekit';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
 import { submitOrderAction } from '@/lib/actions';
+import { trackViewContent } from '@/lib/analytics';
+import { CallBackModal } from '@/components/storefront/CallBackModal';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -36,15 +42,26 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
   const { isSaved, toggleWishlist } = useWishlist();
   const saved = isSaved(product.id);
 
-  const images = product.images && product.images.length > 0
-    ? product.images
-    : ['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80'];
+  const images = useMemo(
+    () =>
+      product.images && product.images.length > 0
+        ? product.images
+        : ['/placeholders/products/smart-ergonomic-reading-table/01.jpg'],
+    [product.images]
+  );
+
+  const isPlaceholder = Boolean(
+    settings.show_placeholder_tag !== false &&
+    (product.has_placeholder_images ||
+      images.some((img) => img.startsWith('/placeholders/') || img.includes('/placeholders/')))
+  );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState(
     product.color_options?.[0] || 'Standard'
   );
   const [quantity, setQuantity] = useState(1);
+  const [isCallBackModalOpen, setIsCallBackModalOpen] = useState(false);
 
   // In-Page Direct Checkout State
   const [name, setName] = useState('');
@@ -54,8 +71,73 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
+  const [websiteHoneypot, setWebsiteHoneypot] = useState('');
+  const [idempotencyKey] = useState(() => 'pdp_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Recently viewed tracker
+  const [recentlyViewed] = useState<
+    Array<{
+      id: string;
+      title: string;
+      title_bn: string;
+      slug: string;
+      price: number;
+      discount_price?: number | null;
+      image: string;
+    }>
+  >(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem('dhd_recently_viewed');
+      const list = stored ? JSON.parse(stored) : [];
+      return list.filter((item: { id: string }) => item.id !== product.id).slice(0, 4);
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dhd_recently_viewed');
+      const list = stored ? JSON.parse(stored) : [];
+      const others = list.filter((item: { id: string }) => item.id !== product.id);
+      const updated = [
+        {
+          id: product.id,
+          title: product.title,
+          title_bn: product.title_bn,
+          slug: product.slug,
+          price: product.price,
+          discount_price: product.discount_price,
+          image: images[0],
+        },
+        ...others,
+      ].slice(0, 8);
+      localStorage.setItem('dhd_recently_viewed', JSON.stringify(updated));
+
+      // Fire Meta Pixel & GA4 ViewContent event
+      trackViewContent({
+        id: product.id,
+        title: product.title_bn || product.title,
+        price: product.discount_price || product.price,
+        category: product.category?.name_bn || product.category?.name,
+      });
+    } catch {
+      // Ignore
+    }
+  }, [
+    product.id,
+    product.title,
+    product.title_bn,
+    product.slug,
+    product.price,
+    product.discount_price,
+    product.category?.name,
+    product.category?.name_bn,
+    images,
+  ]);
 
   const currentPrice = product.discount_price ?? product.price;
   const originalPrice = product.discount_price ? product.price : null;
@@ -89,8 +171,8 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
       return;
     }
 
-    if (!address.trim() || address.trim().length < 6) {
-      setErrorMessage('অনুগ্রহ করে আপনার বিস্তারিত ঠিকানা দিন');
+    if (!address.trim() || address.trim().length < 10) {
+      setErrorMessage('অনুগ্রহ করে বিস্তারিত ঠিকানা দিন (বাসা নং, রোড, এলাকা, জেলা - কমপক্ষে ১০ অক্ষর)');
       return;
     }
 
@@ -117,6 +199,8 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
             unit_price: currentPrice,
           },
         ],
+        website: websiteHoneypot,
+        idempotency_key: idempotencyKey,
       });
 
       if (res.success && res.orderNumber) {
@@ -156,14 +240,52 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
             </div>
           )}
 
-          <div className="absolute top-4 right-4 bg-[#5C3615]/80 backdrop-blur-xs text-white text-xs font-bn font-semibold px-3 py-1 rounded-full border border-white/10">
-            {product.stock_status === 'in_stock'
-              ? 'রেডি স্টক'
+          {/* Stock or Lead Time Badge */}
+          <div className="absolute top-4 right-4 bg-[#2B1D14]/80 backdrop-blur-xs text-[#FAF3E8] text-xs font-bn font-medium px-3 py-1 rounded-full border border-white/10">
+            {product.stock_status === 'out_of_stock'
+              ? 'স্টক শেষ'
               : product.stock_status === 'made_to_order'
               ? 'অর্ডারে তৈরি'
-              : 'স্টক আউট'}
+              : product.lead_time_days
+              ? `ডেলিভারি ${product.lead_time_days} দিনে`
+              : 'ডেলিভারি প্রস্তুত'}
           </div>
+
+          {/* Sample Photo (নমুনা ছবি) Tag */}
+          {isPlaceholder && (
+            <div
+              className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-xs text-amber-200 text-xs font-bn px-3 py-1 rounded-xl border border-amber-400/30 flex items-center gap-1.5 shadow-md"
+              title="আসল পণ্যের ছবি শীঘ্রই যুক্ত হবে"
+            >
+              <Camera className="w-3.5 h-3.5 text-amber-300" />
+              <span>নমুনা ছবি • আসল ছবি শীঘ্রই আসছে</span>
+            </div>
+          )}
         </div>
+
+        {/* Placeholder Information Callout */}
+        {isPlaceholder && (
+          <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-950">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <div className="text-xs font-bn">
+                <p className="font-bold">কারখানায় তৈরি আসল পণ্যের ছবি দ্রুত যুক্ত করা হচ্ছে</p>
+                <p className="text-amber-800 text-[11px] mt-0.5">আপনার কাস্টম সাইজ বা কালারের বাস্তব ছবি ও ভিডিও দেখতে WhatsApp-এ সরাসরি মেসেজ দিন।</p>
+              </div>
+            </div>
+            <a
+              href={`https://wa.me/${settings.whatsapp_number || '8801712345678'}?text=${encodeURIComponent(
+                `আসসালামু আলাইকুম, "${product.title_bn || product.title}" পণ্যের কারখানা তৈরির আসল ছবি ও ভিডিও দেখতে চাই।`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bn font-bold rounded-xl shrink-0 transition-colors shadow-xs"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>আসল ছবি দেখতে চান?</span>
+            </a>
+          </div>
+        )}
 
         {/* Thumbnail Carousel / Grid */}
         {images.length > 1 && (
@@ -190,17 +312,17 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           </div>
         )}
 
-        {/* Workshop Guarantee Box */}
+        {/* Workshop Craftsmanship Standard */}
         <div className="p-4 sm:p-5 bg-white rounded-2xl border border-stone-200 space-y-3">
           <h4 className="font-bn font-bold text-stone-900 text-xs sm:text-sm flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>ড্রিম হোম ডেকোর কারখানার বিশেষ নিশ্চয়তা:</span>
+            <span>ড্রিম হোম ডেকোর কারখানার নির্মাণ মান:</span>
           </h4>
           <ul className="text-xs font-bn text-stone-600 space-y-1.5 list-disc list-inside">
-            <li>১০০% প্রিমিয়াম মেলামাইন বোর্ড দ্বারা নির্মিত, কোনো ভেজাল নেই</li>
-            <li>১ মিমি পিভিসি এজ ব্যান্ডিং দিয়ে মসৃণ ও ওয়াটারপ্রুফ ফিনিশিং</li>
-            <li>ডেলিভারির সময় প্যাকেজ খুলে চেক করে নেওয়ার পূর্ণ সুযোগ</li>
-            <li>মিরপুর নিজস্ব কারখানা থেকে সরাসরি যত্নসহকারে হ্যান্ডেল করা হয়</li>
+            <li>১৬ মিমি ডেনসিটি মেলামাইন বোর্ড ও অ্যান্টি-রাস্ট হার্ডওয়্যার</li>
+            <li>১ মিমি পিভিসি এজ ব্যান্ডিং দিয়ে মসৃণ ও জলরোধী ফিনিশিং</li>
+            <li>ডেলিভারিম্যানের উপস্থিতিতে প্যাকেজ খুলে চেক করে নেওয়ার সুযোগ</li>
+            <li>মিরপুর নিজস্ব কারখানা থেকে সরাসরি যত্নসহকারে সরবরাহ</li>
           </ul>
         </div>
       </div>
@@ -328,14 +450,24 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 bg-[#16A34A] hover:bg-emerald-700 text-white py-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-all hover:scale-[1.01]"
+          className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white py-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-all hover:scale-[1.01]"
         >
           <MessageCircle className="w-4 h-4 shrink-0" />
           <span className="truncate">হোয়াটসঅ্যাপে সরাসরি অর্ডার করুন</span>
         </a>
 
+        {/* Call Back Request Button */}
+        <button
+          type="button"
+          onClick={() => setIsCallBackModalOpen(true)}
+          className="w-full flex items-center justify-center gap-2 bg-[#F4ECE1] hover:bg-[#EAE0D3] text-[#8A5A3B] border border-[#E8E2D9] py-2.5 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
+        >
+          <PhoneCall className="w-4 h-4 text-[#8A5A3B]" />
+          <span>কারিগরের সাথে কথা বলুন (কল ব্যাক রিকোয়েস্ট)</span>
+        </button>
+
         {/* IN-PAGE FAST CHECKOUT FORM (F-Commerce Conversion) */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-[#8B5A2B]/30 shadow-md space-y-4">
+        <div id="direct-order-form" className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-[#8B5A2B]/30 shadow-md space-y-4">
           <div className="border-b border-stone-100 pb-3">
             <span className="bg-[#8B5A2B] text-white text-[10px] sm:text-[11px] font-bn font-semibold px-2 py-0.5 rounded uppercase">
               সরাসরি অর্ডার ফর্ম
@@ -355,6 +487,19 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           )}
 
           <form onSubmit={handleDirectOrder} className="space-y-3">
+            {/* Honeypot field (hidden from real users) */}
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="pdp-website-field">Website</label>
+              <input
+                id="pdp-website-field"
+                type="text"
+                name="website"
+                value={websiteHoneypot}
+                onChange={(e) => setWebsiteHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
             <div>
               <label className="block text-xs font-bn font-semibold text-stone-700 mb-1">
                 আপনার নাম <span className="text-rose-500">*</span>
@@ -393,7 +538,20 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="বাসা নং, রোড, থানা, জেলা"
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-bn"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#E8E2D9] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8A5A3B] font-bn"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bn font-semibold text-stone-700 mb-1">
+                বিশেষ নির্দেশনা (ঐচ্ছিক)
+              </label>
+              <input
+                type="text"
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="যেমন: কালার বা ডেলিভারি সময়ের নির্দেশনা"
+                className="w-full px-3.5 py-2.5 bg-white border border-[#E8E2D9] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8A5A3B] font-bn"
               />
             </div>
 
@@ -531,18 +689,194 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
           </form>
         </div>
 
-        {/* Product Description */}
-        {product.description && (
-          <div className="p-5 bg-white rounded-2xl border border-stone-200 space-y-2">
-            <h3 className="font-bn font-bold text-stone-900 text-sm">
-              পণ্যটির বিস্তারিত বিবরণ:
-            </h3>
-            <p className="font-bn text-stone-600 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
-              {product.description}
-            </p>
+        {/* Custom Sizing Callout */}
+        <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#E8E2D9] flex items-center justify-between gap-3 text-xs font-bn">
+          <div className="space-y-0.5">
+            <span className="font-bold text-[#2B1D14] block">কাস্টম মাপ বা রঙের প্রয়োজন?</span>
+            <span className="text-stone-600 block">আপনার ঘরের পরিমাপ অনুযায়ী ফার্নিচার তৈরি করে দেওয়া সম্ভব।</span>
           </div>
-        )}
+          <Link
+            href={`/custom-furniture?ref=${encodeURIComponent(product.title_bn || product.title)}`}
+            className="px-3.5 py-1.5 bg-white hover:bg-[#F4ECE1] text-[#8A5A3B] border border-[#8A5A3B]/40 rounded-xl font-bold whitespace-nowrap transition-colors shrink-0 shadow-2xs"
+          >
+            কাস্টম অর্ডার করুন
+          </Link>
+        </div>
+
+        {/* Product Details & Specifications Accordions */}
+        <div className="space-y-3 pt-2">
+          {/* Accordion 1: Full Description */}
+          {product.description && (
+            <details
+              open
+              className="group bg-white rounded-2xl border border-[#E8E2D9] p-4.5 shadow-2xs open:border-[#8A5A3B]/40 transition-colors"
+            >
+              <summary className="flex items-center justify-between cursor-pointer font-serif font-bold text-[#2B1D14] text-sm list-none select-none">
+                <span className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#8A5A3B]" />
+                  <span>পণ্যটির বিস্তারিত বিবরণ</span>
+                </span>
+                <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform duration-200" />
+              </summary>
+              <p className="mt-3 text-stone-600 font-bn text-xs sm:text-sm leading-relaxed whitespace-pre-line border-t border-[#E8E2D9]/60 pt-3">
+                {product.description}
+              </p>
+            </details>
+          )}
+
+          {/* Accordion 2: Technical Specifications Table */}
+          <details className="group bg-white rounded-2xl border border-[#E8E2D9] p-4.5 shadow-2xs open:border-[#8A5A3B]/40 transition-colors">
+            <summary className="flex items-center justify-between cursor-pointer font-serif font-bold text-[#2B1D14] text-sm list-none select-none">
+              <span className="flex items-center gap-2">
+                <Wrench className="w-4 h-4 text-[#8A5A3B]" />
+                <span>উপকরণ ও কারিগরি স্পেসিফিকেশন</span>
+              </span>
+              <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform duration-200" />
+            </summary>
+            <div className="mt-3 border-t border-[#E8E2D9]/60 pt-3 text-xs font-bn space-y-2">
+              <div className="grid grid-cols-2 py-1.5 border-b border-stone-100">
+                <span className="text-stone-500 font-medium">বোর্ডের ধরন:</span>
+                <span className="text-stone-900 font-bold font-sans">16mm Density Melamine Board</span>
+              </div>
+              <div className="grid grid-cols-2 py-1.5 border-b border-stone-100">
+                <span className="text-stone-500 font-medium">এজ ব্যান্ডিং সিলিং:</span>
+                <span className="text-stone-900 font-bold font-sans">1mm Waterproof PVC Edge Banding</span>
+              </div>
+              {product.dimensions && (
+                <div className="grid grid-cols-2 py-1.5 border-b border-stone-100">
+                  <span className="text-stone-500 font-medium">পরিমাপ (L x W x H):</span>
+                  <span className="text-stone-900 font-bold font-sans">{product.dimensions}</span>
+                </div>
+              )}
+              {product.material && (
+                <div className="grid grid-cols-2 py-1.5 border-b border-stone-100">
+                  <span className="text-stone-500 font-medium">ম্যাটেরিয়াল ফিনিশ:</span>
+                  <span className="text-stone-900 font-bold font-sans">{product.material}</span>
+                </div>
+              )}
+              <div className="grid grid-cols-2 py-1.5">
+                <span className="text-stone-500 font-medium">প্রস্তুতকারী কারখানা:</span>
+                <span className="text-stone-900 font-bold">ড্রিম হোম ডেকোর, মিরপুর-১০, ঢাকা</span>
+              </div>
+            </div>
+          </details>
+
+          {/* Accordion 3: Delivery & Returns Policy */}
+          <details className="group bg-white rounded-2xl border border-[#E8E2D9] p-4.5 shadow-2xs open:border-[#8A5A3B]/40 transition-colors">
+            <summary className="flex items-center justify-between cursor-pointer font-serif font-bold text-[#2B1D14] text-sm list-none select-none">
+              <span className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-[#8A5A3B]" />
+                <span>ডেলিভারি ও রিটার্ন নিশ্চয়তা</span>
+              </span>
+              <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform duration-200" />
+            </summary>
+            <div className="mt-3 border-t border-[#E8E2D9]/60 pt-3 text-xs font-bn text-stone-600 space-y-2 leading-relaxed">
+              <p>• <strong>ঢাকার ভেতরে:</strong> ১-২ কর্মদিবসে সরাসরি হোম ডেলিভারি (চার্জ ৳১২০)।</p>
+              <p>• <strong>ঢাকার বাইরে:</strong> ৩-৫ কর্মদিবসে কুরিয়ারে ক্যাশ অন ডেলিভারি (চার্জ ৳২০০)।</p>
+              <p>• <strong>খুলে দেখার সুযোগ:</strong> ডেলিভারিম্যানের সামনে সম্পূর্ণ প্যাকেট খুলে দেখে নেওয়ার শতভাগ নিশ্চয়তা রয়েছে। কোনো ত্রুটি থাকলে সরাসরি ফেরত পাঠাতে পারবেন।</p>
+              <p>• <strong>৭ দিনের পার্টস রিপ্লেসমেন্ট:</strong> পরিবহনে কোনো অংশ ক্ষতিগ্রস্ত হলে দ্রুততম সময়ে নতুন পার্টস সরবরাহ করা হয়।</p>
+            </div>
+          </details>
+
+          {/* Accordion 4: Furniture Care Instructions */}
+          <details className="group bg-white rounded-2xl border border-[#E8E2D9] p-4.5 shadow-2xs open:border-[#8A5A3B]/40 transition-colors">
+            <summary className="flex items-center justify-between cursor-pointer font-serif font-bold text-[#2B1D14] text-sm list-none select-none">
+              <span className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-[#8A5A3B]" />
+                <span>মেলামাইন ফার্নিচারের যত্ন ও ব্যবহারবিধি</span>
+              </span>
+              <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform duration-200" />
+            </summary>
+            <div className="mt-3 border-t border-[#E8E2D9]/60 pt-3 text-xs font-bn text-stone-600 space-y-1.5 leading-relaxed">
+              <p>• পরিষ্কার শুকনো নরম সুতি কাপড় দিয়ে নিয়মিত ধুলাবালি মুছুন।</p>
+              <p>• পানি পড়লে দ্রুত শুকনো কাপড় দিয়ে মুছে নিন। অতিরিক্ত তরল দীর্ঘক্ষণ জমিয়ে রাখবেন না।</p>
+              <p>• টেবিল স্থানান্তরের সময় ফ্লোরে টেনে না নিয়ে উঁচু করে ধরে স্থানান্তর করুন।</p>
+              <p>• সরাসরি তীব্র রোদ বা বৃষ্টি হতে দূরে রাখুন।</p>
+            </div>
+          </details>
+        </div>
       </div>
+
+      {/* Recently Viewed Products Section */}
+      {recentlyViewed.length > 0 && (
+        <div className="lg:col-span-12 pt-8 border-t border-[#E8E2D9] space-y-4">
+          <h3 className="font-serif font-bold text-lg text-[#2B1D14]">
+            সম্প্রতি আপনি দেখেছেন
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {recentlyViewed.map((rv) => (
+              <Link
+                key={rv.id}
+                href={`/products/${rv.slug}`}
+                className="group p-3 bg-white rounded-2xl border border-[#E8E2D9] hover:border-[#8A5A3B]/40 transition-all flex flex-col justify-between"
+              >
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-stone-100 mb-2">
+                  <Image
+                    src={getOptimizedImageUrl(rv.image, 250)}
+                    alt={rv.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div>
+                  <h4 className="font-bn font-bold text-xs text-[#2B1D14] group-hover:text-[#8A5A3B] transition-colors line-clamp-1">
+                    {rv.title_bn || rv.title}
+                  </h4>
+                  <span className="font-sans font-bold text-xs text-[#8A5A3B] mt-0.5 block">
+                    {formatBDT(rv.discount_price ?? rv.price)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sticky Mobile Bar for Conversion (390px Mobile View) */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#E8E2D9] p-3 z-40 flex items-center justify-between gap-3 shadow-xl">
+        <div className="min-w-0">
+          <span className="font-sans font-extrabold text-base sm:text-lg text-[#8A5A3B] block leading-none">
+            {formatBDT(currentPrice)}
+          </span>
+          <span className="text-[10px] text-stone-500 font-bn block mt-0.5 truncate">
+            {product.stock_status === 'out_of_stock' ? 'স্টক শেষ' : 'সরাসরি কারখানা মূল্য'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 bg-[#25D366] text-white rounded-xl flex items-center justify-center shadow-xs"
+            aria-label="হোয়াটসঅ্যাপে অর্ডার"
+          >
+            <MessageCircle className="w-4 h-4" />
+          </a>
+
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('direct-order-form');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                addToCart(product, 1, selectedColor);
+              }
+            }}
+            className="px-4 py-2.5 bg-[#8A5A3B] hover:bg-[#6E442B] text-white text-xs font-bn font-bold rounded-xl shadow-xs transition-colors"
+          >
+            অর্ডার করুন
+          </button>
+        </div>
+      </div>
+
+      {/* Call Back Request Modal */}
+      <CallBackModal
+        isOpen={isCallBackModalOpen}
+        onClose={() => setIsCallBackModalOpen(false)}
+        productTitle={product.title_bn || product.title}
+      />
     </div>
   );
 }

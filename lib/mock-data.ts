@@ -4,17 +4,18 @@ export const MOCK_SITE_SETTINGS: SiteSettings = {
   id: 1,
   site_name: 'Dream Home Decor',
   site_name_bn: 'ড্রিম হোম ডেকোর',
-  logo_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=200&q=80',
-  cover_banner_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=85',
+  logo_url: '/brand-images/official_brand_logo.jpg',
+  cover_banner_url: '/placeholders/site/hero.jpg',
   phone: '01712-345678',
   whatsapp_number: '8801712345678',
   facebook_url: 'https://www.facebook.com/profile.php?id=61584955311887',
-  address: 'মিরপুর-১০, ঢাকা, বাংলাদেশ (সরাসরি নিজস্ব কারখানা ও শোরুম)',
+  address: 'সেকশন ১০, ব্লক সি, রোড ২, মিরপুর, ঢাকা ১২১৬ (মিরপুর ১০ গোলচত্বর সংলগ্ন)',
   delivery_charge_inside: 120,
   delivery_charge_outside: 200,
-  announcement_text: '🎉 নিজস্ব কারখানায় তৈরি সেরা মানের ফার্নিচার! সারাদেশে ক্যাশ অন ডেলিভারি। ২৪ ঘণ্টা অর্ডার সার্ভিস।',
+  announcement_text: 'নিজস্ব কারখানায় তৈরি সেরা মানের ফার্নিচার! সারাদেশে ক্যাশ অন ডেলিভারি।',
   bkash_merchant_number: '01712345678',
   nagad_merchant_number: '01712345678',
+  show_placeholder_tag: true,
   updated_at: new Date().toISOString(),
 };
 
@@ -24,7 +25,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Reading Tables',
     name_bn: 'পড়ার টেবিল',
     slug: 'reading-tables',
-    image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/products/smart-ergonomic-reading-table/01.jpg',
     display_order: 1,
     is_active: true,
   },
@@ -33,7 +34,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Computer Tables',
     name_bn: 'কম্পিউটার টেবিল',
     slug: 'computer-tables',
-    image_url: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/products/executive-workstation-computer-desk/01.jpg',
     display_order: 2,
     is_active: true,
   },
@@ -42,7 +43,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Bookshelves',
     name_bn: 'বইয়ের তাক ও বুকশেলফ',
     slug: 'bookshelves',
-    image_url: 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/products/modern-multi-tier-bookshelf/01.jpg',
     display_order: 3,
     is_active: true,
   },
@@ -51,7 +52,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Wall Shelves & Racks',
     name_bn: 'ওয়াল র‍্যাক ও ডেকোর',
     slug: 'wall-shelves',
-    image_url: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/products/floating-geometric-wall-shelf-set/01.jpg',
     display_order: 4,
     is_active: true,
   },
@@ -60,7 +61,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Dressing Tables',
     name_bn: 'ড্রেসিং টেবিল',
     slug: 'dressing-tables',
-    image_url: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/products/luxurious-mirror-dressing-table/01.jpg',
     display_order: 5,
     is_active: true,
   },
@@ -69,7 +70,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Custom Carpentry',
     name_bn: 'কাস্টম অর্ডার',
     slug: 'custom-furniture',
-    image_url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80',
+    image_url: '/placeholders/site/workshop_1.jpg',
     display_order: 6,
     is_active: true,
   },
@@ -86,16 +87,16 @@ export const MOCK_PRODUCTS: Product[] = [
     discount_price: 3800,
     category_id: 'a0000000-0000-0000-0000-000000000001',
     images: [
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/smart-ergonomic-reading-table/01.jpg',
+      '/placeholders/products/smart-ergonomic-reading-table/02.jpg',
     ],
     dimensions: '3.5ft (L) x 2ft (W) x 4.5ft (H)',
-    material: 'Premium Melamine Board with 1mm PVC Edge Banding',
+    material: 'Melamine Board (16mm) with 1mm PVC Edge Banding',
     color_options: ['Walnut Brown', 'Teak Wood', 'Antique Wood', 'Classic White'],
     stock_status: 'in_stock',
     is_featured: true,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -108,8 +109,8 @@ export const MOCK_PRODUCTS: Product[] = [
     discount_price: 3200,
     category_id: 'a0000000-0000-0000-0000-000000000001',
     images: [
-      'https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/compact-student-study-table/01.jpg',
+      '/placeholders/products/compact-student-study-table/02.jpg',
     ],
     dimensions: '3ft (L) x 2ft (W) x 2.5ft (H)',
     material: 'Melamine Board (16mm thickness) with edge protection',
@@ -117,6 +118,7 @@ export const MOCK_PRODUCTS: Product[] = [
     stock_status: 'in_stock',
     is_featured: true,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -129,8 +131,8 @@ export const MOCK_PRODUCTS: Product[] = [
     discount_price: 5200,
     category_id: 'a0000000-0000-0000-0000-000000000002',
     images: [
-      'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/executive-workstation-computer-desk/01.jpg',
+      '/placeholders/products/executive-workstation-computer-desk/02.jpg',
     ],
     dimensions: '4ft (L) x 2.2ft (W) x 2.5ft (H)',
     material: 'Malaysian Processed Wood & Heavy Duty Hardware',
@@ -138,6 +140,7 @@ export const MOCK_PRODUCTS: Product[] = [
     stock_status: 'in_stock',
     is_featured: true,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -145,13 +148,13 @@ export const MOCK_PRODUCTS: Product[] = [
     title: 'Modern Multi-Tier Open Bookshelf & Display Rack',
     title_bn: 'মডার্ন মাল্টি-টায়ার বুকশেলফ ও ডিসপ্লে র‍্যাক',
     slug: 'modern-multi-tier-bookshelf',
-    description: 'বই, শোপিস ও ঘর সাজানোর জন্য আধুনিক ডিজাইনের ওপেন বুকশেলফ। প্রিমিয়াম কোটিং এবং ভারী ওজন বহন করার ক্ষমতা সম্পন্ন মজবুত ফ্রেম। ড্রয়িং বা স্টাডি রুমের আকর্ষনীয় সংযোজন।',
+    description: 'বই, শোপিস ও ঘর সাজানোর জন্য আধুনিক ডিজাইনের ওপেন বুকশেলফ। মসৃণ মেলামাইন ফিনিশ এবং ভারী ওজন বহন করার ক্ষমতা সম্পন্ন মজবুত ফ্রেম। ড্রয়িং বা স্টাডি রুমের সুন্দর সংযোজন।',
     price: 5200,
     discount_price: 4400,
     category_id: 'a0000000-0000-0000-0000-000000000003',
     images: [
-      'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/modern-multi-tier-bookshelf/01.jpg',
+      '/placeholders/products/modern-multi-tier-bookshelf/02.jpg',
     ],
     dimensions: '3ft (L) x 1ft (D) x 5ft (H)',
     material: 'High Density Melamine Board (Scratch resistant)',
@@ -159,6 +162,7 @@ export const MOCK_PRODUCTS: Product[] = [
     stock_status: 'in_stock',
     is_featured: true,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -171,8 +175,8 @@ export const MOCK_PRODUCTS: Product[] = [
     discount_price: 1350,
     category_id: 'a0000000-0000-0000-0000-000000000004',
     images: [
-      'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/floating-geometric-wall-shelf-set/01.jpg',
+      '/placeholders/products/floating-geometric-wall-shelf-set/02.jpg',
     ],
     dimensions: 'Large: 14"x14", Medium: 12"x12", Small: 10"x10"',
     material: 'Water-Resistant Melamine Finish',
@@ -180,6 +184,7 @@ export const MOCK_PRODUCTS: Product[] = [
     stock_status: 'in_stock',
     is_featured: false,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -192,8 +197,8 @@ export const MOCK_PRODUCTS: Product[] = [
     discount_price: 6500,
     category_id: 'a0000000-0000-0000-0000-000000000005',
     images: [
-      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/luxurious-mirror-dressing-table/01.jpg',
+      '/placeholders/products/luxurious-mirror-dressing-table/02.jpg',
     ],
     dimensions: '2.5ft (L) x 1.5ft (W) x 6ft (H)',
     material: 'Melamine Board with 5mm Belgian Mirror Glass',
@@ -201,6 +206,7 @@ export const MOCK_PRODUCTS: Product[] = [
     stock_status: 'made_to_order',
     is_featured: true,
     is_active: true,
+    has_placeholder_images: true,
     created_at: new Date().toISOString(),
   },
 ];
@@ -210,7 +216,7 @@ export const MOCK_CAMPAIGNS: CampaignGiveaway[] = [
     id: 'c0000000-0000-0000-0000-000000000001',
     title: 'Facebook Mega Giveaway: ফ্রি রিডিং টেবিল লটারি অফার!',
     description: 'আমাদের ফেসবুক পেজে লাইক, শেয়ার ও ৩ জন বন্ধুকে কমেন্টে মেনশন করে জিতে নিন আকর্ষণীয় পড়ার টেবিল সম্পূর্ণ ফ্রিতে! সরাসরি ফেসবুক পোস্টে অংশ নিন।',
-    banner_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1200&q=80',
+    banner_url: '/placeholders/site/hero.jpg',
     end_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     is_active: true,
     facebook_post_link: 'https://www.facebook.com/profile.php?id=61584955311887',
@@ -302,46 +308,42 @@ export const MOCK_SAMPLE_ORDERS: Order[] = [
 ];
 
 export const DEFAULT_WORKSHOP_DATA: WorkshopData = {
-  badge: 'সরাসরি কারখানার অন্দরমহল • Inside Our Workshop',
-  title: 'আমরা কীভাবে তৈরি করি আপনার পছন্দের ফার্নিচার?',
+  badge: 'আমাদের মিরপুর ওয়ার্কশপ',
+  title: 'আমরা কীভাবে ফার্নিচার তৈরি করি?',
   description:
-    'কোনো থার্ড-পার্টি বা মধ্যস্বত্বভোগী নয় — বোর্ড কেনা থেকে শুরু করে কাটিং, সাইজিং ও ডেলিভারি প্যাকেজিং পর্যন্ত সবকিছু সম্পন্ন হয় আমাদের নিজস্ব মিরপুরের ওয়ার্কশপে। তাই পাচ্ছেন সেরা ফিনিশিং ও অবিশ্বাস্য সাশ্রয়ী রেট।',
+    'বোর্ড নির্বাচন থেকে শুরু করে নিখুঁত কাটিং, ১ মিমি পিভিসি এজ ব্যান্ডিং ও ডাবল-লেয়ার বাবল র‍্যাপ প্যাকেজিং—প্রতিটি ধাপ সম্পন্ন করেন আমাদের অভিজ্ঞ কারিগররা।',
   steps: [
     {
       id: 'step-1',
-      title: '১. উন্নত মেলামাইন বোর্ড কাটিং',
-      desc: 'কম্পিউটারাইজড কাটার মেশিনে নিখুঁত মাপে বোর্ড সাইজিং করা হয়।',
-      image:
-        'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80',
+      title: '১. মেলামাইন বোর্ড কাটিং',
+      desc: 'ডিজাইন অনুযায়ী নিখুঁত মাপে বোর্ড সাইজিং ও কাটিং সম্পন্ন করা হয়।',
+      image: '/placeholders/site/workshop_1.jpg',
     },
     {
       id: 'step-2',
       title: '২. ১ মিমি পিভিসি এজ ব্যান্ডিং',
-      desc: 'বোর্ডের চারপাশের কাটিং প্রান্ত সম্পূর্ণ মসৃণ ও পানি প্রতিরোধী সিলিং করা হয়।',
-      image:
-        'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80',
+      desc: 'বোর্ডের প্রান্ত মসৃণ ও জলরোধী করতে নিখুঁত পিভিসি সিলিং প্রয়োগ করা হয়।',
+      image: '/placeholders/site/workshop_2.jpg',
     },
     {
       id: 'step-3',
-      title: '৩. দক্ষ কারিগরদের ফিটিং ও ফিনিশিং',
-      desc: 'প্রতিটি জয়েন্ট ও হার্ডওয়্যার স্ক্রু নিখুঁতভাবে পরীক্ষা ও সেট করা হয়।',
-      image:
-        'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=600&q=80',
+      title: '৩. কারিগরের হাতে ফিটিং ও স্ক্রু অ্যাসেম্বলি',
+      desc: 'প্রতিটি জয়েন্ট ও হেভি ডিউটি হার্ডওয়্যার স্ক্রু শক্তভাবে অ্যাসেম্বল করা হয়।',
+      image: '/placeholders/site/workshop_3.jpg',
     },
     {
       id: 'step-4',
       title: '৪. সুরক্ষিত বাবল র‍্যাপ প্যাকেজিং',
-      desc: 'কুরিয়ারে পরিবহনের সময় যেন এক ফোঁটাও দাগ না পড়ে সেজন্য মজবুত প্যাকেজিং।',
-      image:
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
+      desc: 'কুরিয়ারে পরিবহনের সুরক্ষায় কর্নার গার্ড ও বাবল র‍্যাপ দিয়ে মোড়ানো হয়।',
+      image: '/placeholders/site/workshop_4.jpg',
     },
   ],
   videoCard: {
     enabled: true,
-    badge: 'কারখানার সরাসরি ভিডিও ও রিলস',
-    title: 'বোর্ড কাটিং ও তৈরির লাইভ ভিডিও দেখতে চান?',
+    badge: 'কারখানার ভিডিও ও রিলস',
+    title: 'বোর্ড কাটিং ও তৈরির ভিডিও দেখতে চান?',
     description:
-      'আমাদের অফিসিয়াল ফেসবুক পেজে গ্রাহকদের অর্ডার প্রস্তুতের ভিডিও, বোর্ড কাটিং ও ডেলিভারি আপডেট নিয়মিত শেয়ার করা হয়। সরাসরি চোখ রাখুন আমাদের পেজে!',
+      'আমাদের অফিসিয়াল ফেসবুক পেজে অর্ডার প্রস্তুতের ভিডিও, বোর্ড কাটিং ও ডেলিভারি আপডেট নিয়মিত প্রকাশ করা হয়।',
     buttonText: 'ফেসবুকে ভিডিও দেখুন',
     buttonUrl: 'https://www.facebook.com/profile.php?id=61584955311887',
   },

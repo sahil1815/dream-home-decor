@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { getProductBySlug, getProducts, getSiteSettings } from '@/lib/data';
 import { ProductDetailClient } from '@/components/storefront/ProductDetailClient';
 import { ProductCard } from '@/components/storefront/ProductCard';
@@ -27,17 +27,43 @@ export async function generateMetadata({ params }: ProductDetailPageProps) {
 
   if (!product) {
     return {
-      title: 'ফার্নিচার পাওয়া যায়নি | Dream Home Decor',
+      title: 'ফার্নিচার পাওয়া যায়নি',
     };
   }
 
+  const title = product.title_bn || product.title;
+  const description =
+    product.description ||
+    'মিরপুর-১০ কারখানায় ১৬ মিমি উন্নত মেলামাইন বোর্ড ও ১ মিমি পিভিসি এজ ব্যান্ডিং দিয়ে তৈরি টেকসই ফার্নিচার। ক্যাশ অন ডেলিভারি।';
+  const ogImage = product.images?.[0] || '/placeholders/site/hero.jpg';
+
   return {
-    title: `${product.title_bn || product.title} | Dream Home Decor`,
-    description: product.description || 'ড্রিম হোম ডেকোর - সরাসরি নিজস্ব কারখানায় তৈরি মেলামাইন ফার্নিচার।',
+    title: title,
+    description: description,
+    alternates: {
+      canonical: `/products/${slug}`,
+    },
     openGraph: {
-      title: `${product.title_bn || product.title} - কারখানা মূল্য`,
-      description: product.description || 'সেরা মেলামাইন বোর্ড ফার্নিচার সরাসরি নিজস্ব কারখানায় তৈরি।',
-      images: product.images?.[0] ? [product.images[0]] : [],
+      title: `${title} | ফ্যাক্টরি মূল্য`,
+      description: description,
+      url: `/products/${slug}`,
+      siteName: 'Dream Home Decor',
+      locale: 'bn_BD',
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${title} - ড্রিম হোম ডেকোর`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Dream Home Decor`,
+      description: description,
+      images: [ogImage],
     },
   };
 }
@@ -76,6 +102,62 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           {product.title_bn || product.title}
         </span>
       </div>
+
+      {/* JSON-LD Schemas: Product & BreadcrumbList for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.title_bn || product.title,
+              image: product.images || [],
+              description: product.description,
+              sku: product.id,
+              brand: {
+                '@type': 'Brand',
+                name: 'Dream Home Decor',
+              },
+              offers: {
+                '@type': 'Offer',
+                url: `https://dream-home-decor.vercel.app/products/${product.slug}`,
+                priceCurrency: 'BDT',
+                price: product.discount_price ?? product.price,
+                availability:
+                  product.stock_status === 'out_of_stock'
+                    ? 'https://schema.org/OutOfStock'
+                    : 'https://schema.org/InStock',
+                itemCondition: 'https://schema.org/NewCondition',
+              },
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'হোম',
+                  item: 'https://dream-home-decor.vercel.app',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'ফার্নিচার',
+                  item: 'https://dream-home-decor.vercel.app/products',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: product.title_bn || product.title,
+                  item: `https://dream-home-decor.vercel.app/products/${product.slug}`,
+                },
+              ],
+            },
+          ]),
+        }}
+      />
 
       {/* Main Interactive Product Detail */}
       <ProductDetailClient product={product} settings={settings} />

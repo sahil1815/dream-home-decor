@@ -8,11 +8,7 @@ import {
   CheckCircle2,
   Printer,
   PackageCheck,
-  Phone,
-  Home,
   MessageCircle,
-  Truck,
-  ShieldCheck,
 } from 'lucide-react';
 import { formatBDT } from '@/lib/utils';
 
@@ -22,10 +18,23 @@ function SuccessContent() {
   const name = searchParams.get('name') || 'সম্মানিত গ্রাহক';
   const total = searchParams.get('total') || '3920';
   const phone = searchParams.get('phone') || '';
+  const [expectedDateText, setExpectedDateText] = React.useState('২-৪ দিনের মধ্যে');
 
   useEffect(() => {
-    // Fire celebratory confetti!
+    const timer = setTimeout(() => {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + 3);
+      setExpectedDateText(
+        targetDate.toLocaleDateString('bn-BD', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }) + ' (২-৪ দিনের মধ্যে)'
+      );
+    }, 0);
+
     try {
+      // Fire celebratory confetti!
       confetti({
         particleCount: 100,
         spread: 70,
@@ -35,6 +44,8 @@ function SuccessContent() {
     } catch {
       // Ignore confetti errors
     }
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handlePrint = () => {
@@ -61,9 +72,8 @@ function SuccessContent() {
           <h1 className="text-2xl sm:text-3xl font-bn font-extrabold text-stone-900">
             ধন্যবাদ, {name}!
           </h1>
-          <p className="text-stone-500 font-bn text-xs sm:text-sm max-w-lg mx-auto">
-            আপনার অর্ডারটি ড্রিম হোম ডেকোর কারখানায় প্রক্রিয়াকরণ শুরু হয়েছে। খুব শীঘ্রই আমাদের প্রতিনিধি
-            কল করে ডেলিভারি সময় জানিয়ে দেবে।
+          <p className="text-stone-600 font-bn text-sm max-w-lg mx-auto leading-relaxed">
+            আপনার অর্ডার পেয়েছি। ২ ঘণ্টার মধ্যে আমরা ফোন করে নিশ্চিত করব।
           </p>
         </div>
 
@@ -98,6 +108,12 @@ function SuccessContent() {
             <div>
               <span className="text-stone-400 block">পেমেন্ট মেথড:</span>
               <span className="font-semibold text-stone-900">Cash on Delivery (ক্যাশ অন ডেলিভারি)</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block">সম্ভাব্য ডেলিভারি তারিখ:</span>
+              <span className="font-semibold text-emerald-800">
+                {expectedDateText}
+              </span>
             </div>
             <div>
               <span className="text-stone-400 block">কারখানা ও সাপোর্ট:</span>

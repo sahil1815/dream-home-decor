@@ -35,15 +35,16 @@ export function getOptimizedImageUrl(
   options?: Omit<ImageKitTransformOptions, 'width' | 'quality'>
 ): string {
   if (!url) {
-    return 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=800&q=80';
+    return '/placeholders/products/smart-ergonomic-reading-table/01.jpg';
   }
 
-  // If not ImageKit, return original URL (or Unsplash optimization if applicable)
+  // If local asset or placeholder, return as is
+  if (url.startsWith('/')) {
+    return url;
+  }
+
+  // If not ImageKit, return original URL untouched
   if (!isImageKitUrl(url)) {
-    if (url.includes('images.unsplash.com') && width) {
-      const separator = url.includes('?') ? '&' : '?';
-      return `${url}${separator}w=${width}&q=${quality}&auto=format`;
-    }
     return url;
   }
 
@@ -87,12 +88,12 @@ export function getImageKitThumbnail(
  * Fallback curated furniture images for Dream Home Decor categories
  */
 export const FALLBACK_FURNITURE_IMAGES = {
-  readingTable: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80',
-  bookshelf: 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80',
-  computerTable: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
-  wallShelf: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80',
-  dressingTable: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80',
-  workshop1: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1000&q=80',
-  workshop2: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1000&q=80',
-  heroBanner: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=85',
+  readingTable: '/placeholders/products/smart-ergonomic-reading-table/01.jpg',
+  bookshelf: '/placeholders/products/modern-multi-tier-bookshelf/01.jpg',
+  computerTable: '/placeholders/products/executive-workstation-computer-desk/01.jpg',
+  wallShelf: '/placeholders/products/floating-geometric-wall-shelf-set/01.jpg',
+  dressingTable: '/placeholders/products/luxurious-mirror-dressing-table/01.jpg',
+  workshop1: '/placeholders/site/workshop_1.jpg',
+  workshop2: '/placeholders/site/workshop_2.jpg',
+  heroBanner: '/placeholders/site/hero.jpg',
 };

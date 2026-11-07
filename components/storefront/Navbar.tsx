@@ -3,19 +3,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Menu,
   X,
   Search,
   Heart,
   ShoppingBag,
-  User,
   ChevronDown,
   ChevronRight,
-  Phone,
   PackageCheck,
-  Hammer,
   MessageCircle,
 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
@@ -31,6 +28,7 @@ interface NavbarProps {
 
 export function Navbar({ settings, categories }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems, openCart } = useCart();
   const { totalSaved } = useWishlist();
 
@@ -52,6 +50,11 @@ export function Navbar({ settings, categories }: NavbarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Never render storefront navbar on administrative pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   const cleanNumber = (settings.whatsapp_number || '8801700000000').replace(/[^0-9]/g, '');
   const whatsappUrl = buildWhatsAppUrl(
     cleanNumber,
@@ -61,7 +64,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    window.location.href = `/products?search=${encodeURIComponent(searchQuery.trim())}`;
+    router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const isExploreActive = pathname === '/products';
@@ -71,7 +74,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
   const isSavedActive = pathname === '/saved';
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF8F5]/98 backdrop-blur-md border-b border-stone-200/90 transition-all">
+    <header className="sticky top-0 z-40 bg-[#F7F3EE]/95 backdrop-blur-md border-b border-[#E8E2D9] transition-all">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-18 gap-2 sm:gap-4">
           
@@ -170,6 +173,38 @@ export function Navbar({ settings, categories }: NavbarProps) {
                     <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
                   </Link>
                   <Link
+                    href="/custom-furniture"
+                    onClick={() => setMoreOpen(false)}
+                    className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
+                  >
+                    <span>কাস্টম ফার্নিচার তৈরি</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                  </Link>
+                  <Link
+                    href="/about"
+                    onClick={() => setMoreOpen(false)}
+                    className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
+                  >
+                    <span>আমাদের গল্প ও কারখানা</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                  </Link>
+                  <Link
+                    href="/contact"
+                    onClick={() => setMoreOpen(false)}
+                    className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
+                  >
+                    <span>যোগাযোগ ও শোরুম</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                  </Link>
+                  <Link
+                    href="/faq"
+                    onClick={() => setMoreOpen(false)}
+                    className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
+                  >
+                    <span>সচরাচর জিজ্ঞাসা (FAQ)</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                  </Link>
+                  <Link
                     href="/track-order"
                     onClick={() => setMoreOpen(false)}
                     className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
@@ -177,17 +212,6 @@ export function Navbar({ settings, categories }: NavbarProps) {
                     <span className="flex items-center gap-2">
                       <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
                       <span>অর্ডার ট্র্যাকিং</span>
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
-                  </Link>
-                  <Link
-                    href="/#workshop"
-                    onClick={() => setMoreOpen(false)}
-                    className="flex items-center justify-between px-4 py-2.5 text-xs text-stone-800 hover:bg-stone-100/80 transition-colors font-bn font-medium"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Hammer className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                      <span>আমাদের কারখানা</span>
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
                   </Link>
@@ -268,17 +292,7 @@ export function Navbar({ settings, categories }: NavbarProps) {
               <span>হোয়াটসঅ্যাপ</span>
             </a>
 
-            {/* ২. অ্যাকাউন্ট / অ্যাডমিন */}
-            <Link
-              href="/admin"
-              className="hidden sm:inline-flex p-1.5 sm:p-2 text-stone-800 hover:text-[#8B5A2B] transition-colors rounded-full hover:bg-stone-100"
-              title="অ্যাডমিন লগইন / পোর্টাল"
-              aria-label="অ্যাডমিন লগইন"
-            >
-              <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.6]" />
-            </Link>
-
-            {/* ৩. সার্চ বাটন */}
+            {/* ২. সার্চ বাটন */}
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
@@ -372,32 +386,17 @@ export function Navbar({ settings, categories }: NavbarProps) {
                 <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
-              <Link
-                href="/products?category=reading-tables"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
-              >
-                <span>পড়ার টেবিল</span>
-                <ChevronRight className="w-4 h-4 text-stone-400" />
-              </Link>
-
-              <Link
-                href="/products?category=bookshelves"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
-              >
-                <span>বুকশেলফ</span>
-                <ChevronRight className="w-4 h-4 text-stone-400" />
-              </Link>
-
-              <Link
-                href="/products?category=computer-tables"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
-              >
-                <span>কম্পিউটার টেবিল</span>
-                <ChevronRight className="w-4 h-4 text-stone-400" />
-              </Link>
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/products?category=${cat.slug}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
+                >
+                  <span>{cat.name_bn || cat.name}</span>
+                  <ChevronRight className="w-4 h-4 text-stone-400" />
+                </Link>
+              ))}
 
               <Link
                 href="/#workshop"
@@ -406,6 +405,42 @@ export function Navbar({ settings, categories }: NavbarProps) {
               >
                 <span>আমাদের কারখানা</span>
                 <ChevronRight className="w-4 h-4 text-[#8B5A2B]" />
+              </Link>
+
+              <Link
+                href="/custom-furniture"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-[#8B5A2B] text-sm font-bold transition-colors"
+              >
+                <span>কাস্টম ফার্নিচার তৈরি</span>
+                <ChevronRight className="w-4 h-4 text-[#8A5A3B]" />
+              </Link>
+
+              <Link
+                href="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
+              >
+                <span>আমাদের গল্প ও কারখানা</span>
+                <ChevronRight className="w-4 h-4 text-stone-400" />
+              </Link>
+
+              <Link
+                href="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
+              >
+                <span>যোগাযোগ ও শোরুম</span>
+                <ChevronRight className="w-4 h-4 text-stone-400" />
+              </Link>
+
+              <Link
+                href="/faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-stone-800 text-sm font-semibold transition-colors"
+              >
+                <span>সচরাচর জিজ্ঞাসা (FAQ)</span>
+                <ChevronRight className="w-4 h-4 text-stone-400" />
               </Link>
 
               <Link
@@ -430,22 +465,6 @@ export function Navbar({ settings, categories }: NavbarProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span>হোয়াটসঅ্যাপে মেসেজ দিন</span>
                 </a>
-
-                <a
-                  href={`tel:${settings.phone}`}
-                  className="flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-2.5 rounded-xl font-medium text-sm transition-colors shadow-xs"
-                >
-                  <Phone className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>হটলাইন কল: {settings.phone}</span>
-                </a>
-
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-center text-xs text-stone-400 hover:text-stone-600 py-1"
-                >
-                  অ্যাডমিন লগইন (মালিকের পোর্টাল)
-                </Link>
               </div>
             </div>
           </div>

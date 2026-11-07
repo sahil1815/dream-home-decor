@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Zap, Check, MessageCircle, Ruler, Heart } from 'lucide-react';
+import { ShoppingCart, Zap, MessageCircle, Ruler, Heart, Camera } from 'lucide-react';
 import { Product } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
@@ -13,18 +13,30 @@ import { useWishlist } from '@/context/wishlist-context';
 interface ProductCardProps {
   product: Product;
   whatsappNumber?: string;
+  showPlaceholderTag?: boolean;
 }
 
-export function ProductCard({ product, whatsappNumber = '8801712345678' }: ProductCardProps) {
+export function ProductCard({
+  product,
+  whatsappNumber = '8801712345678',
+  showPlaceholderTag = true,
+}: ProductCardProps) {
   const { addToCart, openQuickOrder } = useCart();
   const { isSaved, toggleWishlist } = useWishlist();
   const saved = isSaved(product.id);
 
   const primaryImage =
     product.images?.[0] ||
-    'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80';
+    '/placeholders/products/smart-ergonomic-reading-table/01.jpg';
 
   const secondaryImage = product.images?.[1] || primaryImage;
+
+  const isPlaceholder = Boolean(
+    showPlaceholderTag &&
+    (product.has_placeholder_images ||
+      primaryImage.startsWith('/placeholders/') ||
+      primaryImage.includes('/placeholders/'))
+  );
 
   const currentPrice = product.discount_price ?? product.price;
   const originalPrice = product.discount_price ? product.price : null;
@@ -39,49 +51,70 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
   const whatsappUrl = buildWhatsAppUrl(whatsappNumber, whatsappMessage);
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden border border-stone-200/90 hover:border-amber-700/40 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+    <div className="group bg-white rounded-2xl overflow-hidden border border-[#E8E2D9] hover:border-[#8A5A3B]/40 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between">
       <div>
         {/* Image Container with Badges */}
-        <div className="relative aspect-4/3 sm:aspect-square bg-stone-100 overflow-hidden">
-          <Link href={`/products/${product.slug}`} className="block w-full h-full">
+        <div className="relative aspect-4/3 sm:aspect-square bg-[#FAF8F5] overflow-hidden">
+          <Link href={`/products/${product.slug}`} className="block w-full h-full relative">
             <Image
               src={getOptimizedImageUrl(primaryImage, 600)}
-              alt={product.title}
+              alt={product.title_bn || product.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className={`object-cover transition-all duration-500 ${
+                product.images?.[1] ? 'group-hover:opacity-0' : 'group-hover:scale-105'
+              }`}
             />
+            {product.images?.[1] && (
+              <Image
+                src={getOptimizedImageUrl(secondaryImage, 600)}
+                alt={`${product.title_bn || product.title} - বিকল্প কোণ`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+              />
+            )}
           </Link>
 
           {/* Discount Pill */}
           {discountPercent > 0 && (
-            <div className="absolute top-2.5 left-2.5 bg-rose-600 text-white font-bold text-[11px] px-2 py-0.5 rounded-full shadow-xs font-sans tracking-tight">
+            <div className="absolute top-2.5 left-2.5 bg-[#9F1239] text-white font-bold text-[11px] px-2 py-0.5 rounded-md shadow-xs font-sans tracking-tight">
               -{discountPercent}% ছাড়
             </div>
           )}
 
-          {/* Stock Status Badge */}
+          {/* Sample Photo (নমুনা ছবি) Tag */}
+          {isPlaceholder && (
+            <div
+              className={`absolute ${discountPercent > 0 ? 'top-9' : 'top-2.5'} left-2.5 bg-[#2B1D14]/85 backdrop-blur-xs text-[#FAF3E8] text-[10px] font-bn px-2 py-0.5 rounded-md border border-[#B08D57]/30 flex items-center gap-1 shadow-xs`}
+              title="আসল পণ্যের ছবি শীঘ্রই যুক্ত হবে"
+            >
+              <Camera className="w-2.5 h-2.5 text-[#B08D57]" />
+              <span>নমুনা ছবি</span>
+            </div>
+          )}
+
+          {/* Stock or Lead Time Badge (Shown only when meaningful) */}
           <div className="absolute top-2.5 right-2.5">
             {isOutOfStock ? (
-              <span className="bg-[#5C3615]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-full">
-                স্টক আউট
+              <span className="bg-[#2B1D14]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md">
+                স্টক শেষ
               </span>
             ) : isMadeToOrder ? (
-              <span className="bg-amber-600/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-full font-medium">
+              <span className="bg-[#8A5A3B]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md font-medium">
                 অর্ডারে তৈরি
               </span>
-            ) : (
-              <span className="bg-emerald-600/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                <Check className="w-2.5 h-2.5" />
-                <span>রেডি স্টক</span>
+            ) : product.lead_time_days ? (
+              <span className="bg-[#2B1D14]/75 backdrop-blur-xs text-[#FAF3E8] text-[10px] font-bn px-2 py-0.5 rounded-md font-medium">
+                ডেলিভারি {product.lead_time_days} দিনে
               </span>
-            )}
+            ) : null}
           </div>
 
           {/* Dimensions tag */}
           {product.dimensions && (
-            <div className="absolute bottom-2 left-2 bg-[#2B1B12]/80 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1 font-sans border border-white/10">
-              <Ruler className="w-2.5 h-2.5 text-amber-300" />
+            <div className="absolute bottom-2 left-2 bg-[#2B1D14]/80 backdrop-blur-xs text-stone-200 text-[10px] px-2 py-0.5 rounded flex items-center gap-1 font-sans border border-white/10">
+              <Ruler className="w-2.5 h-2.5 text-[#B08D57]" />
               <span>{product.dimensions}</span>
             </div>
           )}
@@ -94,7 +127,7 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
               e.stopPropagation();
               toggleWishlist(product);
             }}
-            className={`absolute bottom-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-xs transition-transform active:scale-90 cursor-pointer ${
+            className={`absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-xs transition-transform active:scale-90 cursor-pointer ${
               saved
                 ? 'bg-rose-50 text-rose-500 hover:bg-rose-100'
                 : 'bg-white/90 text-stone-600 hover:text-rose-500 hover:bg-white'
@@ -111,17 +144,17 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
         </div>
 
         {/* Content Section */}
-        <div className="p-3.5 sm:p-4 space-y-1.5 sm:space-y-2">
+        <div className="p-4 space-y-1.5">
           {/* Material note */}
           {product.material && (
-            <p className="text-[10px] sm:text-[11px] text-stone-500 font-bn truncate">
+            <p className="text-[11px] text-stone-500 font-bn truncate">
               {product.material}
             </p>
           )}
 
           {/* Product Title */}
           <Link href={`/products/${product.slug}`} className="block">
-            <h3 className="font-bn font-bold text-stone-900 text-sm sm:text-base leading-snug line-clamp-2 hover:text-[#8B5A2B] transition-colors">
+            <h3 className="font-serif font-bold text-[#2B1D14] text-sm sm:text-base leading-snug line-clamp-2 hover:text-[#8A5A3B] transition-colors">
               {product.title_bn || product.title}
             </h3>
             <p className="text-[11px] sm:text-xs text-stone-400 font-sans truncate mt-0.5">
@@ -130,12 +163,12 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
           </Link>
 
           {/* Pricing */}
-          <div className="flex items-baseline gap-1.5 sm:gap-2 pt-0.5 sm:pt-1">
-            <span className="text-base sm:text-xl font-extrabold text-[#8B5A2B] font-sans">
+          <div className="flex items-baseline gap-2 pt-1">
+            <span className="text-base sm:text-lg font-bold text-[#8A5A3B] font-sans">
               {formatBDT(currentPrice)}
             </span>
             {originalPrice && (
-              <span className="text-[11px] sm:text-xs text-stone-400 line-through font-sans">
+              <span className="text-xs text-stone-400 line-through font-sans">
                 {formatBDT(originalPrice)}
               </span>
             )}
@@ -143,16 +176,16 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
         </div>
       </div>
 
-      {/* Action Buttons (F-Commerce Conversion Focused) */}
-      <div className="p-3.5 sm:p-4 pt-0 space-y-1.5 sm:space-y-2">
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+      {/* Action Buttons */}
+      <div className="p-4 pt-0 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Quick Order Button */}
           <button
             type="button"
             onClick={() => openQuickOrder(product)}
-            className="flex items-center justify-center gap-1 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-2 px-1.5 sm:px-3 rounded-xl font-bn font-bold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 bg-[#8A5A3B] hover:bg-[#6E442B] text-white py-2.5 px-3 rounded-xl font-bn font-semibold text-xs sm:text-sm shadow-xs transition-colors cursor-pointer min-h-[44px]"
           >
-            <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300 shrink-0" />
+            <Zap className="w-3.5 h-3.5 text-amber-200 fill-amber-200 shrink-0" />
             <span className="truncate">দ্রুত অর্ডার</span>
           </button>
 
@@ -160,7 +193,7 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
           <button
             type="button"
             onClick={() => addToCart(product, 1)}
-            className="flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 text-stone-800 py-2 px-1.5 sm:px-3 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 bg-[#FAF8F5] hover:bg-[#F4ECE1] text-[#2B1D14] border border-[#E8E2D9] hover:border-[#8A5A3B]/40 py-2.5 px-3 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors cursor-pointer min-h-[44px]"
           >
             <ShoppingCart className="w-3.5 h-3.5 text-stone-600 shrink-0" />
             <span className="truncate">কার্টে যোগ</span>
@@ -172,10 +205,10 @@ export function ProductCard({ product, whatsappNumber = '8801712345678' }: Produ
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bn font-medium transition-colors"
+          className="w-full flex items-center justify-center gap-1.5 text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100 py-2 px-2.5 rounded-xl text-xs font-bn font-medium transition-colors border border-emerald-200/50 min-h-[40px]"
         >
           <MessageCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-          <span className="truncate">হোয়াটসঅ্যাপে অর্ডার করুন</span>
+          <span className="truncate">হোয়াটসঅ্যাপে অর্ডার ও তথ্য</span>
         </a>
       </div>
     </div>

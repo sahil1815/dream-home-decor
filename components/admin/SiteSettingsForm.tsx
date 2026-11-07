@@ -9,11 +9,7 @@ import {
   Loader2,
   Image as ImageIcon,
   Phone,
-  MessageCircle,
   Truck,
-  MapPin,
-  Bell,
-  CreditCard,
   Hammer,
 } from 'lucide-react';
 import { SiteSettings } from '@/types/database';
@@ -48,6 +44,9 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
       '🎉 নিজস্ব কারখানায় তৈরি সেরা মানের ফার্নিচার! সারাদেশে ক্যাশ অন ডেলিভারি। ২৪ ঘণ্টা অর্ডার সার্ভিস।'
   );
   const [bkashNumber, setBkashNumber] = useState(initialSettings.bkash_merchant_number || '01712345678');
+  const [showPlaceholderTag, setShowPlaceholderTag] = useState(
+    initialSettings.show_placeholder_tag !== false
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -71,6 +70,7 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
         delivery_charge_outside: Number(deliveryOutside),
         announcement_text: announcement,
         bkash_merchant_number: bkashNumber,
+        show_placeholder_tag: showPlaceholderTag,
       });
 
       if (res.success) {
@@ -166,6 +166,33 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bn font-bold text-stone-700 mb-1">
+                সাইটের নাম (English)
+              </label>
+              <input
+                type="text"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                placeholder="Dream Home Decor"
+                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-sans text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bn font-bold text-stone-700 mb-1">
+                সাইটের নাম (বাংলা)
+              </label>
+              <input
+                type="text"
+                value={siteNameBn}
+                onChange={(e) => setSiteNameBn(e.target.value)}
+                placeholder="ড্রিম হোম ডেকোর"
+                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-bn text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Logo URL */}
             <div className="space-y-3">
               <label className="block text-xs font-bn font-bold text-stone-700">
@@ -211,7 +238,7 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
                 type="url"
                 value={coverUrl}
                 onChange={(e) => setCoverUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/photo-1555041469-a586c61ea9bc..."
+                placeholder="/placeholders/site/hero.jpg বা ড্রাইভ লিঙ্ক..."
                 className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-sans text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B]"
               />
 
@@ -355,6 +382,27 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
               placeholder="01712-345678"
               className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-sans text-stone-900"
             />
+          </div>
+
+          {/* Placeholder Tag Toggle */}
+          <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bn font-bold text-stone-800">
+                প্লেসহোল্ডার পণ্যে &apos;নমুনা ছবি&apos; ব্যাজ প্রদর্শন
+              </p>
+              <p className="text-[11px] font-bn text-stone-500">
+                অন থাকলে যেসব পণ্যে আসল ছবি আসেনি সেগুলোতে &apos;নমুনা ছবি&apos; ট্যাগ দেখানো হবে
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showPlaceholderTag}
+                onChange={(e) => setShowPlaceholderTag(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-stone-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8B5A2B]"></div>
+            </label>
           </div>
         </div>
       </div>

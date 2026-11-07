@@ -3,14 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { formatBDT } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 
 export function CartDrawer() {
+  const pathname = usePathname();
   const { isCartOpen, closeCart, cart, updateQuantity, removeFromCart, subtotal, totalItems } = useCart();
 
+  if (pathname?.startsWith('/admin')) return null;
   if (!isCartOpen) return null;
 
   return (
@@ -24,10 +27,10 @@ export function CartDrawer() {
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-[#FAF8F5] shadow-2xl flex flex-col border-l border-stone-200 animate-in slide-in-from-right duration-300 h-full max-h-dvh">
           {/* Header */}
-          <div className="p-3.5 sm:p-5 bg-[#5C3615] text-white flex items-center justify-between shrink-0 border-b border-[#44250C]">
+          <div className="p-3.5 sm:p-5 bg-[#2B1D14] text-white flex items-center justify-between shrink-0 border-b border-[#3E281C]">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-amber-300 shrink-0" />
-              <h2 className="font-bn font-bold text-base sm:text-lg text-white">
+              <h2 className="font-serif font-bold text-base sm:text-lg text-white">
                 আপনার শপিং কার্ট ({totalItems})
               </h2>
             </div>
@@ -48,11 +51,11 @@ export function CartDrawer() {
                   <ShoppingBag className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bn font-bold text-stone-800 text-base">
-                    আপনার কার্ট এখন খালি!
+                  <h3 className="font-bn font-bold text-[#2B1D14] text-base">
+                    আপনার কার্টে কোনো ফার্নিচার যুক্ত করা নেই
                   </h3>
-                  <p className="font-bn text-stone-500 text-xs">
-                    পছন্দের ফার্নিচার নির্বাচন করে কার্টে যোগ করুন
+                  <p className="font-bn text-stone-600 text-xs">
+                    পছন্দের ফার্নিচার নির্বাচন করে কার্টে যোগ করুন।
                   </p>
                 </div>
                 <button
@@ -67,7 +70,7 @@ export function CartDrawer() {
                 const price = item.product.discount_price ?? item.product.price;
                 const image =
                   item.product.images?.[0] ||
-                  'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=200&q=80';
+                  '/placeholders/products/smart-ergonomic-reading-table/01.jpg';
 
                 return (
                   <div
@@ -145,23 +148,23 @@ export function CartDrawer() {
 
           {/* Footer Checkout CTA */}
           {cart.length > 0 && (
-            <div className="p-3.5 sm:p-5 bg-white border-t border-stone-200 space-y-2.5 sm:space-y-3 shrink-0">
+            <div className="p-4 sm:p-5 bg-white border-t border-[#E8E2D9] space-y-3 shrink-0">
               <div className="flex items-center justify-between text-xs sm:text-sm font-bn">
                 <span className="text-stone-600">পণ্য সাবটোটাল:</span>
-                <span className="text-base sm:text-lg font-bold font-sans text-stone-900">
+                <span className="text-base sm:text-lg font-bold font-sans text-[#2B1D14]">
                   {formatBDT(subtotal)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bn text-stone-500 bg-amber-50 p-2 rounded-xl border border-amber-200/60">
-                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bn text-stone-700 bg-[#F4ECE1] p-2.5 rounded-xl border border-[#E8E2D9]">
+                <ShieldCheck className="w-4 h-4 text-[#8A5A3B] shrink-0" />
                 <span className="leading-tight">ডেলিভারি চার্জ পরবর্তী ধাপে যুক্ত হবে। সারাদেশে ক্যাশ অন ডেলিভারি।</span>
               </div>
 
               <Link
                 href="/checkout"
                 onClick={closeCart}
-                className="w-full flex items-center justify-center gap-2 bg-[#8B5A2B] hover:bg-[#6D431F] text-white py-3 sm:py-3.5 rounded-2xl font-bn font-bold text-sm sm:text-base shadow-lg transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-[#8A5A3B] hover:bg-[#6E442B] text-white py-3 sm:py-3.5 rounded-xl font-bn font-semibold text-sm sm:text-base shadow-xs transition-colors"
               >
                 <span>অর্ডার সম্পন্ন করুন (চেকআউট)</span>
                 <ArrowRight className="w-4 h-4" />

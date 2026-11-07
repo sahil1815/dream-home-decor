@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { CartItem, Product } from '@/types/database';
+import { trackAddToCart } from '@/lib/analytics';
 
 interface CartContextType {
   cart: CartItem[];
@@ -76,6 +77,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { product, quantity, selectedColor: color }];
     });
     setIsCartOpen(true);
+
+    try {
+      trackAddToCart({
+        id: product.id,
+        title: product.title_bn || product.title,
+        price: product.discount_price || product.price,
+        quantity,
+        category: product.category?.name_bn || product.category?.name,
+      });
+    } catch {
+      // Ignore analytics tracking errors
+    }
   };
 
   const removeFromCart = (productId: string, selectedColor?: string) => {

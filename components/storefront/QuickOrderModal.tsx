@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { X, CheckCircle2, ShieldCheck, Truck, Loader2 } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { X, CheckCircle2, Truck, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { formatBDT } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
@@ -12,6 +12,7 @@ import { DeliveryZone, PaymentMethod } from '@/types/database';
 
 export function QuickOrderModal() {
   const router = useRouter();
+  const pathname = usePathname();
   const { quickOrderProduct, closeQuickOrder } = useCart();
 
   const [quantity, setQuantity] = useState(1);
@@ -23,9 +24,12 @@ export function QuickOrderModal() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [trxId, setTrxId] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
+  const [websiteHoneypot, setWebsiteHoneypot] = useState('');
+  const [idempotencyKey] = useState(() => 'qck_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  if (pathname?.startsWith('/admin')) return null;
   if (!quickOrderProduct) return null;
 
   const currentPrice = quickOrderProduct.discount_price ?? quickOrderProduct.price;
@@ -35,7 +39,7 @@ export function QuickOrderModal() {
 
   const primaryImage =
     quickOrderProduct.images?.[0] ||
-    'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=400&q=80';
+    '/placeholders/products/smart-ergonomic-reading-table/01.jpg';
 
   const currentColor =
     selectedColor ||
@@ -57,8 +61,8 @@ export function QuickOrderModal() {
       return;
     }
 
-    if (!address.trim() || address.trim().length < 6) {
-      setErrorMessage('অনুগ্রহ করে আপনার বিস্তারিত ঠিকানা লিখুন');
+    if (!address.trim() || address.trim().length < 10) {
+      setErrorMessage('অনুগ্রহ করে বিস্তারিত ঠিকানা দিন (বাসা নং, রোড, এলাকা, জেলা - কমপক্ষে ১০ অক্ষর)');
       return;
     }
 
@@ -85,6 +89,8 @@ export function QuickOrderModal() {
             unit_price: currentPrice,
           },
         ],
+        website: websiteHoneypot,
+        idempotency_key: idempotencyKey,
       });
 
       if (res.success && res.orderNumber) {
@@ -203,6 +209,20 @@ export function QuickOrderModal() {
             </div>
           )}
 
+          {/* Honeypot field (hidden from real users) */}
+          <div className="hidden" aria-hidden="true">
+            <label htmlFor="modal-website-field">Website</label>
+            <input
+              id="modal-website-field"
+              type="text"
+              name="website"
+              value={websiteHoneypot}
+              onChange={(e) => setWebsiteHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
+
           {/* Customer Name */}
           <div>
             <label className="block text-xs font-bn font-semibold text-stone-700 mb-1">
@@ -244,7 +264,21 @@ export function QuickOrderModal() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="যেমন: বাসা ১২, রোড ৪, সেক্টর ১০, উত্তরা, ঢাকা"
-              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] font-bn"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#E8E2D9] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8A5A3B] font-bn"
+            />
+          </div>
+
+          {/* Optional Order Notes */}
+          <div>
+            <label className="block text-xs font-bn font-semibold text-stone-700 mb-1">
+              বিশেষ নির্দেশনা বা কালার নোট (ঐচ্ছিক)
+            </label>
+            <input
+              type="text"
+              value={orderNotes}
+              onChange={(e) => setOrderNotes(e.target.value)}
+              placeholder="যেমন: কালার বা ডেলিভারি সময়ের কোনো নির্দেশনা থাকলে লিখুন"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#E8E2D9] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#8A5A3B] font-bn"
             />
           </div>
 

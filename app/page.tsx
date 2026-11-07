@@ -3,16 +3,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowRight,
-  Sparkles,
-  Layers,
-  Award,
-  CheckCircle,
-  XCircle,
-  BookOpen,
-  Monitor,
-  Library,
-  Palette,
-  Maximize2,
+  ShieldCheck,
+  Hammer,
+  Truck,
+  HelpCircle,
+  ChevronDown,
+  MapPin,
+  Clock,
+  Phone,
+  ExternalLink,
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -39,16 +38,27 @@ export default async function HomePage() {
     getWorkshopData(),
   ]);
 
-  const featuredProducts = products.filter((p) => p.is_featured);
-  const readingTables = products.filter(
-    (p) =>
-      p.slug.includes('reading') ||
-      p.title.toLowerCase().includes('reading') ||
-      p.title_bn.includes('পড়ার টেবিল')
-  );
+  const faqs = [
+    {
+      q: 'ফার্নিচারের বোর্ড কি পানি বা আর্দ্রতায় সহজে নষ্ট হবে?',
+      a: 'আমরা ১৬ মিমি মেলামাইন বোর্ড এবং প্রতিটি কাটিং প্রান্তে মেশিনের সাহায্যে ১ মিমি পুরু পিভিসি এজ ব্যান্ডিং সিলিং ব্যবহার করি। এর ফলে স্বাভাবিক পানির ছিটা কিংবা ঘরের আর্দ্রতায় বোর্ডের প্রান্ত ক্ষতিগ্রস্ত হয় না।',
+    },
+    {
+      q: 'ডেলিভারির সময় কি ফার্নিচার খুলে দেখে নেওয়া যাবে?',
+      a: 'হ্যাঁ, সারাদেশে ক্যাশ অন ডেলিভারিতে ডেলিভারিম্যানের সামনে প্যাকেট খুলে ফার্নিচারের ফিনিশিং ও রঙ চেক করে নেওয়ার সম্পূর্ণ সুযোগ রয়েছে। সন্তুষ্ট হলে তবেই মূল্য পরিশোধ করবেন।',
+    },
+    {
+      q: 'আমার ঘরের মাপ অনুযায়ী কাস্টম সাইজ তৈরি করা যাবে কি?',
+      a: 'অবশ্যই। আমাদের মিরপুর-১০ নিজস্ব কারখানা থাকায় যেকোনো টেবিল, সেলফ কিংবা বুকশেলফের দৈর্ঘ্য, প্রস্থ, ড্রয়ার বা তাক আপনার পছন্দমতো কাস্টমাইজ করা সম্ভব। সাইজ জানিয়ে সরাসরি WhatsApp-এ যোগাযোগ করতে পারেন।',
+    },
+    {
+      q: 'ঢাকার ভেতরে ও বাইরে ডেলিভারি পেতে কতদিন সময় লাগে?',
+      a: 'ঢাকার ভেতরের ঠিকানায় সাধারণত ১ থেকে ২ কর্মদিবসে এবং ঢাকার বাইরে ৩ থেকে ৫ কর্মদিবসের মধ্যে কুরিয়ারের মাধ্যমে নিরাপদে বাবল র‍্যাপ প্যাকেজিংসহ পৌঁছে দেওয়া হয়।',
+    },
+  ];
 
   return (
-    <div className="space-y-12 sm:space-y-16">
+    <div className="space-y-16 sm:space-y-24">
       {/* 1. Hero Section */}
       <HeroSlider settings={settings} />
 
@@ -62,19 +72,18 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bn font-bold text-[#8B5A2B] uppercase tracking-wider">
-              <Layers className="w-3.5 h-3.5" />
-              <span>ফার্নিচার ক্যাটাগরি</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold font-bn text-[#1C1917] mt-1">
-              আপনার ঘরের প্রয়োজন অনুযায়ী বেছে নিন
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#2B1D14]">
+              প্রয়োজন অনুযায়ী ফার্নিচার বেছে নিন
             </h2>
+            <p className="text-stone-600 font-bn text-sm mt-1">
+              পড়ার টেবিল, বুকশেলফ কিংবা কাজের ডেস্ক—প্রতিটি মডেল কারখানা থেকে সরাসরি সরবরাহযোগ্য
+            </p>
           </div>
           <Link
             href="/products"
-            className="inline-flex items-center gap-1 text-sm font-bn font-semibold text-[#8B5A2B] hover:text-[#6D431F] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bn font-semibold text-[#8A5A3B] hover:text-[#6E442B] transition-colors shrink-0"
           >
-            <span>সকল ক্যাটাগরি দেখুন</span>
+            <span>সব ক্যাটাগরি</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -84,7 +93,7 @@ export default async function HomePage() {
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className="group p-4 bg-white rounded-2xl border border-stone-200/90 hover:border-amber-600/50 shadow-2xs hover:shadow-lg transition-all text-center flex flex-col items-center justify-between"
+              className="group p-4 bg-white rounded-2xl border border-[#E8E2D9] hover:border-[#8A5A3B]/40 shadow-2xs hover:shadow-md transition-all text-center flex flex-col items-center justify-between"
             >
               <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-stone-100 mb-3 border border-stone-100">
                 <Image
@@ -92,13 +101,13 @@ export default async function HomePage() {
                   alt={cat.name}
                   fill
                   sizes="100px"
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <h3 className="font-bn font-bold text-stone-900 text-sm group-hover:text-[#8B5A2B] transition-colors">
+              <h3 className="font-serif font-bold text-[#2B1D14] text-sm group-hover:text-[#8A5A3B] transition-colors">
                 {cat.name_bn || cat.name}
               </h3>
-              <span className="text-[11px] text-stone-400 font-sans mt-0.5">
+              <span className="text-[11px] text-stone-500 font-sans mt-0.5">
                 {cat.name}
               </span>
             </Link>
@@ -106,33 +115,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. Special Spotlight: Signature Reading Table (পড়ার টেবিল - ৳৩,৮০০) */}
+      {/* 5. Split Editorial: Signature Reading Table (পড়ার টেবিল - ৳৩,৮০০) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-[#F7F3EC] via-[#FAF6F0] to-[#EFE7DC] rounded-3xl overflow-hidden shadow-xl border-2 border-[#8B5A2B]/20 p-5 sm:p-8 lg:p-10 relative">
-          {/* Subtle Warm Decorative Glow */}
-          <div className="absolute top-0 right-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-10 w-80 h-80 bg-[#8B5A2B]/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+        <div className="bg-[#FAF8F5] rounded-3xl overflow-hidden shadow-xs border border-[#E8E2D9] p-6 sm:p-10 lg:p-12 relative">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7 space-y-4">
-              <span className="bg-[#8B5A2B] text-white text-xs font-bn font-bold px-3.5 py-1 rounded-full uppercase tracking-wider inline-block shadow-2xs">
-                হট ডিল • কারখানা স্পেশাল
+              <span className="bg-[#F4ECE1] text-[#8A5A3B] text-xs font-bn font-semibold px-3.5 py-1 rounded-full uppercase tracking-wider inline-block border border-[#E8E2D9]">
+                কারখানা সিগনেচার মডেল
               </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold font-bn leading-tight text-[#2E1E14]">
-                স্মার্ট বুকশেলফ সহ পড়ার টেবিল — মাত্র ৳৩,৮০০!
+
+              <h2 className="text-2xl sm:text-4xl font-bold font-serif leading-tight text-[#2B1D14]">
+                স্মার্ট বুকশেলফ সহ পড়ার টেবিল — মাত্র ৳3,800
               </h2>
               <p className="text-stone-700 font-bn text-sm sm:text-base leading-relaxed">
-                শিক্ষার্থী ও বইপ্রেমীদের জন্য আমাদের সর্বোচ্চ বিক্রিত মডেল। পর্যাপ্ত বই রাখার খোপ,
-                ল্যাপটপ স্পেস ও মসৃণ ওয়াটারপ্রুফ মেলামাইন কোটিং। সরাসরি কারখানা থেকে দ্রুততম সময়ে
-                হোম ডেলিভারি।
+                শিক্ষার্থী ও বইপ্রেমীদের জন্য আমাদের নিয়মিত তৈরি মডেল। পর্যাপ্ত বই রাখার খোপ,
+                ল্যাপটপ স্পেস ও মসৃণ ওয়াটারপ্রুফ মেলামাইন কোটিং। মিরপুর কারখানা থেকে সরাসরি
+                ক্যাশ অন ডেলিভারিতে হোম ডেলিভারি।
               </p>
 
               <div className="flex flex-wrap gap-2.5 sm:gap-4 pt-2">
-                <div className="bg-white/95 backdrop-blur-xs px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bn border border-stone-200 shadow-2xs">
-                  <span className="text-[#8B5A2B] font-bold block">বোর্ড সাইজ:</span>
-                  <span className="text-stone-800 font-medium">৩.৫ ফুট x ২ ফুট x ৪.৫ ফুট</span>
+                <div className="bg-white px-4 py-2.5 rounded-xl text-xs font-bn border border-[#E8E2D9] shadow-2xs">
+                  <span className="text-[#8A5A3B] font-bold block">পরিমাপ:</span>
+                  <span className="text-stone-800 font-medium font-sans">৩.৫ ফুট x ২ ফুট x ৪.৫ ফুট</span>
                 </div>
-                <div className="bg-white/95 backdrop-blur-xs px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bn border border-stone-200 shadow-2xs">
+                <div className="bg-white px-4 py-2.5 rounded-xl text-xs font-bn border border-[#E8E2D9] shadow-2xs">
                   <span className="text-emerald-700 font-bold block">ডেলিভারি:</span>
                   <span className="text-stone-800 font-medium">সারাদেশে ক্যাশ অন ডেলিভারি</span>
                 </div>
@@ -141,28 +147,25 @@ export default async function HomePage() {
               <div className="pt-3 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
                 <Link
                   href="/products/smart-ergonomic-reading-table"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-[#8B5A2B] hover:bg-[#6D431F] text-white px-7 py-3.5 rounded-full font-bn font-bold text-sm sm:text-base shadow-lg shadow-[#8B5A2B]/25 transition-all hover:scale-105"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-[#8A5A3B] hover:bg-[#6E442B] text-white px-7 py-3.5 rounded-xl font-bn font-semibold text-sm sm:text-base shadow-xs transition-colors"
                 >
                   বিস্তারিত দেখুন ও অর্ডার করুন
                 </Link>
-                <span className="text-stone-600 text-xs sm:text-sm font-bn font-medium">
+                <span className="text-stone-600 text-xs sm:text-sm font-bn">
                   বাটন ক্লিক করলেই ক্যাশ অন ডেলিভারি ফর্ম খুলবে
                 </span>
               </div>
             </div>
 
             <div className="lg:col-span-5 relative">
-              <div className="relative aspect-4/3 rounded-2xl overflow-hidden shadow-xl border-2 border-[#8B5A2B]/25">
+              <div className="relative aspect-4/3 rounded-2xl overflow-hidden shadow-md border border-[#E8E2D9]">
                 <Image
-                  src="https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80"
+                  src="/placeholders/products/smart-ergonomic-reading-table/01.jpg"
                   alt="Smart Reading Table"
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
                   className="object-cover"
                 />
-                <div className="absolute top-3 right-3 bg-rose-600 text-white font-bold text-xs px-3 py-1 rounded-full font-sans shadow-xs">
-                  ১৬% সেভ
-                </div>
               </div>
             </div>
           </div>
@@ -173,18 +176,17 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bn font-bold text-[#8B5A2B] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>আমাদের জনপ্রিয় ফার্নিচার</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold font-bn text-[#1C1917] mt-1">
-              রেডি স্টক ও ফ্যাক্টরি ফ্রেশ কালেকশন
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#2B1D14]">
+              ফার্নিচার কালেকশন
             </h2>
+            <p className="text-stone-600 font-bn text-sm mt-1">
+              সরাসরি মিরপুর কারখানা মূল্যে তৈরি ও ডেলিভারিযোগ্য
+            </p>
           </div>
 
           <Link
             href="/products"
-            className="inline-flex items-center gap-1.5 text-sm font-bn font-semibold text-[#8B5A2B] hover:text-[#6D431F]"
+            className="inline-flex items-center gap-1.5 text-sm font-bn font-semibold text-[#8A5A3B] hover:text-[#6E442B]"
           >
             <span>সবগুলো ফার্নিচার ({products.length}+)</span>
             <ArrowRight className="w-4 h-4" />
@@ -205,80 +207,168 @@ export default async function HomePage() {
       {/* 7. Inside Our Workshop Section */}
       <WorkshopShowcase workshopData={workshopData} facebookUrl={settings.facebook_url} />
 
-      {/* 8. Comparison: Why Buy from Factory Direct (Dream Home Decor) vs Traditional Retail */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <span className="text-xs font-bn font-bold text-[#8B5A2B] uppercase tracking-wider">
-            সরাসরি কারখানার সুবিধা
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold font-bn text-[#1C1917]">
-            শোরুম বনাম ড্রিম হোম ডেকোর কারখানা
-          </h2>
-          <p className="text-stone-500 text-sm font-bn">
-            জেনে নিন কেন মধ্যস্বত্বভোগী ছাড়া আমাদের থেকে ফার্নিচার কেনা লাভজনক
-          </p>
-        </div>
+      {/* 8. Factual Craftsmanship & Manufacturing Standards (Replaced Comparison Table) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-3xl border border-[#E8E2D9] p-8 sm:p-12 shadow-xs">
+          <div className="max-w-2xl mb-10">
+            <span className="text-xs font-bn font-semibold text-[#8A5A3B] uppercase tracking-wider block mb-1">
+              নির্মাণ মান ও উপকরণ
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#2B1D14]">
+              আমাদের ফার্নিচার কীভাবে দীর্ঘস্থায়ী হয়?
+            </h2>
+            <p className="text-stone-600 text-sm font-bn mt-2 leading-relaxed">
+              সরাসরি কারখানা থেকে ফার্নিচার ক্রয়ের ক্ষেত্রে উপকরণের স্বচ্ছতা সবচেয়ে গুরুত্বপূর্ণ। প্রতিটি ফার্নিচারে যা নিশ্চিত করা হয়:
+            </p>
+          </div>
 
-        <div className="bg-white rounded-3xl border border-stone-200/90 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-200">
-            {/* Dream Home Decor Column */}
-            <div className="p-6 sm:p-8 space-y-4 bg-emerald-50/30">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  ✓
-                </span>
-                <h3 className="font-bn font-bold text-lg text-emerald-900">
-                  ড্রিম হোম ডেকোর (সরাসরি কারখানা)
-                </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Pillar 1 */}
+            <div className="space-y-3 p-6 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9]">
+              <div className="w-10 h-10 rounded-xl bg-[#F4ECE1] text-[#8A5A3B] flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <ul className="space-y-3 text-sm font-bn text-stone-700">
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>কোনো শোরুম ভাড়া বা রিটেলার কমিশন নেই (২৫-৪০% সাশ্রয়)</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>বোর্ড কাটিং থেকে কালার পর্যন্ত সরাসরি কাস্টমাইজেশনের সুযোগ</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>ডেলিভারি ম্যানের উপস্থিতিতে পণ্য চেক করে নেওয়ার শতভাগ নিশ্চয়তা</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>সরাসরি কারিগরের সাথে কথা বলে সাইজ চূড়ান্ত করার সুবিধা</span>
-                </li>
-              </ul>
+              <h3 className="font-serif font-bold text-lg text-[#2B1D14]">
+                ১৬ মিমি ডেনসিটি মেলামাইন বোর্ড
+              </h3>
+              <p className="font-bn text-stone-600 text-xs sm:text-sm leading-relaxed">
+                উচ্চ ঘনত্বের বোর্ড ব্যবহার করা হয়, যা সাধারণ ব্যবহারের চাপ ও ওজন সহজে সহ্য করতে পারে। ওপরের মসৃণ কোটিং স্ক্র্যাচ প্রতিরোধী।
+              </p>
             </div>
 
-            {/* Traditional Retail Showroom Column */}
-            <div className="p-6 sm:p-8 space-y-4 bg-rose-50/30">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
-                  ✕
-                </span>
-                <h3 className="font-bn font-bold text-lg text-rose-900">
-                  সাধারণ মার্কেট বা শোরুম
-                </h3>
+            {/* Pillar 2 */}
+            <div className="space-y-3 p-6 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9]">
+              <div className="w-10 h-10 rounded-xl bg-[#F4ECE1] text-[#8A5A3B] flex items-center justify-center">
+                <Hammer className="w-5 h-5" />
               </div>
-              <ul className="space-y-3 text-sm font-bn text-stone-600">
-                <li className="flex items-center gap-2.5">
-                  <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>শোরুমের উচ্চ ডেকোরেশন ও ভাড়া বাবদ অতিরিক্ত চড়া দাম</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>ভেতরের বোর্ডের মান সরাসরি যাচাই করার সুযোগ নেই</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>কাস্টম সাইজ তৈরি করতে গেলে দ্বিগুণ চার্জ দাবি করা হয়</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>বিক্রির পর সার্ভিসিং নিয়ে দীর্ঘসূত্রিতা ও গড়িমসি</span>
-                </li>
-              </ul>
+              <h3 className="font-serif font-bold text-lg text-[#2B1D14]">
+                ১ মিমি পিভিসি এজ সিলিং
+              </h3>
+              <p className="font-bn text-stone-600 text-xs sm:text-sm leading-relaxed">
+                কাটিং প্রান্তগুলোতে মেশিনের সাহায্যে পিভিসি সিলিং দেওয়া হয়। ফলে অসাবধানতাবশত পানি বা তরল পড়লেও ভেতরের বোর্ডে সহজে পানি জমে না।
+              </p>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="space-y-3 p-6 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9]">
+              <div className="w-10 h-10 rounded-xl bg-[#F4ECE1] text-[#8A5A3B] flex items-center justify-center">
+                <Truck className="w-5 h-5" />
+              </div>
+              <h3 className="font-serif font-bold text-lg text-[#2B1D14]">
+                সরাসরি কারখানা ডেলিভারি
+              </h3>
+              <p className="font-bn text-stone-600 text-xs sm:text-sm leading-relaxed">
+                মিরপুর-১০ কারখানা থেকে বাবল র‍্যাপ দিয়ে সুরক্ষিতভাবে আপনার ঠিকানায় পাঠানো হয়। ডেলিভারিম্যানের সামনে খুলে চেক করার পর মূল্য পরিশোধের সুযোগ।
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. FAQ Accordion Section */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-xl mx-auto mb-10 space-y-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bn font-semibold text-[#8A5A3B]">
+            <HelpCircle className="w-4 h-4" />
+            <span>সচরাচর জিজ্ঞাসা</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#2B1D14]">
+            অর্ডার করার আগে জেনে নিন
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <details
+              key={idx}
+              className="group bg-white rounded-2xl border border-[#E8E2D9] p-5 shadow-2xs open:border-[#8A5A3B]/40 transition-colors"
+            >
+              <summary className="flex items-center justify-between cursor-pointer font-serif font-bold text-[#2B1D14] text-base list-none select-none">
+                <span>{faq.q}</span>
+                <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform duration-200 shrink-0 ml-4" />
+              </summary>
+              <p className="mt-3 text-stone-600 font-bn text-sm leading-relaxed border-t border-[#E8E2D9]/60 pt-3">
+                {faq.a}
+              </p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* 10. Showroom & Mirpur Factory Location Block */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="bg-white rounded-3xl border border-[#E8E2D9] overflow-hidden shadow-xs grid grid-cols-1 lg:grid-cols-12">
+          {/* Details Column */}
+          <div className="lg:col-span-7 p-8 sm:p-12 space-y-6 flex flex-col justify-between">
+            <div className="space-y-3">
+              <span className="text-xs font-bn font-semibold text-[#8A5A3B] uppercase tracking-wider block">
+                সরাসরি কারখানা পরিদর্শন
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#2B1D14]">
+                আমাদের ওয়ার্কশপ ও শোরুমে স্বাগতম
+              </h2>
+              <p className="text-stone-600 font-bn text-sm leading-relaxed">
+                মিরপুর-১০ এ অবস্থিত আমাদের নিজস্ব কারখানায় এসে স্বচক্ষে বোর্ডের মান, ফিনিশিং ও কাটিং দেখতে পারেন। সরাসরি কথা বলে দিতে পারেন আপনার পছন্দের কাস্টম অর্ডারের মাপ।
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bn">
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9] space-y-1.5">
+                <div className="flex items-center gap-2 text-[#8A5A3B] font-bold">
+                  <MapPin className="w-4 h-4" />
+                  <span>কারখানা ও শোরুম ঠিকানা</span>
+                </div>
+                <p className="text-stone-700 leading-relaxed font-sans">
+                  {settings.address || 'সেকশন ১০, ব্লক সি, রোড ২, মিরপুর, ঢাকা ১২১৬ (মিরপুর ১০ গোলচত্বর সংলগ্ন)'}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E2D9] space-y-1.5">
+                <div className="flex items-center gap-2 text-[#8A5A3B] font-bold">
+                  <Clock className="w-4 h-4" />
+                  <span>পরিদর্শনের সময়সূচি</span>
+                </div>
+                <p className="text-stone-700 leading-relaxed font-sans">
+                  প্রতিদিন সকাল ১০:০০ টা — রাত ৯:০০ টা<br />
+                  (শুক্রবারসহ সপ্তাহের ৭ দিনই খোলা)
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <a
+                href="https://maps.google.com/?q=Mirpur-10+Dhaka+Bangladesh"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#8A5A3B] hover:bg-[#6E442B] text-white px-5 py-2.5 rounded-xl font-bn font-semibold text-xs sm:text-sm shadow-xs transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                <span>গুগল ম্যাপে লোকেশন দেখুন</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+              </a>
+
+              <a
+                href={`tel:${settings.phone}`}
+                className="inline-flex items-center gap-2 bg-white hover:bg-[#FAF8F5] text-[#2B1D14] border border-[#E8E2D9] px-4 py-2.5 rounded-xl font-bn font-semibold text-xs sm:text-sm transition-colors"
+              >
+                <Phone className="w-4 h-4 text-[#8A5A3B]" />
+                <span className="font-sans">হটলাইন: {settings.phone}</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Showroom Photo Column */}
+          <div className="lg:col-span-5 relative min-h-[300px] lg:min-h-full bg-stone-100">
+            <Image
+              src="/placeholders/site/showroom.jpg"
+              alt="Dream Home Decor Showroom & Workshop Mirpur"
+              fill
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden" />
+            <div className="absolute bottom-4 left-4 text-white text-xs font-bn font-semibold lg:hidden">
+              মিরপুর-১০ ডিসপ্লে ও কারখানা কর্নার
             </div>
           </div>
         </div>

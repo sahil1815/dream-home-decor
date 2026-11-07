@@ -35,27 +35,27 @@ interface WorkshopManagerProps {
 const SAMPLE_WORKSHOP_IMAGES = [
   {
     name: 'বোর্ড কাটিং মেশিন',
-    url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80',
+    url: '/placeholders/site/workshop_1.jpg',
   },
   {
     name: 'পিভিসি এজ ব্যান্ডিং',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80',
+    url: '/placeholders/site/workshop_2.jpg',
   },
   {
     name: 'দক্ষ কারিগর ফিটিং',
-    url: 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=600&q=80',
+    url: '/placeholders/site/workshop_3.jpg',
   },
   {
     name: 'বাবল র‍্যাপ প্যাকেজিং',
-    url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
+    url: '/placeholders/site/workshop_4.jpg',
   },
   {
     name: 'কাঠ ও বোর্ড ওয়ার্কশপ',
-    url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
+    url: '/placeholders/site/about_workshop.jpg',
   },
   {
-    name: 'ফিনিশড ফার্নিচার পরিদর্শন',
-    url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80',
+    name: 'ফিনিশড ফার্নিচার শোরুম',
+    url: '/placeholders/site/showroom.jpg',
   },
 ];
 

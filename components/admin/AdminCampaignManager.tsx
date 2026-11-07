@@ -9,8 +9,6 @@ import {
   ExternalLink,
   CheckCircle2,
   Loader2,
-  Image as ImageIcon,
-  Save,
 } from 'lucide-react';
 import { CampaignGiveaway } from '@/types/database';
 import { getOptimizedImageUrl } from '@/lib/imagekit';

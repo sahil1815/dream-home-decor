@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, ShoppingBag, Trash2, ArrowRight, Sparkles } from 'lucide-react';
+import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '@/context/wishlist-context';
 import { useCart } from '@/context/cart-context';
 import { formatBDT, getDiscountPercentage } from '@/lib/utils';
@@ -73,7 +73,7 @@ export default function SavedPage() {
 
             const primaryImage =
               product.images?.[0] ||
-              'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80';
+              '/placeholders/products/smart-ergonomic-reading-table/01.jpg';
 
             return (
               <div

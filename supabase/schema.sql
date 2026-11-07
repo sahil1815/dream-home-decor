@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
   site_name TEXT NOT NULL DEFAULT 'Dream Home Decor',
   site_name_bn TEXT NOT NULL DEFAULT 'ড্রিম হোম ডেকোর',
   logo_url TEXT DEFAULT 'https://ik.imagekit.io/dreamhomedecor/brand/logo.png',
-  cover_banner_url TEXT DEFAULT 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=85',
+  cover_banner_url TEXT DEFAULT '/placeholders/site/hero.jpg',
   phone TEXT NOT NULL DEFAULT '01700-000000',
   whatsapp_number TEXT NOT NULL DEFAULT '8801700000000',
   facebook_url TEXT NOT NULL DEFAULT 'https://www.facebook.com/profile.php?id=61584955311887',
@@ -186,10 +186,9 @@ CREATE POLICY "Public can insert orders"
   ON orders FOR INSERT
   WITH CHECK (true);
 
--- Public can view their order status by order_number or phone lookup
-CREATE POLICY "Public can lookup their order"
-  ON orders FOR SELECT
-  USING (true);
+-- NOTE: Public SELECT on orders is REVOKED to protect customer PII (phone, address, orders).
+-- Order tracking lookups are strictly routed through secure Server Actions using SUPABASE_SERVICE_ROLE_KEY
+-- which require both (order_number, normalized_phone) and return masked PII.
 
 -- Admin can view, update, delete all orders
 CREATE POLICY "Admin can manage orders"
@@ -204,10 +203,7 @@ CREATE POLICY "Public can insert order items"
   ON order_items FOR INSERT
   WITH CHECK (true);
 
--- Public can view order items (for tracking receipt)
-CREATE POLICY "Public can view order items"
-  ON order_items FOR SELECT
-  USING (true);
+-- NOTE: Public SELECT on order items is REVOKED. Lookups are handled via secure Server Actions.
 
 -- Admin can manage order items
 CREATE POLICY "Admin can manage order items"
@@ -265,7 +261,7 @@ INSERT INTO site_settings (
   'Dream Home Decor',
   'ড্রিম হোম ডেকোর',
   'https://ik.imagekit.io/dreamhomedecor/brand/logo.png',
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1600&q=85',
+  '/placeholders/site/hero.jpg',
   '01712-345678',
   '8801712345678',
   'https://www.facebook.com/profile.php?id=61584955311887',
@@ -279,12 +275,12 @@ INSERT INTO site_settings (
 
 -- Seed Categories
 INSERT INTO categories (id, name, name_bn, slug, image_url, display_order, is_active) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'Reading Tables', 'পড়ার টেবিল', 'reading-tables', 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80', 1, true),
-  ('a0000000-0000-0000-0000-000000000002', 'Computer Tables', 'কম্পিউটার টেবিল', 'computer-tables', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80', 2, true),
-  ('a0000000-0000-0000-0000-000000000003', 'Bookshelves', 'বইয়ের তাক ও বুকশেলফ', 'bookshelves', 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80', 3, true),
-  ('a0000000-0000-0000-0000-000000000004', 'Wall Shelves & Racks', 'ওয়াল র‍্যাক ও ডেকোর', 'wall-shelves', 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80', 4, true),
-  ('a0000000-0000-0000-0000-000000000005', 'Dressing Tables', 'ড্রেসিং টেবিল', 'dressing-tables', 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80', 5, true),
-  ('a0000000-0000-0000-0000-000000000006', 'Custom Carpentry', 'কাস্টম অর্ডার', 'custom-furniture', 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80', 6, true)
+  ('a0000000-0000-0000-0000-000000000001', 'Reading Tables', 'পড়ার টেবিল', 'reading-tables', '/placeholders/products/smart-ergonomic-reading-table/01.jpg', 1, true),
+  ('a0000000-0000-0000-0000-000000000002', 'Computer Tables', 'কম্পিউটার টেবিল', 'computer-tables', '/placeholders/products/executive-workstation-computer-desk/01.jpg', 2, true),
+  ('a0000000-0000-0000-0000-000000000003', 'Bookshelves', 'বইয়ের তাক ও বুকশেলফ', 'bookshelves', '/placeholders/products/modern-multi-tier-bookshelf/01.jpg', 3, true),
+  ('a0000000-0000-0000-0000-000000000004', 'Wall Shelves & Racks', 'ওয়াল র‍্যাক ও ডেকোর', 'wall-shelves', '/placeholders/products/floating-geometric-wall-shelf-set/01.jpg', 4, true),
+  ('a0000000-0000-0000-0000-000000000005', 'Dressing Tables', 'ড্রেসিং টেবিল', 'dressing-tables', '/placeholders/products/luxurious-mirror-dressing-table/01.jpg', 5, true),
+  ('a0000000-0000-0000-0000-000000000006', 'Custom Carpentry', 'কাস্টম অর্ডার', 'custom-furniture', '/placeholders/site/workshop_1.jpg', 6, true)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Seed Core Products
@@ -315,8 +311,8 @@ INSERT INTO products (
     3800,
     'a0000000-0000-0000-0000-000000000001',
     ARRAY[
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/smart-ergonomic-reading-table/01.jpg',
+      '/placeholders/products/smart-ergonomic-reading-table/02.jpg'
     ],
     '3.5ft (L) x 2ft (W) x 4.5ft (H)',
     'Premium Melamine Board with 1mm PVC Edge Banding',
@@ -335,8 +331,8 @@ INSERT INTO products (
     3200,
     'a0000000-0000-0000-0000-000000000001',
     ARRAY[
-      'https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/compact-student-study-table/01.jpg',
+      '/placeholders/products/compact-student-study-table/02.jpg'
     ],
     '3ft (L) x 2ft (W) x 2.5ft (H)',
     'Melamine Board (16mm thickness) with edge protection',
@@ -355,8 +351,8 @@ INSERT INTO products (
     5200,
     'a0000000-0000-0000-0000-000000000002',
     ARRAY[
-      'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/executive-workstation-computer-desk/01.jpg',
+      '/placeholders/products/executive-workstation-computer-desk/02.jpg'
     ],
     '4ft (L) x 2.2ft (W) x 2.5ft (H)',
     'Malaysian Processed Wood & Heavy Duty Hardware',
@@ -375,8 +371,8 @@ INSERT INTO products (
     4400,
     'a0000000-0000-0000-0000-000000000003',
     ARRAY[
-      'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/modern-multi-tier-bookshelf/01.jpg',
+      '/placeholders/products/modern-multi-tier-bookshelf/02.jpg'
     ],
     '3ft (L) x 1ft (D) x 5ft (H)',
     'High Density Melamine Board (Scratch resistant)',
@@ -395,8 +391,8 @@ INSERT INTO products (
     1350,
     'a0000000-0000-0000-0000-000000000004',
     ARRAY[
-      'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/floating-geometric-wall-shelf-set/01.jpg',
+      '/placeholders/products/floating-geometric-wall-shelf-set/02.jpg'
     ],
     'Large: 14"x14", Medium: 12"x12", Small: 10"x10"',
     'Water-Resistant Melamine Finish',
@@ -415,8 +411,8 @@ INSERT INTO products (
     6500,
     'a0000000-0000-0000-0000-000000000005',
     ARRAY[
-      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+      '/placeholders/products/luxurious-mirror-dressing-table/01.jpg',
+      '/placeholders/products/luxurious-mirror-dressing-table/02.jpg'
     ],
     '2.5ft (L) x 1.5ft (W) x 6ft (H)',
     'Melamine Board with 5mm Belgian Mirror Glass',
@@ -440,8 +436,315 @@ INSERT INTO campaigns_giveaways (
   'c0000000-0000-0000-0000-000000000001',
   'Facebook Mega Giveaway: ফ্রি রিডিং টেবিল লটারি অফার!',
   'আমাদের ফেসবুক পেজে লাইক, শেয়ার ও কমেন্ট করে জিতে নিন আকর্ষণীয় পড়ার টেবিল সম্পূর্ণ ফ্রিতে! বিস্তারিত জানতে ফেসবুক পোস্টটি দেখুন।',
-  'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1200&q=80',
+  '/placeholders/site/hero.jpg',
   timezone('utc'::text, now()) + INTERVAL '15 days',
   true,
   'https://www.facebook.com/profile.php?id=61584955311887'
 ) ON CONFLICT (id) DO NOTHING;
+
+
+-- ==============================================================================
+-- PHASE 2 EXTENSIONS: ORDER FLOW, AUDIT LOG, CUSTOMERS & STORE METADATA
+-- ==============================================================================
+
+-- Sequential Order Number Generator
+CREATE SEQUENCE IF NOT EXISTS dhd_order_number_seq START WITH 1001;
+
+CREATE OR REPLACE FUNCTION generate_dhd_order_number()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.order_number IS NULL OR NEW.order_number = '' THEN
+    NEW.order_number := 'DHD-' || nextval('dhd_order_number_seq')::TEXT;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_set_order_number ON orders;
+CREATE TRIGGER trigger_set_order_number
+  BEFORE INSERT ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION generate_dhd_order_number();
+
+-- Order Status History Table
+CREATE TABLE IF NOT EXISTS order_status_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
+  status TEXT NOT NULL,
+  note TEXT,
+  changed_by TEXT DEFAULT 'system',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_status_history_order_id ON order_status_history(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_status_history_created_at ON order_status_history(created_at DESC);
+
+-- Trigger: Automatically record status changes in order_status_history
+CREATE OR REPLACE FUNCTION log_order_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') OR (OLD.status IS DISTINCT FROM NEW.status) THEN
+    INSERT INTO order_status_history (order_id, status, note, changed_by, created_at)
+    VALUES (NEW.id, NEW.status, 'স্ট্যাটাস পরিবর্তন: ' || NEW.status, 'system', NOW());
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_log_order_status_change ON orders;
+CREATE TRIGGER trigger_log_order_status_change
+  AFTER INSERT OR UPDATE OF status ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION log_order_status_change();
+
+-- Internal Order Notes Table (Staff Only)
+CREATE TABLE IF NOT EXISTS order_notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
+  staff_id TEXT NOT NULL,
+  staff_name TEXT NOT NULL,
+  note TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_notes_order_id ON order_notes(order_id);
+
+-- Customers Table
+CREATE TABLE IF NOT EXISTS customers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  phone TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  address TEXT,
+  delivery_zone TEXT,
+  total_orders INTEGER NOT NULL DEFAULT 1,
+  total_spent NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+  is_blocked BOOLEAN NOT NULL DEFAULT FALSE,
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+
+-- Trigger: Upsert into customers on new order
+CREATE OR REPLACE FUNCTION sync_customer_on_order()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO customers (phone, name, address, delivery_zone, total_orders, total_spent, updated_at)
+  VALUES (
+    NEW.customer_phone,
+    NEW.customer_name,
+    NEW.customer_address,
+    NEW.delivery_zone,
+    1,
+    NEW.total_amount,
+    NOW()
+  )
+  ON CONFLICT (phone) DO UPDATE SET
+    name = EXCLUDED.name,
+    address = COALESCE(EXCLUDED.address, customers.address),
+    delivery_zone = COALESCE(EXCLUDED.delivery_zone, customers.delivery_zone),
+    total_orders = customers.total_orders + 1,
+    total_spent = customers.total_spent + EXCLUDED.total_spent,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_sync_customer_on_order ON orders;
+CREATE TRIGGER trigger_sync_customer_on_order
+  AFTER INSERT ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION sync_customer_on_order();
+
+-- Product Images Table (Supports Drive Import & Local Placeholders)
+CREATE TABLE IF NOT EXISTS product_images (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  url TEXT NOT NULL,
+  storage_key TEXT,
+  alt TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  width INTEGER,
+  height INTEGER,
+  blur_data_url TEXT,
+  source TEXT NOT NULL DEFAULT 'upload',
+  is_placeholder BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
+
+-- Product Variants Table
+CREATE TABLE IF NOT EXISTS product_variants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  variant_type TEXT NOT NULL DEFAULT 'color',
+  name TEXT NOT NULL,
+  sku TEXT,
+  price_adjustment NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+  stock_quantity INTEGER NOT NULL DEFAULT 10,
+  image_url TEXT,
+  is_available BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_variants_product_id ON product_variants(product_id);
+
+-- Delivery Zones Configuration
+CREATE TABLE IF NOT EXISTS delivery_zones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  name_bn TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  charge NUMERIC(10, 2) NOT NULL DEFAULT 120.00,
+  estimated_days TEXT NOT NULL DEFAULT '২-৩ দিন',
+  free_threshold NUMERIC(10, 2),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Site Media Slots
+CREATE TABLE IF NOT EXISTS site_media (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slot TEXT UNIQUE NOT NULL,
+  url TEXT NOT NULL,
+  alt TEXT,
+  source TEXT NOT NULL DEFAULT 'upload',
+  is_placeholder BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Site Content Editor
+CREATE TABLE IF NOT EXISTS site_content (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  content JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_by TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Admin Users Table
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'staff',
+  password_hash TEXT NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  last_login_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Immutable Audit Log
+CREATE TABLE IF NOT EXISTS audit_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_email TEXT NOT NULL,
+  admin_role TEXT NOT NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  details JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at DESC);
+
+-- Custom Furniture Order Requests Inbox
+CREATE TABLE IF NOT EXISTS custom_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  dimensions TEXT,
+  color TEXT,
+  budget NUMERIC(10, 2),
+  description TEXT,
+  reference_images TEXT[],
+  status TEXT NOT NULL DEFAULT 'new',
+  quoted_price NUMERIC(10, 2),
+  staff_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Customer Reviews Table
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  customer_name TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT NOT NULL,
+  customer_photos TEXT[],
+  is_approved BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Discount Coupons Table
+CREATE TABLE IF NOT EXISTS coupons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  discount_type TEXT NOT NULL DEFAULT 'percent',
+  discount_value NUMERIC(10, 2) NOT NULL,
+  min_order_amount NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+  usage_limit INTEGER,
+  usage_count INTEGER NOT NULL DEFAULT 0,
+  expires_at TIMESTAMPTZ,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Abandoned Checkouts Table
+CREATE TABLE IF NOT EXISTS abandoned_checkouts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_name TEXT,
+  customer_phone TEXT NOT NULL,
+  cart_items JSONB NOT NULL,
+  subtotal NUMERIC(10, 2) NOT NULL,
+  is_recovered BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE order_status_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE delivery_zones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_media ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE custom_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE abandoned_checkouts ENABLE ROW LEVEL SECURITY;
+
+-- Public Select Policies
+CREATE POLICY "Public read active product images" ON product_images FOR SELECT USING (true);
+CREATE POLICY "Public read active variants" ON product_variants FOR SELECT USING (is_available = true);
+CREATE POLICY "Public read delivery zones" ON delivery_zones FOR SELECT USING (is_active = true);
+CREATE POLICY "Public read site media" ON site_media FOR SELECT USING (true);
+CREATE POLICY "Public read site content" ON site_content FOR SELECT USING (true);
+CREATE POLICY "Public read approved reviews" ON reviews FOR SELECT USING (is_approved = true);
+
+-- Public Insert Policies
+CREATE POLICY "Public insert custom requests" ON custom_requests FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public insert abandoned checkouts" ON abandoned_checkouts FOR INSERT WITH CHECK (true);
+
+-- Admin All Policies
+CREATE POLICY "Admin manage status history" ON order_status_history FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage order notes" ON order_notes FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage customers" ON customers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage product images" ON product_images FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage product variants" ON product_variants FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage delivery zones" ON delivery_zones FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage site media" ON site_media FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage site content" ON site_content FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage admin users" ON admin_users FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage audit log" ON audit_log FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage custom requests" ON custom_requests FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage reviews" ON reviews FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage coupons" ON coupons FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manage abandoned checkouts" ON abandoned_checkouts FOR ALL TO authenticated USING (true) WITH CHECK (true);

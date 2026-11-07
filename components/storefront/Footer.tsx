@@ -1,14 +1,15 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   Phone,
   MessageCircle,
   MapPin,
   ShieldCheck,
   Truck,
-  RotateCcw,
-  Clock,
   Heart,
 } from 'lucide-react';
 import { FacebookIcon } from '@/components/icons/FacebookIcon';
@@ -20,6 +21,12 @@ interface FooterProps {
 }
 
 export function Footer({ settings }: FooterProps) {
+  const pathname = usePathname();
+
+  // Never render storefront footer on administrative pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   return (
     <footer className="bg-[#2B1B12] text-[#F5EFE6] pt-14 pb-24 lg:pb-8 border-t border-[#3E281C]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -143,19 +150,31 @@ export function Footer({ settings }: FooterProps) {
               গ্রাহক সেবা ও পলিসি
             </h4>
             <ul className="space-y-2.5 text-sm font-bn text-stone-300">
-              <li className="flex items-center gap-2 text-stone-300">
-                <Truck className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>সারাদেশে হোম ডেলিভারি</span>
+              <li>
+                <Link href="/delivery-and-returns" className="hover:text-amber-300 transition-colors flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>ডেলিভারি ও রিটার্ন পলিসি</span>
+                </Link>
               </li>
-              <li className="flex items-center gap-2 text-stone-300">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>ডেলিভারি ম্যানের সামনে দেখে নেওয়ার সুযোগ</span>
+              <li>
+                <Link href="/faq" className="hover:text-amber-300 transition-colors flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>সচরাচর জিজ্ঞাসা (FAQ)</span>
+                </Link>
               </li>
-              <li className="flex items-center gap-2 text-stone-300">
-                <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>২৪ ঘণ্টা অনলাইন অর্ডার সুবিধা</span>
+              <li>
+                <Link href="/custom-furniture" className="hover:text-amber-300 transition-colors flex items-center gap-2">
+                  <span className="text-amber-500 font-bold">›</span>
+                  <span>কাস্টম ফার্নিচার রিকোয়েস্ট</span>
+                </Link>
               </li>
-              <li className="pt-2">
+              <li>
+                <Link href="/about" className="hover:text-amber-300 transition-colors flex items-center gap-2">
+                  <span className="text-amber-500 font-bold">›</span>
+                  <span>আমাদের কারখানা ও গল্প</span>
+                </Link>
+              </li>
+              <li className="pt-1">
                 <Link
                   href="/track-order"
                   className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold text-sm font-bn"
@@ -204,9 +223,13 @@ export function Footer({ settings }: FooterProps) {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-stone-400 font-bn text-center sm:text-left">
           <p>© {new Date().getFullYear()} {settings.site_name}. সর্বস্বত্ব সংরক্ষিত।</p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4">
-            <Link href="/admin" className="hover:text-amber-300 transition-colors">
-              অ্যাডমিন পোর্টাল
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            <Link href="/privacy" className="hover:text-stone-200 transition-colors">
+              গোপনীয়তা নীতিমালা
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-stone-200 transition-colors">
+              শর্তাবলি
             </Link>
             <span>•</span>
             <span className="flex items-center gap-1">

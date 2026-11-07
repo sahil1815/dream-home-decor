@@ -10,8 +10,6 @@ import {
   ArrowDown,
   Image as ImageIcon,
   AlertCircle,
-  Check,
-  ExternalLink,
 } from 'lucide-react';
 import { getOptimizedImageUrl, isImageKitUrl } from '@/lib/imagekit';
 
@@ -121,7 +119,7 @@ export function ImageKitUrlManager({ images, onChange }: ImageKitUrlManagerProps
           type="button"
           onClick={() =>
             addSampleImage(
-              'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80'
+              '/placeholders/products/smart-ergonomic-reading-table/01.jpg'
             )
           }
           className="text-[10px] font-bn text-[#8B5A2B] hover:underline bg-white px-2 py-0.5 rounded border border-stone-200"
@@ -132,7 +130,7 @@ export function ImageKitUrlManager({ images, onChange }: ImageKitUrlManagerProps
           type="button"
           onClick={() =>
             addSampleImage(
-              'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80'
+              '/placeholders/products/executive-workstation-computer-desk/01.jpg'
             )
           }
           className="text-[10px] font-bn text-[#8B5A2B] hover:underline bg-white px-2 py-0.5 rounded border border-stone-200"
@@ -143,7 +141,7 @@ export function ImageKitUrlManager({ images, onChange }: ImageKitUrlManagerProps
           type="button"
           onClick={() =>
             addSampleImage(
-              'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80'
+              '/placeholders/products/modern-multi-tier-bookshelf/01.jpg'
             )
           }
           className="text-[10px] font-bn text-[#8B5A2B] hover:underline bg-white px-2 py-0.5 rounded border border-stone-200"
