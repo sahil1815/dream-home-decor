@@ -96,7 +96,7 @@ export async function notifyOwnerNewOrder(
     )
     .join('\n');
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dream-home-decor.vercel.app';
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://dream-home-decor.vercel.app';
   const adminOrderUrl = `${siteUrl}/admin/orders`;
 
   // 1. Telegram Message (HTML formatting)

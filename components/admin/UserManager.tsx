@@ -50,7 +50,7 @@ export function UserManager({ currentSession, configuredUsers }: UserManagerProp
       role: 'owner',
       titleBn: 'কারখানা মালিক (Owner)',
       username: configuredUsers?.ownerUsername || 'admin',
-      email: configuredUsers?.ownerEmail || process.env.NEXT_PUBLIC_ADMIN_OWNER_EMAIL || 'owner@dreamhomedecor.com',
+      email: configuredUsers?.ownerEmail || 'owner@dreamhomedecor.com',
       badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
       description: 'সর্বোচ্চ প্রশাসনিক ক্ষমতা: ব্র্যান্ড কনফিগারেশন, ইউজার ও অডিট লগ, আর্থিক ডেটা এবং ডাটাবেজ সিকিউরিটি।',
       permissions: [
@@ -65,7 +65,7 @@ export function UserManager({ currentSession, configuredUsers }: UserManagerProp
       role: 'manager',
       titleBn: 'স্টোর ম্যানেজার (Manager)',
       username: configuredUsers?.managerUsername || 'manager',
-      email: configuredUsers?.managerEmail || process.env.NEXT_PUBLIC_ADMIN_MANAGER_EMAIL || 'manager@dreamhomedecor.com',
+      email: configuredUsers?.managerEmail || 'manager@dreamhomedecor.com',
       badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
       description: 'দৈনন্দিন বাণিজ্যিক অপারেশন: পণ্য তালিকা, মূল্য, ডিসকাউন্ট, ডেলিভারি চার্জ এবং কাস্টমার নিয়ন্ত্রণ।',
       permissions: [
@@ -80,7 +80,7 @@ export function UserManager({ currentSession, configuredUsers }: UserManagerProp
       role: 'staff',
       titleBn: 'অর্ডার স্টাফ (Staff)',
       username: configuredUsers?.staffUsername || 'staff',
-      email: configuredUsers?.staffEmail || process.env.NEXT_PUBLIC_ADMIN_STAFF_EMAIL || 'staff@dreamhomedecor.com',
+      email: configuredUsers?.staffEmail || 'staff@dreamhomedecor.com',
       badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
       description: 'অর্ডার প্রসেসিং ও কাস্টমার রিলেশনস: ফোন কল, কুরিয়ার স্ট্যাটাস আপডেট এবং অভ্যন্তরীণ নোট লেখা।',
       permissions: [

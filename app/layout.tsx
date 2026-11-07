@@ -42,7 +42,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://dream-home-decor.vercel.app'),
+  metadataBase: new URL(process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://dream-home-decor.vercel.app'),
   title: {
     default: 'Dream Home Decor | নিজস্ব কারখানায় তৈরি আধুনিক ফার্নিচার',
     template: '%s | Dream Home Decor',
