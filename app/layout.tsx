@@ -76,6 +76,17 @@ export const metadata: Metadata = {
       'মিরপুর-১০ নিজস্ব কারখানায় তৈরি পড়ার টেবিল ও স্টোরেজ ফার্নিচার। সরাসরি ফ্যাক্টরি মূল্যে ক্যাশ অন ডেলিভারি।',
     images: ['/placeholders/site/hero.jpg'],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/brand-images/official_brand_logo.jpg', type: 'image/jpeg' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   robots: {
     index: true,
     follow: true,
