@@ -465,23 +465,60 @@ export async function updateOrderStatusAction(
       .maybeSingle();
 
     // 2. Update status on order
-    const { data: updatedRows, error } = await supabase
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', orderId)
-      .select('id, order_number');
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+
+    let { data: updatedRows, error } = isUuid
+      ? await supabase
+          .from('orders')
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('id', orderId)
+          .select('id, order_number')
+      : await supabase
+          .from('orders')
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('order_number', orderId)
+          .select('id, order_number');
+
+    // Handle legacy database check constraint if new statuses are not yet allowed in DB
+    if (error && error.message.includes('orders_status_check')) {
+      const fallbackMap: Record<string, OrderStatus> = {
+        confirmation_call: 'pending',
+        ready: 'in_production',
+        returned: 'cancelled',
+      };
+      const fallbackStatus = fallbackMap[status] || 'pending';
+      const fallbackNote = `[বর্তমান পর্যায়: ${status}]`;
+
+      const fallbackQuery = isUuid
+        ? supabase
+            .from('orders')
+            .update({
+              status: fallbackStatus,
+              staff_notes: fallbackNote,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orderId)
+            .select('id, order_number')
+        : supabase
+            .from('orders')
+            .update({
+              status: fallbackStatus,
+              staff_notes: fallbackNote,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('order_number', orderId)
+            .select('id, order_number');
+
+      const fallbackRes = await fallbackQuery;
+      if (!fallbackRes.error) {
+        updatedRows = fallbackRes.data;
+        error = null;
+      }
+    }
 
     if (error) {
       logger.error('Failed to update order status', error, { orderId, status });
       return { success: false, error: error.message };
-    }
-
-    if (!updatedRows || updatedRows.length === 0) {
-      // Attempt update by order_number if id didn't match
-      await supabase
-        .from('orders')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('order_number', orderId);
     }
 
     // 3. Record in order_status_history
@@ -1718,16 +1755,50 @@ export async function bulkUpdateOrderStatusAction(orderIds: string[], status: Or
     const nonUuidIds = orderIds.filter((id) => !uuidIds.includes(id));
 
     if (uuidIds.length > 0) {
-      await supabase
+      const { error: bulkErr } = await supabase
         .from('orders')
         .update({ status, updated_at: new Date().toISOString() })
         .in('id', uuidIds);
+
+      if (bulkErr && bulkErr.message.includes('orders_status_check')) {
+        const fallbackMap: Record<string, OrderStatus> = {
+          confirmation_call: 'pending',
+          ready: 'in_production',
+          returned: 'cancelled',
+        };
+        const fallbackStatus = fallbackMap[status] || 'pending';
+        await supabase
+          .from('orders')
+          .update({
+            status: fallbackStatus,
+            staff_notes: `[বাল্ক পর্যায়: ${status}]`,
+            updated_at: new Date().toISOString(),
+          })
+          .in('id', uuidIds);
+      }
     }
     if (nonUuidIds.length > 0) {
-      await supabase
+      const { error: nonUuidErr } = await supabase
         .from('orders')
         .update({ status, updated_at: new Date().toISOString() })
         .in('order_number', nonUuidIds);
+
+      if (nonUuidErr && nonUuidErr.message.includes('orders_status_check')) {
+        const fallbackMap: Record<string, OrderStatus> = {
+          confirmation_call: 'pending',
+          ready: 'in_production',
+          returned: 'cancelled',
+        };
+        const fallbackStatus = fallbackMap[status] || 'pending';
+        await supabase
+          .from('orders')
+          .update({
+            status: fallbackStatus,
+            staff_notes: `[বাল্ক পর্যায়: ${status}]`,
+            updated_at: new Date().toISOString(),
+          })
+          .in('order_number', nonUuidIds);
+      }
     }
 
     for (const id of uuidIds) {

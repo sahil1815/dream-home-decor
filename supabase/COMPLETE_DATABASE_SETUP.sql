@@ -296,6 +296,21 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_charge NUMERIC DEFAULT 120;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_verified BOOLEAN DEFAULT false;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
 
+-- Allow all 9 furniture order statuses by updating the check constraint
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check;
+ALTER TABLE orders ADD CONSTRAINT orders_status_check 
+  CHECK (status IN (
+    'pending', 
+    'confirmation_call', 
+    'confirmed', 
+    'in_production', 
+    'ready', 
+    'shipped', 
+    'delivered', 
+    'cancelled', 
+    'returned'
+  ));
+
 -- Order Notes Evolution
 ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS author_name TEXT;
 ALTER TABLE order_notes ADD COLUMN IF NOT EXISTS author_email TEXT;
