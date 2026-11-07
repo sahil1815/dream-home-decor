@@ -12,5 +12,14 @@ export const revalidate = 0;
 export default async function AdminUsersPage() {
   const session = await getAdminSessionAction();
 
-  return <UserManager currentSession={session} />;
+  const configuredUsers = {
+    ownerUsername: process.env.ADMIN_OWNER_USERNAME || process.env.ADMIN_USERNAME || 'admin',
+    ownerEmail: process.env.ADMIN_OWNER_EMAIL || process.env.ADMIN_EMAIL || 'owner@dreamhomedecor.com',
+    managerUsername: process.env.ADMIN_MANAGER_USERNAME || 'manager',
+    managerEmail: process.env.ADMIN_MANAGER_EMAIL || 'manager@dreamhomedecor.com',
+    staffUsername: process.env.ADMIN_STAFF_USERNAME || 'staff',
+    staffEmail: process.env.ADMIN_STAFF_EMAIL || 'staff@dreamhomedecor.com',
+  };
+
+  return <UserManager currentSession={session} configuredUsers={configuredUsers} />;
 }

@@ -64,6 +64,35 @@ test('Admin Auth: Allowed Fallback Passwords for Name Login', async (t) => {
     assert.ok(record.allowedPlainPasswords.includes('admin123'));
     assert.ok(record.allowedPlainPasswords.includes('DHD_OwnerMirpur2026!Secure'));
   });
+
+  await t.test('dynamically honors custom usernames and passwords from environment variables', async () => {
+    const prevAdminUser = process.env.ADMIN_USERNAME;
+    const prevAdminPass = process.env.ADMIN_PASSWORD;
+    const prevManagerUser = process.env.ADMIN_MANAGER_USERNAME;
+    const prevManagerPass = process.env.ADMIN_MANAGER_PASSWORD;
+
+    try {
+      process.env.ADMIN_USERNAME = 'super_boss';
+      process.env.ADMIN_PASSWORD = 'CustomBossPass2026!';
+      process.env.ADMIN_MANAGER_USERNAME = 'shop_karim';
+      process.env.ADMIN_MANAGER_PASSWORD = 'KarimPass2026!';
+
+      const bossRecord = await findAdminByIdentifier('super_boss');
+      assert.ok(bossRecord);
+      assert.strictEqual(bossRecord.user.role, 'owner');
+      assert.ok(bossRecord.allowedPlainPasswords.includes('CustomBossPass2026!'));
+
+      const managerRecord = await findAdminByIdentifier('shop_karim');
+      assert.ok(managerRecord);
+      assert.strictEqual(managerRecord.user.role, 'manager');
+      assert.ok(managerRecord.allowedPlainPasswords.includes('KarimPass2026!'));
+    } finally {
+      process.env.ADMIN_USERNAME = prevAdminUser;
+      process.env.ADMIN_PASSWORD = prevAdminPass;
+      process.env.ADMIN_MANAGER_USERNAME = prevManagerUser;
+      process.env.ADMIN_MANAGER_PASSWORD = prevManagerPass;
+    }
+  });
 });
 
 test('Admin Auth: Rate Limiting & Role Hierarchy', async (t) => {
