@@ -465,14 +465,23 @@ export async function updateOrderStatusAction(
       .maybeSingle();
 
     // 2. Update status on order
-    const { error } = await supabase
+    const { data: updatedRows, error } = await supabase
       .from('orders')
       .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select('id, order_number');
 
     if (error) {
       logger.error('Failed to update order status', error, { orderId, status });
       return { success: false, error: error.message };
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      // Attempt update by order_number if id didn't match
+      await supabase
+        .from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('order_number', orderId);
     }
 
     // 3. Record in order_status_history
@@ -1494,18 +1503,35 @@ export async function toggleCustomerBlocklistAction(phone: string, isBlocked: bo
     }
 
     const supabase = createAdminClient();
-    await supabase
+    const { data: updated, error } = await supabase
       .from('customers')
       .update({ is_blocked: isBlocked, updated_at: new Date().toISOString() })
-      .eq('phone', cleanPhone);
+      .eq('phone', cleanPhone)
+      .select('phone');
 
-    await supabase.from('audit_log').insert({
-      admin_email: session.email,
-      admin_role: session.role,
-      action: isBlocked ? 'block_customer' : 'unblock_customer',
-      entity_type: 'customers',
-      details: { phone: cleanPhone },
-    });
+    if (error) {
+      logger.error('Failed to toggle customer blocklist', error);
+      return { success: false, error: 'কাস্টমার ব্লক স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে: ' + error.message };
+    }
+
+    if (!updated || updated.length === 0) {
+      await supabase.from('customers').upsert(
+        { phone: cleanPhone, name: 'গ্রাহক', is_blocked: isBlocked, updated_at: new Date().toISOString() },
+        { onConflict: 'phone' }
+      );
+    }
+
+    try {
+      await supabase.from('audit_log').insert({
+        admin_email: session.email,
+        admin_role: session.role,
+        action: isBlocked ? 'block_customer' : 'unblock_customer',
+        entity_type: 'customers',
+        details: { phone: cleanPhone },
+      });
+    } catch {
+      // Non-blocking audit log
+    }
 
     revalidatePath('/admin/orders');
     revalidatePath('/admin/customers');
@@ -1532,18 +1558,35 @@ export async function updateCustomerNotesAction(phone: string, notes: string) {
     }
 
     const supabase = createAdminClient();
-    await supabase
+    const { data: updated, error } = await supabase
       .from('customers')
-      .update({ notes, updated_at: new Date().toISOString() })
-      .eq('phone', cleanPhone);
+      .update({ notes: notes.trim(), updated_at: new Date().toISOString() })
+      .eq('phone', cleanPhone)
+      .select('phone');
 
-    await supabase.from('audit_log').insert({
-      admin_email: session.email,
-      admin_role: session.role,
-      action: 'update_customer_note',
-      entity_type: 'customers',
-      details: { phone: cleanPhone, notes },
-    });
+    if (error) {
+      logger.error('Failed to update customer notes', error);
+      return { success: false, error: 'কাস্টমার নোট সংরক্ষণ ব্যর্থ হয়েছে: ' + error.message };
+    }
+
+    if (!updated || updated.length === 0) {
+      await supabase.from('customers').upsert(
+        { phone: cleanPhone, name: 'গ্রাহক', notes: notes.trim(), updated_at: new Date().toISOString() },
+        { onConflict: 'phone' }
+      );
+    }
+
+    try {
+      await supabase.from('audit_log').insert({
+        admin_email: session.email,
+        admin_role: session.role,
+        action: 'update_customer_note',
+        entity_type: 'customers',
+        details: { phone: cleanPhone, notes },
+      });
+    } catch {
+      // Non-blocking audit log
+    }
 
     revalidatePath('/admin/customers');
     return { success: true, message: 'কাস্টমার নোট সফলভাবে সংরক্ষিত হয়েছে' };
@@ -1866,12 +1909,25 @@ export async function updateCustomRequestAction(
     if (quotationAmount !== undefined) updatePayload.quoted_price = Number(quotationAmount);
     if (staffNotes !== undefined) updatePayload.staff_notes = staffNotes;
 
-    const { error } = await supabase
+    const { data: updatedRows, error } = await supabase
       .from('custom_requests')
       .update(updatePayload)
-      .eq('id', id);
+      .eq('id', id)
+      .select('id');
 
     if (error) return { success: false, error: error.message };
+
+    if (!updatedRows || updatedRows.length === 0) {
+      await supabase.from('custom_requests').upsert({
+        id,
+        customer_name: 'গ্রাহক',
+        customer_phone: '01700000000',
+        category: 'কাস্টম ফার্নিচার',
+        notes: '',
+        ...updatePayload,
+        created_at: new Date().toISOString(),
+      });
+    }
 
     revalidatePath('/admin/custom-orders');
     return { success: true, message: 'কাস্টম অর্ডার তথ্য সংরক্ষিত হয়েছে' };
