@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- DREAM HOME DECOR - COMPLETE PRODUCTION DATABASE SETUP & SEED SCRIPT
--- Execute this script once in the Supabase Dashboard: SQL Editor -> Run
+-- Execute this script in the Supabase Dashboard: SQL Editor -> Run
+-- Safe for both brand-new setups and updating existing databases (Idempotent).
 -- Project: https://pnipubiflitwjaaagnau.supabase.co
 -- ==============================================================================
 
@@ -8,10 +9,12 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 2. SEQUENCES FOR ORDER NUMBERING (e.g. DHD-1001)
+-- 2. SEQUENCES FOR ORDER NUMBERING (e.g. DHD-1004, DHD-1005)
 CREATE SEQUENCE IF NOT EXISTS dhd_order_number_seq START WITH 1004;
 
--- 3. SITE SETTINGS TABLE
+-- 3. CORE TABLES (CREATE IF NOT EXISTS)
+
+-- 3.1 Site Settings
 CREATE TABLE IF NOT EXISTS site_settings (
   id INT PRIMARY KEY DEFAULT 1,
   site_name TEXT NOT NULL DEFAULT 'Dream Home Decor',
@@ -32,7 +35,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
   CONSTRAINT single_settings_row CHECK (id = 1)
 );
 
--- 4. CATEGORIES TABLE
+-- 3.2 Categories
 CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -44,7 +47,7 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 5. PRODUCTS TABLE
+-- 3.3 Products
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
@@ -65,7 +68,7 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 6. DELIVERY ZONES TABLE
+-- 3.4 Delivery Zones
 CREATE TABLE IF NOT EXISTS delivery_zones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -77,7 +80,7 @@ CREATE TABLE IF NOT EXISTS delivery_zones (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 7. ORDERS TABLE (Supports Full 9-Status Flow & Tracking)
+-- 3.5 Orders
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_number TEXT NOT NULL UNIQUE,
@@ -91,6 +94,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_method TEXT DEFAULT 'cod',
   transaction_id TEXT,
   order_notes TEXT,
+  staff_notes TEXT,
   status TEXT NOT NULL DEFAULT 'pending',
   is_flagged_suspicious BOOLEAN DEFAULT false,
   due_amount NUMERIC DEFAULT 0,
@@ -105,7 +109,7 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 8. ORDER ITEMS TABLE
+-- 3.6 Order Items
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
@@ -117,7 +121,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 9. ORDER STATUS HISTORY TABLE
+-- 3.7 Order Status History
 CREATE TABLE IF NOT EXISTS order_status_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
@@ -127,7 +131,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 10. ORDER INTERNAL NOTES TABLE
+-- 3.8 Order Internal Notes
 CREATE TABLE IF NOT EXISTS order_notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE NOT NULL,
@@ -137,7 +141,7 @@ CREATE TABLE IF NOT EXISTS order_notes (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 11. CUSTOMERS DIRECTORY TABLE
+-- 3.9 Customers Directory
 CREATE TABLE IF NOT EXISTS customers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -152,9 +156,9 @@ CREATE TABLE IF NOT EXISTS customers (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 12. CUSTOM FURNITURE REQUESTS TABLE
+-- 3.10 Custom Furniture Requests
 CREATE TABLE IF NOT EXISTS custom_requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
   dimensions TEXT,
@@ -162,14 +166,15 @@ CREATE TABLE IF NOT EXISTS custom_requests (
   budget NUMERIC,
   description TEXT,
   reference_image_url TEXT,
-  status TEXT DEFAULT 'new', -- 'new', 'quoted', 'accepted', 'rejected'
+  reference_images TEXT[] DEFAULT '{}'::TEXT[],
+  status TEXT DEFAULT 'new',
   quoted_price NUMERIC,
   staff_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 13. ABANDONED CHECKOUTS TABLE
+-- 3.11 Abandoned Checkouts
 CREATE TABLE IF NOT EXISTS abandoned_checkouts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_name TEXT,
@@ -183,11 +188,11 @@ CREATE TABLE IF NOT EXISTS abandoned_checkouts (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 14. COUPONS TABLE
+-- 3.12 Coupons
 CREATE TABLE IF NOT EXISTS coupons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT UNIQUE NOT NULL,
-  discount_type TEXT NOT NULL DEFAULT 'percentage', -- 'percentage' or 'flat'
+  discount_type TEXT NOT NULL DEFAULT 'percentage',
   discount_value NUMERIC NOT NULL,
   min_order_amount NUMERIC DEFAULT 0,
   max_uses INT,
@@ -197,19 +202,21 @@ CREATE TABLE IF NOT EXISTS coupons (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 15. REVIEWS TABLE
+-- 3.13 Reviews
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   customer_name TEXT NOT NULL,
   customer_phone TEXT,
   rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  comment TEXT NOT NULL,
+  comment TEXT,
+  review_text TEXT,
+  customer_photos TEXT[] DEFAULT '{}'::TEXT[],
   is_approved BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 16. SITE CONTENT & POLICIES TABLE
+-- 3.14 Site Content & Policies
 CREATE TABLE IF NOT EXISTS site_content (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -218,7 +225,7 @@ CREATE TABLE IF NOT EXISTS site_content (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 17. AUDIT LOG (IMMUTABLE)
+-- 3.15 Audit Log
 CREATE TABLE IF NOT EXISTS audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   admin_email TEXT NOT NULL,
@@ -230,7 +237,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 18. ADMIN USERS TABLE
+-- 3.16 Admin Users
 CREATE TABLE IF NOT EXISTS admin_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
@@ -241,17 +248,21 @@ CREATE TABLE IF NOT EXISTS admin_users (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 19. CAMPAIGNS & WORKSHOP SETTINGS
+-- 3.17 Campaigns & Giveaways
 CREATE TABLE IF NOT EXISTS campaigns_giveaways (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   title TEXT NOT NULL,
   description TEXT,
   discount_code TEXT,
   discount_percentage INT,
+  banner_url TEXT,
+  end_date TIMESTAMPTZ,
+  facebook_post_link TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
+-- 3.18 Workshop Settings
 CREATE TABLE IF NOT EXISTS workshop_settings (
   id INT PRIMARY KEY DEFAULT 1,
   video_url TEXT,
@@ -263,55 +274,104 @@ CREATE TABLE IF NOT EXISTS workshop_settings (
 );
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
--- Permissive policies so server actions and admin can write reliably
+-- 4. SCHEMA EVOLUTION: ENSURE MISSING COLUMNS EXIST ON PRE-EXISTING TABLES
+-- This guarantees that if a table already existed, all required columns are added.
 -- ==============================================================================
 
-ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE delivery_zones ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_status_history ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE custom_requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE abandoned_checkouts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE site_content ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE campaigns_giveaways ENABLE ROW LEVEL SECURITY;
-ALTER TABLE workshop_settings ENABLE ROW LEVEL SECURITY;
+-- Orders Evolution
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS due_amount NUMERIC DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS advance_payment_amount NUMERIC DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier_tracking_code TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier_consignment_id TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier_status TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_flagged_suspicious BOOLEAN DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_notes TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS staff_notes TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS utm_source TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS utm_medium TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS utm_campaign TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_zone TEXT DEFAULT 'inside';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_charge NUMERIC DEFAULT 120;
 
--- Allow full access for all tables
+-- Products Evolution
+ALTER TABLE products ADD COLUMN IF NOT EXISTS title_bn TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}'::TEXT[];
+ALTER TABLE products ADD COLUMN IF NOT EXISTS dimensions TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS material TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS color_options TEXT[] DEFAULT ARRAY['Walnut Brown', 'Teak Wood', 'Classic White'];
+ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_status TEXT DEFAULT 'in_stock';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
+-- Site Settings Evolution
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS site_name_bn TEXT DEFAULT 'ড্রিম হোম ডেকোর';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS logo_url TEXT DEFAULT '/brand-images/official_brand_logo.jpg';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS cover_banner_url TEXT DEFAULT '/placeholders/site/hero.jpg';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '01712-345678';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS whatsapp_number TEXT DEFAULT '8801712345678';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS facebook_url TEXT DEFAULT 'https://www.facebook.com/profile.php?id=61584955311887';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS address TEXT DEFAULT 'সেকশন ১০, ব্লক সি, রোড ২, মিরপুর, ঢাকা ১২১৬ (মিরপুর ১০ গোলচত্বর সংলগ্ন)';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS delivery_charge_inside NUMERIC DEFAULT 120;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS delivery_charge_outside NUMERIC DEFAULT 200;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS announcement_text TEXT DEFAULT 'নিজস্ব কারখানায় তৈরি সেরা মানের ফার্নিচার! সারাদেশে ক্যাশ অন ডেলিভারি।';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS bkash_merchant_number TEXT DEFAULT '01712345678';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS nagad_merchant_number TEXT DEFAULT '01712345678';
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS show_placeholder_tag BOOLEAN DEFAULT true;
+
+-- Ensure unique constraint on orders.order_number
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'orders_order_number_key'
+  ) THEN
+    ALTER TABLE orders ADD CONSTRAINT orders_order_number_key UNIQUE (order_number);
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
+
+-- ==============================================================================
+-- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- Enables row level security and grants permissive policies for public API and actions
+-- ==============================================================================
+
 DO $$
 DECLARE
   tbl TEXT;
+  tables TEXT[] := ARRAY[
+    'site_settings', 'categories', 'products', 'delivery_zones',
+    'orders', 'order_items', 'order_status_history', 'order_notes',
+    'customers', 'custom_requests', 'abandoned_checkouts', 'coupons',
+    'reviews', 'site_content', 'audit_log', 'admin_users',
+    'campaigns_giveaways', 'workshop_settings'
+  ];
 BEGIN
-  FOR tbl IN
-    SELECT tablename FROM pg_tables WHERE schemaname = 'public'
-  LOOP
-    EXECUTE format('DROP POLICY IF EXISTS "Public full access policy" ON %I;', tbl);
-    EXECUTE format('CREATE POLICY "Public full access policy" ON %I FOR ALL USING (true) WITH CHECK (true);', tbl);
+  FOREACH tbl IN ARRAY tables LOOP
+    BEGIN
+      EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY;', tbl);
+      EXECUTE format('DROP POLICY IF EXISTS "Public full access policy" ON %I;', tbl);
+      EXECUTE format('CREATE POLICY "Public full access policy" ON %I FOR ALL USING (true) WITH CHECK (true);', tbl);
+    EXCEPTION
+      WHEN OTHERS THEN NULL;
+    END;
   END LOOP;
 END $$;
 
 -- ==============================================================================
--- INITIAL SEED DATA
+-- 6. INITIAL SEED DATA
 -- Ensures all cards, orders, and customer records exist as real PostgreSQL rows
 -- ==============================================================================
 
--- 1. Delivery Zones
+-- 6.1 Delivery Zones
 INSERT INTO delivery_zones (name, name_bn, slug, charge, estimated_days, is_active)
 VALUES 
   ('Inside Dhaka Metro', 'ঢাকার ভেতরে (মেট্রো)', 'inside', 120, '২-৩ দিন', true),
   ('Outside Dhaka', 'ঢাকার বাইরে (সারাদেশ)', 'outside', 200, '৩-৫ দিন', true)
 ON CONFLICT (slug) DO UPDATE SET charge = EXCLUDED.charge, is_active = EXCLUDED.is_active;
 
--- 2. Initial Customers (Shown in Customer Directory)
+-- 6.2 Initial Customers (Customer Directory)
 INSERT INTO customers (id, name, phone, address, delivery_zone, total_orders, total_spent, is_blocked, notes)
 VALUES
   ('c0000000-0000-0000-0000-000000000001', 'রফিকুল ইসলাম', '01711223344', 'রোড ১২, সেক্টর ৪, উত্তরা, ঢাকা', 'inside', 3, 12500, false, 'নিয়মিত কাস্টমার, ফিনিশিং ভালো পছন্দ করেন'),
@@ -319,32 +379,39 @@ VALUES
   ('c0000000-0000-0000-0000-000000000003', 'সাকিব হাসান', '01998877665', 'জিইসি মোড়, নাসিরাবাদ, চট্টগ্রাম', 'outside', 1, 5400, false, 'চট্টগ্রাম কুরিয়ার ডেলিভারি')
 ON CONFLICT (phone) DO UPDATE SET name = EXCLUDED.name, notes = EXCLUDED.notes;
 
--- 3. Initial Orders (Shown in Order Management & Production Kanban)
+-- 6.3 Initial Orders (Order Management & Factory Production Kanban)
+-- Uses valid hexadecimal UUID literals (d0000000-...)
 INSERT INTO orders (id, order_number, customer_name, customer_phone, customer_address, delivery_zone, delivery_charge, subtotal, total_amount, payment_method, status, due_amount)
 VALUES
-  ('o0000000-0000-0000-0000-000000000001', 'DHD-1001', 'তানভীর আহমেদ', '01711223344', 'বাড়ি ১২, রোড ৪, সেক্টর ১০, উত্তরা, ঢাকা', 'inside', 120, 3800, 3920, 'cod', 'in_production', 3920),
-  ('o0000000-0000-0000-0000-000000000002', 'DHD-1002', 'ফারজানা ইসলাম', '01812345678', 'নুরজাহান রোড, মোহাম্মদপুর, ঢাকা', 'inside', 120, 4400, 4520, 'cod', 'confirmed', 4520),
-  ('o0000000-0000-0000-0000-000000000003', 'DHD-1003', 'সাকিব হাসান', '01998877665', 'জিইসি মোড়, নাসিরাবাদ, চট্টগ্রাম', 'outside', 200, 5200, 5400, 'cod', 'pending', 5400)
+  ('d0000000-0000-0000-0000-000000000001', 'DHD-1001', 'তানভীর আহমেদ', '01711223344', 'বাড়ি ১২, রোড ৪, সেক্টর ১০, উত্তরা, ঢাকা', 'inside', 120, 3800, 3920, 'cod', 'in_production', 3920),
+  ('d0000000-0000-0000-0000-000000000002', 'DHD-1002', 'ফারজানা ইসলাম', '01812345678', 'নুরজাহান রোড, মোহাম্মদপুর, ঢাকা', 'inside', 120, 4400, 4520, 'cod', 'confirmed', 4520),
+  ('d0000000-0000-0000-0000-000000000003', 'DHD-1003', 'সাকিব হাসান', '01998877665', 'জিইসি মোড়, নাসিরাবাদ, চট্টগ্রাম', 'outside', 200, 5200, 5400, 'cod', 'pending', 5400)
 ON CONFLICT (order_number) DO UPDATE SET status = EXCLUDED.status, updated_at = NOW();
 
--- 4. Initial Order Items
-INSERT INTO order_items (order_id, product_title, selected_color, quantity, unit_price)
+-- 6.4 Initial Order Items
+INSERT INTO order_items (id, order_id, product_title, selected_color, quantity, unit_price)
 VALUES
-  ('o0000000-0000-0000-0000-000000000001', 'Smart Ergonomic Reading Table with Bookshelf', 'Walnut Brown', 1, 3800),
-  ('o0000000-0000-0000-0000-000000000002', 'Modern Multi-Tier Open Bookshelf & Display Rack', 'Teak Wood', 1, 4400),
-  ('o0000000-0000-0000-0000-000000000003', 'Executive Workstation & Computer Desk', 'Classic White', 1, 5200)
-ON CONFLICT DO NOTHING;
+  ('e0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'Smart Ergonomic Reading Table with Bookshelf', 'Walnut Brown', 1, 3800),
+  ('e0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000002', 'Modern Multi-Tier Open Bookshelf & Display Rack', 'Teak Wood', 1, 4400),
+  ('e0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000003', 'Executive Workstation & Computer Desk', 'Classic White', 1, 5200)
+ON CONFLICT (id) DO NOTHING;
 
--- 5. Initial Status History
-INSERT INTO order_status_history (order_id, status, note, changed_by)
+-- 6.5 Initial Order Status History
+INSERT INTO order_status_history (id, order_id, status, note, changed_by)
 VALUES
-  ('o0000000-0000-0000-0000-000000000001', 'in_production', 'কারখানায় বোর্ড কাটিং ও ফিটিং শুরু হয়েছে', 'সিস্টেম'),
-  ('o0000000-0000-0000-0000-000000000002', 'confirmed', 'গ্রাহকের সাথে ফোনে কথা বলে অর্ডার নিশ্চিত করা হয়েছে', 'সিস্টেম'),
-  ('o0000000-0000-0000-0000-000000000003', 'pending', 'ওয়েবসাইট থেকে নতুন অর্ডার প্লেস করা হয়েছে', 'গ্রাহক')
-ON CONFLICT DO NOTHING;
+  ('f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'in_production', 'কারখানায় বোর্ড কাটিং ও ফিটিং শুরু হয়েছে', 'সিস্টেম'),
+  ('f0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000002', 'confirmed', 'গ্রাহকের সাথে ফোনে কথা বলে অর্ডার নিশ্চিত করা হয়েছে', 'সিস্টেম'),
+  ('f0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000003', 'pending', 'ওয়েবসাইট থেকে নতুন অর্ডার প্লেস করা হয়েছে', 'গ্রাহক')
+ON CONFLICT (id) DO NOTHING;
 
--- 6. Initial Custom Furniture Request (Shown in Custom Orders Modal)
+-- 6.6 Initial Custom Furniture Requests (Custom Orders)
 INSERT INTO custom_requests (id, customer_name, customer_phone, dimensions, color, budget, description, status, quoted_price, staff_notes)
 VALUES
-  ('b0000000-0000-0000-0000-000000000001', 'তানভীর আহমেদ', '01711223344', '5ft x 2.5ft x 3ft', 'Dark Walnut', 8500, 'অফিস ডেস্কে মনিটর আর্ম মাউন্ট এবং ড্রয়ারের ডাবল চ্যানেল ড্রপ চাই।', 'new', 8500, 'বোর্ড কোয়ালিটি, চ্যানেল ফিটিংস এবং লিড-টাইম নোট লিখুন...')
-ON CONFLICT DO NOTHING;
+  ('cr-1', 'তানভীর আহমেদ', '01711223344', '5ft x 2.5ft x 3ft', 'Dark Walnut', 8500, 'অফিস ডেস্কে মনিটর আর্ম মাউন্ট এবং ড্রয়ারের ডাবল চ্যানেল ড্রপ চাই।', 'new', 8500, 'বোর্ড কোয়ালিটি, চ্যানেল ফিটিংস এবং লিড-টাইম নোট লিখুন...'),
+  ('cr-2', 'নাসরিন সুলতানা', '01899887766', '4ft x 1ft x 6ft', 'White & Gold', 6500, 'বেডরুমের কর্নারে কাচের পাল্লা সহ বইয়ের ডিসপ্লে র‍্যাক।', 'quoted', 7200, 'মেলামাইন বোর্ড ও ৫ মিমি গ্লাস দরজার কোটেশন পাঠানো হয়েছে।')
+ON CONFLICT (id) DO UPDATE SET quoted_price = EXCLUDED.quoted_price, staff_notes = EXCLUDED.staff_notes, status = EXCLUDED.status;
+
+-- 6.7 Initial Site Settings
+INSERT INTO site_settings (id, site_name, site_name_bn, phone, whatsapp_number, delivery_charge_inside, delivery_charge_outside)
+VALUES (1, 'Dream Home Decor', 'ড্রিম হোম ডেকোর', '01712-345678', '8801712345678', 120, 200)
+ON CONFLICT (id) DO UPDATE SET updated_at = NOW();
