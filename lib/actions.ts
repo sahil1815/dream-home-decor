@@ -722,22 +722,60 @@ export async function saveProductAction(productData: {
     };
 
     let productId = productData.id;
+    const currentPayload: Record<string, unknown> = { ...payload };
 
     if (productId) {
-      const { error } = await supabase
-        .from('products')
-        .update(payload)
-        .eq('id', productId);
+      let updateError: { message: string } | null = null;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const { error } = await supabase
+          .from('products')
+          .update(currentPayload)
+          .eq('id', productId);
 
-      if (error) return { success: false, error: error.message };
+        if (!error) {
+          updateError = null;
+          break;
+        }
+
+        const match = error.message.match(/Could not find the '([^']+)' column of/i);
+        if (match && match[1] && match[1] in currentPayload) {
+          delete currentPayload[match[1]];
+        } else {
+          updateError = error;
+          break;
+        }
+      }
+
+      if (updateError) return { success: false, error: updateError.message };
     } else {
-      const { data: newProd, error } = await supabase
-        .from('products')
-        .insert(payload)
-        .select('id')
-        .single();
-      if (error) return { success: false, error: error.message };
-      productId = newProd.id;
+      let insertError: { message: string } | null = null;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const { data: newProd, error } = await supabase
+          .from('products')
+          .insert(currentPayload)
+          .select('id')
+          .single();
+
+        if (!error && newProd) {
+          productId = newProd.id;
+          insertError = null;
+          break;
+        }
+
+        if (error) {
+          const match = error.message.match(/Could not find the '([^']+)' column of/i);
+          if (match && match[1] && match[1] in currentPayload) {
+            delete currentPayload[match[1]];
+          } else {
+            insertError = error;
+            break;
+          }
+        }
+      }
+
+      if (insertError || !productId) {
+        return { success: false, error: insertError?.message || 'পণ্য সংরক্ষণ ব্যর্থ হয়েছে' };
+      }
     }
 
     // Record audit log
@@ -1847,7 +1885,7 @@ export async function duplicateProductAction(productId: string) {
     const newTitleBn = `${original.title_bn} (কপি)`;
     const newTitle = `${original.title} (Copy)`;
 
-    const { error: insertErr } = await supabase.from('products').insert({
+    const dupPayload: Record<string, unknown> = {
       title: newTitle,
       title_bn: newTitleBn,
       slug: newSlug,
@@ -1864,7 +1902,23 @@ export async function duplicateProductAction(productId: string) {
       is_featured: false,
       is_active: false, // Inactive by default so staff can adjust
       has_placeholder_images: original.has_placeholder_images,
-    });
+    };
+
+    let insertErr: { message: string } | null = null;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const { error } = await supabase.from('products').insert(dupPayload);
+      if (!error) {
+        insertErr = null;
+        break;
+      }
+      const match = error.message.match(/Could not find the '([^']+)' column of/i);
+      if (match && match[1] && match[1] in dupPayload) {
+        delete dupPayload[match[1]];
+      } else {
+        insertErr = error;
+        break;
+      }
+    }
 
     if (insertErr) return { success: false, error: insertErr.message };
 
