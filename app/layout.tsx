@@ -3,7 +3,7 @@ import { Noto_Serif_Bengali, Hind_Siliguri, Inter } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { WishlistProvider } from '@/context/wishlist-context';
-import { getSiteSettings, getCategories } from '@/lib/data';
+import { getSiteSettings, getCategories, getSiteContentMap } from '@/lib/data';
 import { AnnouncementBar } from '@/components/storefront/AnnouncementBar';
 import { Navbar } from '@/components/storefront/Navbar';
 import { Footer } from '@/components/storefront/Footer';
@@ -104,9 +104,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, categories] = await Promise.all([
+  const [settings, categories, contentMap] = await Promise.all([
     getSiteSettings(),
     getCategories(),
+    getSiteContentMap(),
   ]);
 
   const organizationSchema = {
@@ -155,7 +156,10 @@ export default async function RootLayout({
         <CartProvider>
           <WishlistProvider>
             {/* Top Announcement Bar */}
-            <AnnouncementBar settings={settings} />
+            <AnnouncementBar
+              settings={settings}
+              announcementContent={contentMap?.announcement?.content as any}
+            />
 
             {/* Sticky Navigation */}
             <Navbar settings={settings} categories={categories} />

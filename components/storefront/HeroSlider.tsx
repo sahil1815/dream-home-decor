@@ -10,14 +10,36 @@ import { buildWhatsAppUrl } from '@/lib/utils';
 
 interface HeroSliderProps {
   settings: SiteSettings;
+  heroContent?: {
+    badge?: string;
+    title?: string;
+    subtitle?: string;
+    cta_text?: string;
+    cta_link?: string;
+  };
 }
 
-export function HeroSlider({ settings }: HeroSliderProps) {
+export function HeroSlider({ settings, heroContent }: HeroSliderProps) {
   const bannerImage = settings.cover_banner_url || '/placeholders/site/hero.jpg';
   const whatsappUrl = buildWhatsAppUrl(
     settings.whatsapp_number,
     'আসসালামু আলাইকুম, আমি ড্রিম হোম ডেকোর ফার্নিচার সম্পর্কে জানতে চাই।'
   );
+
+  const badgeText =
+    heroContent?.badge?.trim() ||
+    'মিরপুর নিজস্ব কারখানায় প্রস্তুতকৃত • সরাসরি ফ্যাক্টরি মূল্য';
+
+  const headline =
+    heroContent?.title?.trim() ||
+    'আপনার ঘরের জন্য হাতে তৈরি ফার্নিচার, সরাসরি নিজস্ব কারখানা থেকে';
+
+  const subtitle =
+    heroContent?.subtitle?.trim() ||
+    'উন্নত মেলামাইন বোর্ড ও মালয়েশিয়ান প্রসেসড উডে তৈরি পড়ার টেবিল, বুকশেলফ ও কম্পিউটার ডেস্ক। কোনো শোরুমের অতিরিক্ত ভাড়া বা মধ্যস্বত্বভোগী ছাড়া নির্ভরযোগ্য স্থায়িত্ব। পড়ার টেবিল শুরু মাত্র ৳3,800 থেকে।';
+
+  const ctaText = heroContent?.cta_text?.trim() || 'ফার্নিচার কালেকশন দেখুন';
+  const ctaLink = heroContent?.cta_link?.trim() || '/products';
 
   return (
     <section className="relative overflow-hidden bg-[#F7F3EE] py-14 sm:py-20 lg:py-24 border-b border-[#E8E2D9]">
@@ -28,26 +50,17 @@ export function HeroSlider({ settings }: HeroSliderProps) {
             {/* Top Factory Badge */}
             <div className="inline-flex items-center gap-2 bg-[#F4ECE1] border border-[#E8E2D9] px-3.5 py-1.5 rounded-full text-[#8A5A3B] text-xs sm:text-sm font-bn font-semibold">
               <Hammer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8A5A3B] shrink-0" />
-              <span>মিরপুর নিজস্ব কারখানায় প্রস্তুতকৃত • সরাসরি ফ্যাক্টরি মূল্য</span>
+              <span>{badgeText}</span>
             </div>
 
             {/* Main Headline in Noto Serif Bengali */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2B1D14] tracking-tight font-serif leading-[1.3]">
-              আপনার ঘরের জন্য{' '}
-              <span className="text-[#8A5A3B] relative inline-block">
-                হাতে তৈরি ফার্নিচার
-              </span>
-              , সরাসরি নিজস্ব কারখানা থেকে
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2B1D14] tracking-tight font-serif leading-[1.3] whitespace-pre-line">
+              {headline}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-sm sm:text-base text-stone-700 font-bn leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              উন্নত মেলামাইন বোর্ড ও মালয়েশিয়ান প্রসেসড উডে তৈরি পড়ার টেবিল, বুকশেলফ ও কম্পিউটার ডেস্ক।
-              কোনো শোরুমের অতিরিক্ত ভাড়া বা মধ্যস্বত্বভোগী ছাড়া নির্ভরযোগ্য স্থায়িত্ব। পড়ার টেবিল শুরু মাত্র{' '}
-              <span className="font-bold text-[#8A5A3B] underline decoration-[#B08D57] underline-offset-4 font-sans">
-                ৳3,800
-              </span>{' '}
-              থেকে।
+            <p className="text-sm sm:text-base text-stone-700 font-bn leading-relaxed max-w-2xl mx-auto lg:mx-0 whitespace-pre-line">
+              {subtitle}
             </p>
 
             {/* Bullets */}
@@ -73,11 +86,11 @@ export function HeroSlider({ settings }: HeroSliderProps) {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-3">
               <Link
-                href="/products"
+                href={ctaLink}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8A5A3B] hover:bg-[#6E442B] text-white px-7 py-3.5 rounded-xl font-bn font-semibold text-sm sm:text-base shadow-xs transition-colors"
               >
                 <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                <span>ফার্নিচার কালেকশন দেখুন</span>
+                <span>{ctaText}</span>
                 <ArrowRight className="w-4 h-4 shrink-0" />
               </Link>
 

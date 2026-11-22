@@ -2197,8 +2197,12 @@ export async function saveSiteContentAction(
       entity_id: id,
     });
 
+    revalidatePath('/', 'layout');
     revalidatePath('/');
     revalidatePath('/admin/content');
+    revalidatePath('/delivery-and-returns');
+    revalidatePath('/faq');
+    revalidatePath('/contact');
     return { success: true, message: 'কনটেন্ট সফলভাবে সংরক্ষিত হয়েছে এবং ওয়েবসাইটে কার্যকর হয়েছে' };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';

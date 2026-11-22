@@ -19,6 +19,7 @@ import {
   getProducts,
   getCampaigns,
   getWorkshopData,
+  getSiteContentMap,
 } from '@/lib/data';
 import { HeroSlider } from '@/components/storefront/HeroSlider';
 import { TrustBadges } from '@/components/storefront/TrustBadges';
@@ -27,18 +28,27 @@ import { WorkshopShowcase } from '@/components/storefront/WorkshopShowcase';
 import { CampaignBanner } from '@/components/storefront/CampaignBanner';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 
-export const revalidate = 3600; // 1-hour ISR
+export const revalidate = 60; // 1-minute ISR fallback + on-demand revalidatePath
 
 export default async function HomePage() {
-  const [settings, categories, products, campaigns, workshopData] = await Promise.all([
+  const [settings, categories, products, campaigns, workshopData, contentMap] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getProducts({ limit: 12 }),
     getCampaigns(),
     getWorkshopData(),
+    getSiteContentMap(),
   ]);
 
-  const faqs = [
+  const heroContent = contentMap?.hero?.content as {
+    badge?: string;
+    title?: string;
+    subtitle?: string;
+    cta_text?: string;
+    cta_link?: string;
+  } | undefined;
+
+  const fallbackFaqs = [
     {
       q: 'ফার্নিচারের বোর্ড কি পানি বা আর্দ্রতায় সহজে নষ্ট হবে?',
       a: 'আমরা ১৬ মিমি মেলামাইন বোর্ড এবং প্রতিটি কাটিং প্রান্তে মেশিনের সাহায্যে ১ মিমি পুরু পিভিসি এজ ব্যান্ডিং সিলিং ব্যবহার করি। এর ফলে স্বাভাবিক পানির ছিটা কিংবা ঘরের আর্দ্রতায় বোর্ডের প্রান্ত ক্ষতিগ্রস্ত হয় না।',
@@ -57,10 +67,15 @@ export default async function HomePage() {
     },
   ];
 
+  const adminFaq = contentMap?.faq?.content as { items?: Array<{ q: string; a: string }> } | undefined;
+  const faqs = (Array.isArray(adminFaq?.items) && adminFaq.items.length > 0)
+    ? adminFaq.items
+    : fallbackFaqs;
+
   return (
     <div className="space-y-16 sm:space-y-24">
       {/* 1. Hero Section */}
-      <HeroSlider settings={settings} />
+      <HeroSlider settings={settings} heroContent={heroContent} />
 
       {/* 2. Trust Badges Bar */}
       <TrustBadges />

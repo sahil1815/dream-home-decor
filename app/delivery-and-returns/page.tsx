@@ -2,6 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Truck, ShieldCheck, CheckCircle, Package } from 'lucide-react';
+import { getSiteContentMap, getSiteSettings } from '@/lib/data';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'ডেলিভারি ও রিটার্ন পলিসি',
@@ -20,7 +23,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DeliveryAndReturnsPage() {
+export default async function DeliveryAndReturnsPage() {
+  const [contentMap, settings] = await Promise.all([
+    getSiteContentMap(),
+    getSiteSettings(),
+  ]);
+
+  const deliveryPolicy = (contentMap?.delivery_policy?.content || {}) as {
+    lead_time_inside?: string;
+    lead_time_outside?: string;
+    packaging?: string;
+  };
+
+  const returnPolicy = (contentMap?.return_policy?.content || {}) as {
+    condition?: string;
+    damage_warranty?: string;
+  };
+
+  const leadTimeInside = deliveryPolicy.lead_time_inside || '১ থেকে ২ কর্মদিবস';
+  const leadTimeOutside = deliveryPolicy.lead_time_outside || '৩ থেকে ৫ কর্মদিবস';
+  const packagingNotice = deliveryPolicy.packaging || 'হেভি-ডিউটি বাবল র‍্যাপ এবং ৪-কোণা কর্নার প্রোটেকশন দিয়ে প্যাক করা হয়।';
+  const returnCondition = returnPolicy.condition || 'ডেলিভারির সময় যদি পণ্যে কোনো ভাঙা, ফাটা বা বড় ধরনের ত্রুটি দেখতে পান, তবে কোনো চার্জ ছাড়াই ডেলিভারিম্যানের কাছে পণ্য ফেরত দিতে পারবেন।';
+  const damageWarranty = returnPolicy.damage_warranty || 'পরিবহনজনিত ভাঙচুর বা ত্রুটির ক্ষেত্রে ২৪ ঘণ্টার মধ্যে অভিযোগ দিলে বিনামূল্যে রিপ্লেসমেন্ট প্রদান করা হয়।';
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12">
       {/* Header */}
@@ -47,8 +72,8 @@ export default function DeliveryAndReturnsPage() {
             ঢাকার ভেতরে হোম ডেলিভারি
           </h2>
           <div className="text-xs sm:text-sm font-bn text-stone-600 space-y-1.5">
-            <p>• <strong>সময়সীমা:</strong> ১ থেকে ২ কর্মদিবস।</p>
-            <p>• <strong>ডেলিভারি চার্জ:</strong> ৳১২০ (ফিক্সড)।</p>
+            <p>• <strong>সময়সীমা:</strong> {leadTimeInside}।</p>
+            <p>• <strong>ডেলিভারি চার্জ:</strong> ৳{settings.delivery_charge_inside ?? 120} (ফিক্সড)।</p>
             <p>• <strong>পদ্ধতি:</strong> সরাসরি আমাদের নিজস্ব প্রতিনিধি বা নির্ভরযোগ্য লোকাল কুরিয়ার দ্বারা হোম ডেলিভারি।</p>
           </div>
         </div>
@@ -61,8 +86,8 @@ export default function DeliveryAndReturnsPage() {
             ঢাকার বাইরে সারা বাংলাদেশে ডেলিভারি
           </h2>
           <div className="text-xs sm:text-sm font-bn text-stone-600 space-y-1.5">
-            <p>• <strong>সময়সীমা:</strong> ৩ থেকে ৫ কর্মদিবস।</p>
-            <p>• <strong>কুরিয়ার চার্জ:</strong> ৳২০০ (ফিক্সড)।</p>
+            <p>• <strong>সময়সীমা:</strong> {leadTimeOutside}।</p>
+            <p>• <strong>কুরিয়ার চার্জ:</strong> ৳{settings.delivery_charge_outside ?? 200} (ফিক্সড)।</p>
             <p>• <strong>পদ্ধতি:</strong> সুন্দরবন / স্টিডফাস্ট কুরিয়ারের মাধ্যমে জেলা বা উপজেলা পয়েন্টে সুরক্ষিত হোম ডেলিভারি।</p>
           </div>
         </div>
@@ -77,7 +102,7 @@ export default function DeliveryAndReturnsPage() {
           </h2>
         </div>
         <p className="text-stone-700 font-bn text-xs sm:text-sm leading-relaxed">
-          আমরা কোনো প্রকার লুকোচুরি সমর্থন করি না। ডেলিভারিম্যান আপনার ঠিকানায় ফার্নিচার নিয়ে গেলে তার উপস্থিতিতে বাবল র‍্যাপ খুলে বোর্ড, কাটিং, কালার ও ফিনিশিং সম্পূর্ণ যাচাই করে নিন। আপনি সন্তুষ্ট হলে তবেই নির্ধারিত মূল্য পরিশোধ করবেন।
+          {packagingNotice} ডেলিভারিম্যান আপনার ঠিকানায় ফার্নিচার নিয়ে গেলে তার উপস্থিতিতে বাবল র‍্যাপ খুলে বোর্ড, কাটিং, কালার ও ফিনিশিং সম্পূর্ণ যাচাই করে নিন। আপনি সন্তুষ্ট হলে তবেই নির্ধারিত মূল্য পরিশোধ করবেন।
         </p>
       </div>
 
@@ -85,7 +110,7 @@ export default function DeliveryAndReturnsPage() {
       <div className="bg-white rounded-3xl border border-[#E8E2D9] p-6 sm:p-8 space-y-6 shadow-xs">
         <div className="border-b border-stone-100 pb-3">
           <h2 className="font-serif font-bold text-lg text-[#2B1D14]">
-            রিটার্ন ও ৭ দিনের রিপ্লেসমেন্ট শর্তাবলি
+            রিটার্ন ও রিপ্লেসমেন্ট শর্তাবলি
           </h2>
         </div>
 
@@ -93,14 +118,14 @@ export default function DeliveryAndReturnsPage() {
           <div className="flex items-start gap-3">
             <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <p>
-              <strong>তাৎক্ষণিক রিটার্ন:</strong> ডেলিভারির সময় যদি পণ্যে কোনো ভাঙা, ফাটা বা বড় ধরনের ত্রুটি দেখতে পান, তবে কোনো চার্জ ছাড়াই ডেলিভারিম্যানের কাছে পণ্য ফেরত দিতে পারবেন।
+              <strong>তাৎক্ষণিক রিটার্ন:</strong> {returnCondition}
             </p>
           </div>
 
           <div className="flex items-start gap-3">
             <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <p>
-              <strong>৭ দিনের পার্টস রিপ্লেসমেন্ট:</strong> পরিবহনের কারণে কোনো ড্রয়ার স্লাইডার, হাতল বা ছোট স্ক্রু ক্ষতিগ্রস্ত হয়ে থাকলে পণ্য হাতে পাওয়ার ৭ দিনের মধ্যে আমাদের জানালে আমরা সম্পূর্ণ ফ্রিতে নতুন পার্টস কুরিয়ার করব।
+              <strong>ওয়ারেন্টি ও রিপ্লেসমেন্ট:</strong> {damageWarranty}
             </p>
           </div>
 
