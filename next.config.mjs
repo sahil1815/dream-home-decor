@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    agentUpgrade: 'security',
+  },
   poweredByHeader: false,
   compress: true,
   turbopack: {
@@ -22,6 +25,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '**.fbcdn.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
         pathname: '/**',
       },
       {

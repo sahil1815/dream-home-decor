@@ -25,102 +25,139 @@ export function SiteContentEditor({ initialContent }: SiteContentEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const safeObject = (raw: unknown): Record<string, unknown> => {
+    if (!raw) return {};
+    if (typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
+      return raw as Record<string, unknown>;
+    }
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+      } catch {}
+    }
+    return {};
+  };
+
+  const safeString = (val: unknown, fallback = ''): string => {
+    return typeof val === 'string' ? val : fallback;
+  };
+
   // Announcement state
-  const announcement = (contentMap.announcement?.content || {}) as {
+  const announcement = safeObject(contentMap.announcement?.content) as {
     enabled?: boolean;
     text?: string;
     link?: string;
   };
-  const [annText, setAnnText] = useState(
-    announcement.text ||
+  const [annText, setAnnText] = useState(() =>
+    safeString(
+      announcement.text,
       '🎉 মিরপুর নিজস্ব কারখানা থেকে সরাসরি ফার্নিচার কিনুন! সারাদেশে ক্যাশ অন ডেলিভারি।'
+    )
   );
   const [annEnabled, setAnnEnabled] = useState(announcement.enabled !== false);
-  const [annLink, setAnnLink] = useState(announcement.link || '/products');
+  const [annLink, setAnnLink] = useState(() => safeString(announcement.link, '/products'));
 
   // Hero state
-  const hero = (contentMap.hero?.content || {}) as {
+  const hero = safeObject(contentMap.hero?.content) as {
     badge?: string;
     title?: string;
     subtitle?: string;
     cta_text?: string;
     cta_link?: string;
   };
-  const [heroBadge, setHeroBadge] = useState(
-    hero.badge || 'সরাসরি নিজস্ব কারখানায় তৈরি • ফ্যাক্টরি হোলসেল রেট'
+  const [heroBadge, setHeroBadge] = useState(() =>
+    safeString(hero.badge, 'সরাসরি নিজস্ব কারখানায় তৈরি • ফ্যাক্টরি হোলসেল রেট')
   );
-  const [heroTitle, setHeroTitle] = useState(
-    hero.title || 'প্রিমিয়াম কোয়ালিটি মেলামাইন ও কাঠের ফার্নিচার'
+  const [heroTitle, setHeroTitle] = useState(() =>
+    safeString(hero.title, 'প্রিমিয়াম কোয়ালিটি মেলামাইন ও কাঠের ফার্নিচার')
   );
-  const [heroSubtitle, setHeroSubtitle] = useState(
-    hero.subtitle ||
+  const [heroSubtitle, setHeroSubtitle] = useState(() =>
+    safeString(
+      hero.subtitle,
       'মিরপুর নিজস্ব কারখানায় উন্নত মেশিনারিজ ও দক্ষ কারিগর দ্বারা প্রস্তুতকৃত। মধ্যস্বত্বভোগী ছাড়া পান নির্ভরযোগ্য স্থায়িত্ব।'
+    )
   );
-  const [heroCtaText, setHeroCtaText] = useState(hero.cta_text || 'ফার্নিচার কালেকশন দেখুন');
-  const [heroCtaLink, setHeroCtaLink] = useState(hero.cta_link || '/products');
+  const [heroCtaText, setHeroCtaText] = useState(() =>
+    safeString(hero.cta_text, 'ফার্নিচার কালেকশন দেখুন')
+  );
+  const [heroCtaLink, setHeroCtaLink] = useState(() => safeString(hero.cta_link, '/products'));
 
   // Policies state
-  const deliveryPolicy = (contentMap.delivery_policy?.content || {}) as {
+  const deliveryPolicy = safeObject(contentMap.delivery_policy?.content) as {
     lead_time_inside?: string;
     lead_time_outside?: string;
     packaging?: string;
   };
-  const [leadInside, setLeadInside] = useState(
-    deliveryPolicy.lead_time_inside || '১-২ কর্মদিবস (হোম ডেলিভারি)'
+  const [leadInside, setLeadInside] = useState(() =>
+    safeString(deliveryPolicy.lead_time_inside, '১-২ কর্মদিবস (হোম ডেলিভারি)')
   );
-  const [leadOutside, setLeadOutside] = useState(
-    deliveryPolicy.lead_time_outside || '৩-৫ কর্মদিবস (রেডএক্স বা সুন্দরবন কুরিয়ার)'
+  const [leadOutside, setLeadOutside] = useState(() =>
+    safeString(deliveryPolicy.lead_time_outside, '৩-৫ কর্মদিবস (রেডএক্স বা সুন্দরবন কুরিয়ার)')
   );
-  const [packagingText, setPackagingText] = useState(
-    deliveryPolicy.packaging || 'হেভি-ডিউটি বাবল র‍্যাপ এবং ৪-কোণা কর্নার প্রোটেকশন দিয়ে প্যাক করা হয়।'
+  const [packagingText, setPackagingText] = useState(() =>
+    safeString(
+      deliveryPolicy.packaging,
+      'হেভি-ডিউটি বাবল র‍্যাপ এবং ৪-কোণা কর্নার প্রোটেকশন দিয়ে প্যাক করা হয়।'
+    )
   );
 
-  const returnPolicy = (contentMap.return_policy?.content || {}) as {
+  const returnPolicy = safeObject(contentMap.return_policy?.content) as {
     condition?: string;
     damage_warranty?: string;
   };
-  const [returnCondition, setReturnCondition] = useState(
-    returnPolicy.condition ||
+  const [returnCondition, setReturnCondition] = useState(() =>
+    safeString(
+      returnPolicy.condition,
       'ডেলিভারিম্যানের উপস্থিতিতে পার্সেল চেক করে গ্রহণ করুন। কোনো ত্রুটি বা সাইজ সমস্যা থাকলে তাৎক্ষণিক ফেরত দিতে পারবেন।'
+    )
   );
-  const [damageWarranty, setDamageWarranty] = useState(
-    returnPolicy.damage_warranty ||
+  const [damageWarranty, setDamageWarranty] = useState(() =>
+    safeString(
+      returnPolicy.damage_warranty,
       'পরিবহনজনিত ভাঙচুর বা ত্রুটির ক্ষেত্রে ২৪ ঘণ্টার মধ্যে অভিযোগ দিলে বিনামূল্যে রিপ্লেসমেন্ট প্রদান করা হয়।'
+    )
   );
 
   // FAQ state
-  const faqData = (contentMap.faq?.content || {}) as {
+  const faqData = safeObject(contentMap.faq?.content) as {
     items?: Array<{ q: string; a: string }>;
   };
-  const [faqItems, setFaqItems] = useState<Array<{ q: string; a: string }>>(
-    faqData.items || [
-      {
-        q: 'আপনারা কি সম্পূর্ণ নিজস্ব কারখানায় ফার্নিচার তৈরি করেন?',
-        a: 'হ্যাঁ, আমাদের কারখানা মিরপুর-১০ এ অবস্থিত। কাঠ কাটিং, এজ ব্যান্ডিং ও ফিটিং সবকিছু নিজস্ব দক্ষ কারিগর দ্বারা সম্পন্ন হয়।',
-      },
-      {
-        q: 'ডেলিভারির সময় কি খুলে চেক করা যাবে?',
-        a: 'অবশ্যই! আমাদের প্রতিটি পণ্যে ক্যাশ অন ডেলিভারি সুবিধা রয়েছে। ডেলিভারিম্যান সামনে থাকা অবস্থায় পণ্য খুলে সন্তুষ্ট হয়ে পেমেন্ট করবেন।',
-      },
-    ]
+  const [faqItems, setFaqItems] = useState<Array<{ q: string; a: string }>>(() =>
+    Array.isArray(faqData.items)
+      ? faqData.items
+      : [
+          {
+            q: 'আপনারা কি সম্পূর্ণ নিজস্ব কারখানায় ফার্নিচার তৈরি করেন?',
+            a: 'হ্যাঁ, আমাদের কারখানা মিরপুর-১০ এ অবস্থিত। কাঠ কাটিং, এজ ব্যান্ডিং ও ফিটিং সবকিছু নিজস্ব দক্ষ কারিগর দ্বারা সম্পন্ন হয়।',
+          },
+          {
+            q: 'ডেলিভারির সময় কি খুলে চেক করা যাবে?',
+            a: 'অবশ্যই! আমাদের প্রতিটি পণ্যে ক্যাশ অন ডেলিভারি সুবিধা রয়েছে। ডেলিভারিম্যান সামনে থাকা অবস্থায় পণ্য খুলে সন্তুষ্ট হয়ে পেমেন্ট করবেন।',
+          },
+        ]
   );
 
   // Contact state
-  const contact = (contentMap.contact_details?.content || {}) as {
+  const contact = safeObject(contentMap.contact_details?.content) as {
     address?: string;
     hours?: string;
     phone?: string;
     whatsapp?: string;
     email?: string;
   };
-  const [contactAddress, setContactAddress] = useState(
-    contact.address || 'মিরপুর-১০, ঢাকা, বাংলাদেশ (সরাসরি নিজস্ব কারখানা ও শোরুম)'
+  const [contactAddress, setContactAddress] = useState(() =>
+    safeString(contact.address, 'মিরপুর-১০, ঢাকা, বাংলাদেশ (সরাসরি নিজস্ব কারখানা ও শোরুম)')
   );
-  const [contactHours, setContactHours] = useState(
-    contact.hours || 'প্রতিদিন সকাল ১০:০০ টা থেকে রাত ১০:০০ টা পর্যন্ত খোলা'
+  const [contactHours, setContactHours] = useState(() =>
+    safeString(contact.hours, 'প্রতিদিন সকাল ১০:০০ টা থেকে রাত ১০:০০ টা পর্যন্ত খোলা')
   );
-  const [contactPhone, setContactPhone] = useState(contact.phone || '01712-345678');
-  const [contactWa, setContactWa] = useState(contact.whatsapp || '8801712345678');
+  const [contactPhone, setContactPhone] = useState(() =>
+    safeString(contact.phone, '01712-345678')
+  );
+  const [contactWa, setContactWa] = useState(() =>
+    safeString(contact.whatsapp, '8801712345678')
+  );
 
   const handleSaveTab = async (section: string) => {
     setIsSaving(true);

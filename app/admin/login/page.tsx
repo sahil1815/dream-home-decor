@@ -22,20 +22,46 @@ function AdminLoginForm() {
     setErrorMsg('');
 
     try {
-      const res = await loginAdminAction({
-        name: name.trim(),
-        email: name.trim(),
-        password,
-      });
+      let res: { success: boolean; error?: string } | null = null;
 
-      if (!res.success) {
-        setErrorMsg(res.error || 'লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক নাম ও পাসওয়ার্ড দিন।');
+      // 1. Primary: Next.js Server Action
+      try {
+        res = await loginAdminAction({
+          name: name.trim(),
+          email: name.trim(),
+          password,
+        });
+      } catch (actionErr) {
+        // 2. Resilient Fallback: If Server Action ID changed due to a new deployment (409 Conflict),
+        // fallback to persistent REST API endpoint
+        try {
+          const apiRes = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name.trim(),
+              email: name.trim(),
+              password,
+            }),
+          });
+          if (apiRes.ok) {
+            res = await apiRes.json();
+          } else {
+            throw actionErr;
+          }
+        } catch {
+          throw actionErr;
+        }
+      }
+
+      if (!res?.success) {
+        setErrorMsg(res?.error || 'লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে সঠিক নাম ও পাসওয়ার্ড দিন।');
       } else {
         router.push(redirectTarget);
         router.refresh();
       }
     } catch {
-      setErrorMsg('সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।');
+      setErrorMsg('সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। অনুগ্রহ করে পৃষ্ঠাটি একবার রিলোড (⌘+Shift+R বা Ctrl+F5) করে আবার চেষ্টা করুন।');
     } finally {
       setLoading(false);
     }
@@ -44,9 +70,18 @@ function AdminLoginForm() {
   return (
     <div className="bg-white py-8 px-6 sm:px-10 rounded-3xl shadow-xl border border-stone-200/90 space-y-6">
       {errorMsg && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bn rounded-2xl flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{errorMsg}</span>
+        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bn rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+            <span>{errorMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="text-[11px] text-rose-800 underline font-semibold shrink-0 cursor-pointer hover:text-rose-950 self-end sm:self-auto"
+          >
+            পেজ রিলোড করুন 🔄
+          </button>
         </div>
       )}
 

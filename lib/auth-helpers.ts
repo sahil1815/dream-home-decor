@@ -68,12 +68,12 @@ export function clearLoginAttempts(key: string): void {
 }
 
 /**
- * Find administrative user by Name, Username, or Email.
- * Allows login via Name (e.g. 'admin', 'owner', 'sahil', or custom names from .env) as well as email.
- * Fully configurable via environment variables in .env / .env.local:
- * - ADMIN_USERNAME / ADMIN_PASSWORD (Owner)
- * - ADMIN_MANAGER_USERNAME / ADMIN_MANAGER_PASSWORD (Manager)
- * - ADMIN_STAFF_USERNAME / ADMIN_STAFF_PASSWORD (Staff)
+ * Find administrative user strictly by Name, Username, or Email defined in environment variables.
+ * NO hardcoded fallback usernames, passwords, or fuzzy matching.
+ * Only credentials explicitly provided in environment variables (.env / .env.local) are valid:
+ * - Owner: ADMIN_USERNAME, ADMIN_NAME, ADMIN_EMAIL (Password: ADMIN_PASSWORD or ADMIN_OWNER_PASSWORD_HASH)
+ * - Manager: ADMIN_MANAGER_USERNAME, ADMIN_MANAGER_NAME, ADMIN_MANAGER_EMAIL (Password: ADMIN_MANAGER_PASSWORD or ADMIN_MANAGER_PASSWORD_HASH)
+ * - Staff: ADMIN_STAFF_USERNAME, ADMIN_STAFF_NAME, ADMIN_STAFF_EMAIL (Password: ADMIN_STAFF_PASSWORD or ADMIN_STAFF_PASSWORD_HASH)
  */
 export async function findAdminByIdentifier(identifier: string): Promise<AdminRecord | null> {
   const normalized = identifier.trim().toLowerCase();
@@ -92,151 +92,93 @@ export async function findAdminByIdentifier(identifier: string): Promise<AdminRe
     return res;
   };
 
-  // 1. Environment variable configured / default Owner
-  const envOwnerEmail = (
-    process.env.ADMIN_OWNER_EMAIL ||
-    process.env.ADMIN_EMAIL ||
-    'owner@dreamhomedecor.com'
-  ).toLowerCase().trim();
-  const envOwnerName = process.env.ADMIN_OWNER_NAME || process.env.ADMIN_NAME;
-  const envOwnerUsername = process.env.ADMIN_OWNER_USERNAME || process.env.ADMIN_USERNAME;
-  const envOwnerPassword = (process.env.ADMIN_OWNER_PASSWORD || process.env.ADMIN_PASSWORD || '').trim();
-  const envOwnerPasswordHash = process.env.ADMIN_OWNER_PASSWORD_HASH;
-
-  const ownerAliases = new Set([
-    'admin',
-    'administrator',
-    'owner',
-    'sahil',
-    'sahil1815',
-    'superadmin',
-    'মালিক',
-    'কারখানা মালিক',
-    'এডমিন',
-    'অ্যাডমিন',
-    'সাহিল',
-    envOwnerEmail,
-    ...splitAliases(envOwnerName, envOwnerUsername),
-  ]);
-
-  // 2. Environment variable configured Manager
-  const envManagerEmail = (
-    process.env.ADMIN_MANAGER_EMAIL || 'manager@dreamhomedecor.com'
-  ).toLowerCase().trim();
-  const envManagerName = process.env.ADMIN_MANAGER_NAME;
-  const envManagerUsername = process.env.ADMIN_MANAGER_USERNAME;
+  // 1. Manager configuration strictly from environment variables
   const envManagerPassword = (process.env.ADMIN_MANAGER_PASSWORD || '').trim();
   const envManagerPasswordHash = process.env.ADMIN_MANAGER_PASSWORD_HASH;
+  const envManagerEmail = (process.env.ADMIN_MANAGER_EMAIL || '').toLowerCase().trim();
+  const envManagerName = process.env.ADMIN_MANAGER_NAME;
+  const envManagerUsername = process.env.ADMIN_MANAGER_USERNAME;
 
   const managerAliases = new Set([
-    'manager',
-    'store manager',
-    'স্টোর ম্যানেজার',
-    'ম্যানেজার',
-    envManagerEmail,
-    ...splitAliases(envManagerName, envManagerUsername),
+    ...splitAliases(envManagerUsername, envManagerEmail, envManagerName),
   ]);
 
-  // 3. Environment variable configured Staff
-  const envStaffEmail = (
-    process.env.ADMIN_STAFF_EMAIL || 'staff@dreamhomedecor.com'
-  ).toLowerCase().trim();
-  const envStaffName = process.env.ADMIN_STAFF_NAME;
-  const envStaffUsername = process.env.ADMIN_STAFF_USERNAME;
-  const envStaffPassword = (process.env.ADMIN_STAFF_PASSWORD || '').trim();
-  const envStaffPasswordHash = process.env.ADMIN_STAFF_PASSWORD_HASH;
-
-  const staffAliases = new Set([
-    'staff',
-    'order staff',
-    'অর্ডার স্টাফ',
-    'স্টাফ',
-    envStaffEmail,
-    ...splitAliases(envStaffName, envStaffUsername),
-  ]);
-
-  // Check Manager
-  if (managerAliases.has(normalized)) {
+  if ((envManagerPassword || envManagerPasswordHash) && managerAliases.has(normalized)) {
     const hash =
-      envManagerPasswordHash ||
-      (envManagerPassword
-        ? bcrypt.hashSync(envManagerPassword, 10)
-        : bcrypt.hashSync('manager123', 10));
-
-    const plainAllowed: string[] = [];
-    if (envManagerPassword) plainAllowed.push(envManagerPassword);
-    plainAllowed.push('manager', 'manager123', '123456', 'DHD_ManagerMirpur2026!Secure');
+      envManagerPasswordHash || bcrypt.hashSync(envManagerPassword, 10);
 
     return {
       user: {
         id: 'usr_manager_01',
-        email: envManagerEmail,
-        name: envManagerName || 'স্টোর ম্যানেজার (Manager)',
+        email: envManagerEmail || `${envManagerUsername || 'manager'}@dreamhomedecor.com`,
+        name: envManagerName || envManagerUsername || 'স্টোর ম্যানেজার (Manager)',
         role: 'manager',
       },
       passwordHash: hash,
-      allowedPlainPasswords: plainAllowed,
+      allowedPlainPasswords: envManagerPassword ? [envManagerPassword] : [],
     };
   }
 
-  // Check Staff
-  if (staffAliases.has(normalized)) {
-    const hash =
-      envStaffPasswordHash ||
-      (envStaffPassword
-        ? bcrypt.hashSync(envStaffPassword, 10)
-        : bcrypt.hashSync('staff123', 10));
+  // 2. Staff configuration strictly from environment variables
+  const envStaffPassword = (process.env.ADMIN_STAFF_PASSWORD || '').trim();
+  const envStaffPasswordHash = process.env.ADMIN_STAFF_PASSWORD_HASH;
+  const envStaffEmail = (process.env.ADMIN_STAFF_EMAIL || '').toLowerCase().trim();
+  const envStaffName = process.env.ADMIN_STAFF_NAME;
+  const envStaffUsername = process.env.ADMIN_STAFF_USERNAME;
 
-    const plainAllowed: string[] = [];
-    if (envStaffPassword) plainAllowed.push(envStaffPassword);
-    plainAllowed.push('staff', 'staff123', '123456', 'DHD_StaffMirpur2026!Secure');
+  const staffAliases = new Set([
+    ...splitAliases(envStaffUsername, envStaffEmail, envStaffName),
+  ]);
+
+  if ((envStaffPassword || envStaffPasswordHash) && staffAliases.has(normalized)) {
+    const hash =
+      envStaffPasswordHash || bcrypt.hashSync(envStaffPassword, 10);
 
     return {
       user: {
         id: 'usr_staff_01',
-        email: envStaffEmail,
-        name: envStaffName || 'অর্ডার স্টাফ (Staff)',
+        email: envStaffEmail || `${envStaffUsername || 'staff'}@dreamhomedecor.com`,
+        name: envStaffName || envStaffUsername || 'অর্ডার স্টাফ (Staff)',
         role: 'staff',
       },
       passwordHash: hash,
-      allowedPlainPasswords: plainAllowed,
+      allowedPlainPasswords: envStaffPassword ? [envStaffPassword] : [],
     };
   }
 
-  // Check Owner (default administrative account)
-  if (
-    ownerAliases.has(normalized) ||
-    normalized.includes('admin') ||
-    normalized.includes('owner') ||
-    normalized.includes('sahil') ||
-    normalized.includes('মালিক')
-  ) {
-    const hash =
-      envOwnerPasswordHash ||
-      (envOwnerPassword
-        ? bcrypt.hashSync(envOwnerPassword, 10)
-        : bcrypt.hashSync('admin123', 10));
+  // 3. Owner configuration strictly from environment variables
+  const envOwnerPassword = (
+    process.env.ADMIN_OWNER_PASSWORD ||
+    process.env.ADMIN_PASSWORD ||
+    ''
+  ).trim();
+  const envOwnerPasswordHash =
+    process.env.ADMIN_OWNER_PASSWORD_HASH || process.env.ADMIN_PASSWORD_HASH;
+  const envOwnerEmail = (
+    process.env.ADMIN_OWNER_EMAIL ||
+    process.env.ADMIN_EMAIL ||
+    ''
+  ).toLowerCase().trim();
+  const envOwnerName = process.env.ADMIN_OWNER_NAME || process.env.ADMIN_NAME;
+  const envOwnerUsername = process.env.ADMIN_OWNER_USERNAME || process.env.ADMIN_USERNAME;
 
-    const plainAllowed: string[] = [];
-    if (envOwnerPassword) plainAllowed.push(envOwnerPassword);
-    plainAllowed.push(
-      'admin',
-      'admin123',
-      '123456',
-      'sahil',
-      'sahil123',
-      'DHD_OwnerMirpur2026!Secure'
-    );
+  const ownerAliases = new Set([
+    ...splitAliases(envOwnerUsername, envOwnerEmail, envOwnerName),
+  ]);
+
+  if ((envOwnerPassword || envOwnerPasswordHash) && ownerAliases.has(normalized)) {
+    const hash =
+      envOwnerPasswordHash || bcrypt.hashSync(envOwnerPassword, 10);
 
     return {
       user: {
         id: 'usr_owner_01',
-        email: envOwnerEmail,
-        name: envOwnerName || 'কারখানা মালিক (Owner)',
+        email: envOwnerEmail || `${envOwnerUsername || 'admin'}@dreamhomedecor.com`,
+        name: envOwnerName || envOwnerUsername || 'কারখানা মালিক (Owner)',
         role: 'owner',
       },
       passwordHash: hash,
-      allowedPlainPasswords: plainAllowed,
+      allowedPlainPasswords: envOwnerPassword ? [envOwnerPassword] : [],
     };
   }
 

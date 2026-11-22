@@ -466,7 +466,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
           {/* Section 4: Images Manager */}
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200 space-y-4 shadow-2xs">
             <h2 className="text-sm font-bn font-bold text-stone-900 border-b border-stone-100 pb-2">
-              ৪. ছবির গ্যালারি ও ড্রাইভ লিঙ্ক
+              ৪. ছবির গ্যালারি ও ড্রাইভ অটো-আপলোড
             </h2>
             <ImageKitUrlManager images={images} onChange={setImages} />
           </div>

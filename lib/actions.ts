@@ -1313,6 +1313,81 @@ export async function importGoogleDriveImagesAction(items: DriveScannedItem[]) {
 }
 
 /**
+ * Server Action: Upload Single Product Image to Dedicated Google Drive Folder (Admin - Staff/Manager/Owner)
+ * Uses the Google Apps Script Webhook bridge to upload into the dedicated folder
+ * and returns high-resolution direct thumbnail link for the storefront and product manager.
+ */
+export async function uploadProductImageToGoogleDriveAction(formData: FormData) {
+  try {
+    await requireAdmin('staff');
+
+    const file = formData.get('file');
+    if (!file || !(file instanceof File)) {
+      return { success: false, error: 'কোনো ইমেজ ফাইল নির্বাচন করা হয়নি।' };
+    }
+
+    if (!file.type.startsWith('image/')) {
+      return { success: false, error: 'শুধুমাত্র ইমেজ ফাইল (JPG, PNG, WebP) গ্রহণযোগ্য।' };
+    }
+
+    const MAX_SIZE = 15 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return { success: false, error: 'ফাইলের সাইজ ১৫ মেগাবাইট (15MB)-এর বেশি হতে পারবে না।' };
+    }
+
+    const webhookUrl =
+      process.env.GOOGLE_DRIVE_WEBHOOK_URL ||
+      'https://script.google.com/macros/s/AKfycbzUIpSh7X6mPEmpT7_86qXTMo4hZlPn_mcV3gTwRBL7TWiuzp0VyU2Ijfgq6h7THgPkmQ/exec';
+
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+    const payload = {
+      fileName: file.name,
+      mimeType: file.type || 'image/jpeg',
+      base64,
+    };
+
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      redirect: 'follow',
+      next: { revalidate: 0 },
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return {
+        success: false,
+        error: `গুগল ড্রাইভ আপলোড ব্যর্থ হয়েছে (${res.status}): ${errText.slice(0, 100)}`,
+      };
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data || !data.success) {
+      return {
+        success: false,
+        error: data?.error || 'গুগল ড্রাইভে ফাইল সংরক্ষণ করা যায়নি।',
+      };
+    }
+
+    const directUrl = data.directUrl || `https://drive.google.com/thumbnail?id=${data.fileId}&sz=w1600`;
+
+    return {
+      success: true,
+      fileId: data.fileId,
+      fileName: data.fileName || file.name,
+      url: directUrl,
+      message: 'গুগল ড্রাইভে ছবি সফলভাবে আপলোড হয়েছে!',
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown upload error';
+    return { success: false, error: `আপলোড করার সময় ত্রুটি ঘটেছে: ${msg}` };
+  }
+}
+
+/**
  * Server Action: Fetch Media Library & Slots (Admin)
  */
 export async function getMediaLibraryAction() {

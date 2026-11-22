@@ -742,10 +742,22 @@ export async function getSiteContentMap(): Promise<
       > = { ...defaultContent };
 
       for (const row of data) {
+        let parsedContent = row.content;
+        if (typeof parsedContent === 'string') {
+          try {
+            parsedContent = JSON.parse(parsedContent);
+          } catch {
+            parsedContent = {};
+          }
+        }
+        if (!parsedContent || typeof parsedContent !== 'object' || Array.isArray(parsedContent)) {
+          parsedContent = {};
+        }
+
         map[row.id] = {
           id: row.id,
           title: row.title,
-          content: (row.content as Record<string, unknown>) || {},
+          content: parsedContent as Record<string, unknown>,
           updated_at: row.updated_at,
         };
       }
