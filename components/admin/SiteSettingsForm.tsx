@@ -15,6 +15,7 @@ import {
 import { SiteSettings } from '@/types/database';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
 import { saveSiteSettingsAction } from '@/lib/actions';
+import { DriveImageUploader } from '@/components/admin/DriveImageUploader';
 
 interface SiteSettingsFormProps {
   initialSettings: SiteSettings;
@@ -156,13 +157,19 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Section 1: Logo & Cover Banners (ImageKit URL Preview) */}
+        {/* Section 1: Logo & Cover Banners (Google Drive Auto-Upload) */}
         <div className="lg:col-span-12 bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 space-y-6">
-          <div className="border-b border-stone-100 pb-3 flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-[#8B5A2B]" />
-            <h2 className="text-base font-bn font-bold text-stone-900">
-              ইমেজকিট ব্যানার ও লোগো মিডিয়া (ImageKit Media Assets)
-            </h2>
+          <div className="border-b border-stone-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-[#8B5A2B]" />
+              <h2 className="text-base font-bn font-bold text-stone-900">
+                লোগো ও ব্যানার মিডিয়া (Google Drive অটো-আপলোড)
+              </h2>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bn font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              ড্রাইভ সিঙ্ক সক্রিয় (Dream Home Decor Products)
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,71 +199,28 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Logo URL */}
-            <div className="space-y-3">
-              <label className="block text-xs font-bn font-bold text-stone-700">
-                সাইট লোগো ImageKit লিঙ্ক (Logo URL)
-              </label>
-              <input
-                type="url"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://ik.imagekit.io/dreamhomedecor/logo.png"
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-sans text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B]"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* Site Logo Uploader */}
+            <DriveImageUploader
+              label="সাইট লোগো (Site Logo)"
+              helperText="কম্পিউটার/মোবাইল থেকে সিলেক্ট করলে স্বয়ংক্রিয়ভাবে গুগল ড্রাইভে আপলোড হবে।"
+              value={logoUrl}
+              onChange={setLogoUrl}
+              aspectRatio="square"
+              previewLabel="লাইভ লোগো প্রিভিউ"
+              placeholder="https://ik.imagekit.io/... অথবা https://drive.google.com/..."
+            />
 
-              {/* Instant Logo Preview */}
-              <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-2xl border border-stone-200">
-                <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-900 shrink-0 border border-stone-300 flex items-center justify-center">
-                  {logoUrl ? (
-                    <Image
-                      src={getOptimizedImageUrl(logoUrl, 150)}
-                      alt="Logo preview"
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="font-serif font-bold text-white text-base">DH</span>
-                  )}
-                </div>
-                <div className="text-xs font-bn">
-                  <span className="font-bold text-stone-800 block">লাইভ লোগো প্রিভিউ</span>
-                  <span className="text-stone-400 text-[11px]">
-                    ওয়েবসাইটের হেডার ও ফুটার অংশে দৃশ্যমান হবে
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Cover Banner URL */}
-            <div className="space-y-3">
-              <label className="block text-xs font-bn font-bold text-stone-700">
-                হোমপেজ হিরো কাভার ব্যানার (Hero Cover URL)
-              </label>
-              <input
-                type="url"
-                value={coverUrl}
-                onChange={(e) => setCoverUrl(e.target.value)}
-                placeholder="/placeholders/site/hero.jpg বা ড্রাইভ লিঙ্ক..."
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-stone-300 rounded-xl text-xs font-sans text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B]"
-              />
-
-              {/* Instant Banner Preview */}
-              <div className="relative aspect-16/7 rounded-2xl overflow-hidden border border-stone-300 bg-stone-100">
-                {coverUrl && (
-                  <Image
-                    src={getOptimizedImageUrl(coverUrl, 600)}
-                    alt="Cover preview"
-                    fill
-                    className="object-cover"
-                  />
-                )}
-                <div className="absolute bottom-2 left-2 bg-stone-900/80 text-white text-[10px] font-bn px-2 py-0.5 rounded">
-                  হিরো ব্যানার প্রিভিউ
-                </div>
-              </div>
-            </div>
+            {/* Cover Banner Uploader */}
+            <DriveImageUploader
+              label="হোমপেজ হিরো কাভার ব্যানার (Hero Cover Banner)"
+              helperText="হোমপেজের মূল হিরো ব্যানার হিসেবে প্রদর্শিত হবে। স্বয়ংক্রিয়ভাবে ড্রাইভে সেভ হবে।"
+              value={coverUrl}
+              onChange={setCoverUrl}
+              aspectRatio="banner"
+              previewLabel="হিরো ব্যানার প্রিভিউ"
+              placeholder="https://images.unsplash.com/... অথবা https://drive.google.com/..."
+            />
           </div>
         </div>
 

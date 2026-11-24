@@ -240,16 +240,14 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
             </div>
           )}
 
-          {/* Stock or Lead Time Badge */}
-          <div className="absolute top-4 right-4 bg-[#2B1D14]/80 backdrop-blur-xs text-[#FAF3E8] text-xs font-bn font-medium px-3 py-1 rounded-full border border-white/10">
-            {product.stock_status === 'out_of_stock'
-              ? 'স্টক শেষ'
-              : product.stock_status === 'made_to_order'
-              ? 'অর্ডারে তৈরি'
-              : product.lead_time_days
-              ? `ডেলিভারি ${product.lead_time_days} দিনে`
-              : 'ডেলিভারি প্রস্তুত'}
-          </div>
+          {/* Stock Status Badge (Shown only when out of stock or made to order) */}
+          {(product.stock_status === 'out_of_stock' || product.stock_status === 'made_to_order') && (
+            <div className="absolute top-4 right-4 bg-[#2B1D14]/80 backdrop-blur-xs text-[#FAF3E8] text-xs font-bn font-medium px-3 py-1 rounded-full border border-white/10">
+              {product.stock_status === 'out_of_stock'
+                ? 'স্টক শেষ'
+                : 'অর্ডারে তৈরি'}
+            </div>
+          )}
 
           {/* Sample Photo (নমুনা ছবি) Tag */}
           {isPlaceholder && (

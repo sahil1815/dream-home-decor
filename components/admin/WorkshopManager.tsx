@@ -21,6 +21,7 @@ import {
   Loader2,
   Sliders,
   PlayCircle,
+  UploadCloud,
 } from 'lucide-react';
 import { WorkshopData, WorkshopStep } from '@/types/database';
 import { DEFAULT_WORKSHOP_DATA } from '@/lib/mock-data';
@@ -103,6 +104,30 @@ export function WorkshopManager({
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [uploadingStepIdx, setUploadingStepIdx] = useState<number | null>(null);
+
+  const handleUploadStepImage = async (idx: number, file: File) => {
+    if (!file) return;
+    setUploadingStepIdx(idx);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/drive-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        handleUpdateStep(idx, 'image', data.url);
+      } else {
+        alert(data.error || 'ছবি আপলোড ব্যর্থ হয়েছে।');
+      }
+    } catch {
+      alert('ছবি আপলোড করার সময় নেটওয়ার্ক ত্রুটি হয়েছে।');
+    } finally {
+      setUploadingStepIdx(null);
+    }
+  };
 
   // Helper: Construct current data payload
   const currentPayload: WorkshopData = {
@@ -638,9 +663,26 @@ export function WorkshopManager({
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="block text-[11px] font-bn font-bold text-stone-600">
-                              ইমেজ লিংক (ImageKit / Unsplash URL)
-                            </label>
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bn font-bold text-stone-600">
+                                ইমেজ লিংক (Google Drive / ImageKit)
+                              </label>
+                              <label className="text-[11px] font-bn text-[#8B5A2B] hover:text-[#6D431F] font-semibold flex items-center gap-1 cursor-pointer">
+                                <UploadCloud className="w-3 h-3" />
+                                <span>{uploadingStepIdx === idx ? 'আপলোড হচ্ছে...' : 'ছবি আপলোড করুন'}</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  disabled={uploadingStepIdx === idx}
+                                  onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                      handleUploadStepImage(idx, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
                             <input
                               type="url"
                               value={step.image}

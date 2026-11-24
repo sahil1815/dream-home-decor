@@ -94,22 +94,20 @@ export function ProductCard({
             </div>
           )}
 
-          {/* Stock or Lead Time Badge (Shown only when meaningful) */}
-          <div className="absolute top-2.5 right-2.5">
-            {isOutOfStock ? (
-              <span className="bg-[#2B1D14]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md">
-                স্টক শেষ
-              </span>
-            ) : isMadeToOrder ? (
-              <span className="bg-[#8A5A3B]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md font-medium">
-                অর্ডারে তৈরি
-              </span>
-            ) : product.lead_time_days ? (
-              <span className="bg-[#2B1D14]/75 backdrop-blur-xs text-[#FAF3E8] text-[10px] font-bn px-2 py-0.5 rounded-md font-medium">
-                ডেলিভারি {product.lead_time_days} দিনে
-              </span>
-            ) : null}
-          </div>
+          {/* Stock Badge (Shown only when out of stock or made to order) */}
+          {(isOutOfStock || isMadeToOrder) && (
+            <div className="absolute top-2.5 right-2.5">
+              {isOutOfStock ? (
+                <span className="bg-[#2B1D14]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md">
+                  স্টক শেষ
+                </span>
+              ) : (
+                <span className="bg-[#8A5A3B]/90 backdrop-blur-xs text-white text-[11px] font-bn px-2 py-0.5 rounded-md font-medium">
+                  অর্ডারে তৈরি
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Dimensions tag */}
           {product.dimensions && (
