@@ -71,3 +71,59 @@ test('Zod Schema Order Validation', async (t) => {
     assert.equal(result.success, false);
   });
 });
+
+test('Sequential Order Numbering & Dummy Order Deletion Resilience', async (t) => {
+  const calculateNextNumber = (existingOrderNumbers, candidateChecker = () => true) => {
+    const DEFAULT_START = 1000;
+    let maxNum = DEFAULT_START;
+
+    for (const numStr of existingOrderNumbers) {
+      const m = numStr?.match(/^DHD-(\d+)$/i);
+      if (m) {
+        const num = parseInt(m[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+
+    let candidateNum = maxNum + 1;
+    let candidate = `DHD-${candidateNum}`;
+
+    while (!candidateChecker(candidate)) {
+      candidateNum++;
+      candidate = `DHD-${candidateNum}`;
+    }
+
+    return candidate;
+  };
+
+  await t.test('starts cleanly at DHD-1001 when all dummy orders are deleted (empty table)', () => {
+    const next = calculateNextNumber([]);
+    assert.equal(next, 'DHD-1001');
+  });
+
+  await t.test('generates DHD-1004 when initial dummy orders DHD-1001..DHD-1003 exist', () => {
+    const next = calculateNextNumber(['DHD-1001', 'DHD-1002', 'DHD-1003']);
+    assert.equal(next, 'DHD-1004');
+  });
+
+  await t.test('resets sequential numbering safely when random dummy order (e.g. DHD-9650) is deleted', () => {
+    // Before deleting DHD-9650
+    const beforeDelete = calculateNextNumber(['DHD-1001', 'DHD-1002', 'DHD-1003', 'DHD-9650']);
+    assert.equal(beforeDelete, 'DHD-9651');
+
+    // After deleting DHD-9650
+    const afterDelete = calculateNextNumber(['DHD-1001', 'DHD-1002', 'DHD-1003']);
+    assert.equal(afterDelete, 'DHD-1004');
+  });
+
+  await t.test('collision-safeguard advances to next free sequential number if candidate is occupied', () => {
+    const occupied = new Set(['DHD-1001', 'DHD-1002', 'DHD-1003', 'DHD-1004', 'DHD-1005']);
+    const next = calculateNextNumber(
+      ['DHD-1001', 'DHD-1002', 'DHD-1003'],
+      (candidate) => !occupied.has(candidate)
+    );
+    assert.equal(next, 'DHD-1006');
+  });
+});

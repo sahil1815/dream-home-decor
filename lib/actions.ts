@@ -28,6 +28,7 @@ import {
   DEFAULT_WORKSHOP_DATA,
   MOCK_CAMPAIGNS,
   MOCK_PRODUCTS,
+  MOCK_SAMPLE_ORDERS,
 } from '@/lib/mock-data';
 import { notifyOwnerNewOrder, notifyStatusChangeAlert } from '@/lib/notifications';
 import { logger } from '@/lib/logger';
@@ -116,6 +117,78 @@ export async function logoutAdminAction() {
 
 export async function getAdminSessionAction(): Promise<AdminSession | null> {
   return await getAdminSession();
+}
+
+/**
+ * Atomically & safely determines the next sequential order number (e.g. DHD-1001, DHD-1002).
+ * Even if all dummy orders are deleted or purged, this starts cleanly at DHD-1001
+ * and dynamically avoids collisions with any existing orders.
+ */
+export async function getNextOrderNumber(supabaseClient?: ReturnType<typeof createAdminClient>): Promise<string> {
+  const DEFAULT_START = 1000;
+
+  if (!isSupabaseConfigured()) {
+    const numbers = MOCK_SAMPLE_ORDERS
+      .map((o) => {
+        const m = o.order_number?.match(/^DHD-(\d+)$/i);
+        return m ? parseInt(m[1], 10) : null;
+      })
+      .filter((n): n is number => n !== null && !isNaN(n));
+    const maxNum = numbers.length > 0 ? Math.max(...numbers) : DEFAULT_START;
+    return `DHD-${maxNum + 1}`;
+  }
+
+  const supabase = supabaseClient || createAdminClient();
+
+  try {
+    // 1. Fetch recent order numbers to compute highest active sequential number
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('order_number')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    let maxNum = DEFAULT_START;
+
+    if (!error && orders && orders.length > 0) {
+      for (const row of orders) {
+        const m = row.order_number?.match(/^DHD-(\d+)$/i);
+        if (m) {
+          const num = parseInt(m[1], 10);
+          if (!isNaN(num) && num > maxNum) {
+            maxNum = num;
+          }
+        }
+      }
+    }
+
+    let candidateNum = maxNum + 1;
+    let candidate = `DHD-${candidateNum}`;
+
+    // 2. Collision safeguard: verify candidate doesn't already exist in DB
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 25) {
+      attempts++;
+      const { data: existing } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('order_number', candidate)
+        .maybeSingle();
+
+      if (!existing) {
+        isUnique = true;
+      } else {
+        candidateNum++;
+        candidate = `DHD-${candidateNum}`;
+      }
+    }
+
+    return candidate;
+  } catch (err) {
+    logger.error('Error in getNextOrderNumber', { error: String(err) });
+    return `DHD-${DEFAULT_START + 1}`;
+  }
 }
 
 /**
@@ -242,21 +315,21 @@ export async function submitOrderAction(payload: CreateOrderPayload) {
     );
     const authoritativeTotal = authoritativeSubtotal + authoritativeDeliveryCharge;
 
-    // Human-friendly sequential order number fallback
-    const fallbackOrderNumber = `DHD-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Authoritative sequential order number
+    const initialOrderNumber = await getNextOrderNumber(supabase);
 
     // Fallback if Supabase is not connected
     if (!isSupabaseConfigured()) {
       if (data.idempotency_key) {
         idempotencyCache.set(data.idempotency_key, {
-          orderNumber: fallbackOrderNumber,
+          orderNumber: initialOrderNumber,
           orderId: 'mock-order-id',
           expiresAt: Date.now() + 5 * 60 * 1000,
         });
       }
       return {
         success: true,
-        orderNumber: fallbackOrderNumber,
+        orderNumber: initialOrderNumber,
         message: 'অর্ডার সফলভাবে গ্রহণ করা হয়েছে (Demo Mode)!',
       };
     }
@@ -268,35 +341,54 @@ export async function submitOrderAction(payload: CreateOrderPayload) {
       totalAmount: authoritativeTotal,
     });
 
-    // Insert order using service role client
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        order_number: fallbackOrderNumber,
-        customer_name: data.customer_name.trim(),
-        customer_phone: normalizedPhone,
-        customer_address: data.customer_address.trim(),
-        delivery_zone: data.delivery_zone,
-        delivery_charge: authoritativeDeliveryCharge,
-        subtotal: authoritativeSubtotal,
-        total_amount: authoritativeTotal,
-        payment_method: data.payment_method,
-        transaction_id: data.transaction_id?.trim() || null,
-        order_notes: data.order_notes?.trim() || null,
-        status: 'pending',
-        is_flagged_suspicious: risk.isSuspicious,
-        due_amount: authoritativeTotal,
-        advance_payment_amount: 0,
-        utm_source: payload.utm_source || null,
-        utm_medium: payload.utm_medium || null,
-        utm_campaign: payload.utm_campaign || null,
-      })
-      .select('id, order_number')
-      .single();
+    // Insert order using service role client with collision-safe retry loop
+    let orderData: { id: string; order_number: string } | null = null;
+    let candidateOrderNumber = initialOrderNumber;
+    let insertAttempts = 0;
 
-    if (orderError) {
-      logger.error('Supabase order insert error', orderError);
-      return { success: false, error: 'অর্ডার সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।' };
+    while (!orderData && insertAttempts < 5) {
+      insertAttempts++;
+      const { data: inserted, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          order_number: candidateOrderNumber,
+          customer_name: data.customer_name.trim(),
+          customer_phone: normalizedPhone,
+          customer_address: data.customer_address.trim(),
+          delivery_zone: data.delivery_zone,
+          delivery_charge: authoritativeDeliveryCharge,
+          subtotal: authoritativeSubtotal,
+          total_amount: authoritativeTotal,
+          payment_method: data.payment_method,
+          transaction_id: data.transaction_id?.trim() || null,
+          order_notes: data.order_notes?.trim() || null,
+          status: 'pending',
+          is_flagged_suspicious: risk.isSuspicious,
+          due_amount: authoritativeTotal,
+          advance_payment_amount: 0,
+          utm_source: payload.utm_source || null,
+          utm_medium: payload.utm_medium || null,
+          utm_campaign: payload.utm_campaign || null,
+        })
+        .select('id, order_number')
+        .single();
+
+      if (!orderError && inserted) {
+        orderData = inserted;
+      } else if (orderError && orderError.code === '23505') {
+        logger.warn('Order number collision detected, retrying with next sequential number', {
+          candidateOrderNumber,
+          attempt: insertAttempts,
+        });
+        candidateOrderNumber = await getNextOrderNumber(supabase);
+      } else {
+        logger.error('Supabase order insert error', orderError);
+        return { success: false, error: 'অর্ডার সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।' };
+      }
+    }
+
+    if (!orderData) {
+      return { success: false, error: 'অর্ডার সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।' };
     }
 
     // 6. Insert order items
@@ -1967,6 +2059,202 @@ export async function bulkUpdateOrderStatusAction(orderIds: string[], status: Or
     return { success: true, message: `${orderIds.length}টি অর্ডারের স্ট্যাটাস সফলভাবে আপডেট হয়েছে` };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Permanently Delete Order
+ * Cleans up order_items, order_status_history, order_notes, and orders records.
+ * Inserts audit log and revalidates paths.
+ */
+export async function deleteOrderAction(orderId: string): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
+  try {
+    const session = await requireAdmin('staff');
+
+    if (!orderId || typeof orderId !== 'string') {
+      return { success: false, error: 'সঠিক অর্ডার আইডি প্রদান করুন' };
+    }
+
+    const cleanOrderId = orderId.trim();
+
+    if (!isSupabaseConfigured()) {
+      return {
+        success: true,
+        message: 'অর্ডারটি সফলভাবে মুছে ফেলা হয়েছে (Demo Mode)',
+      };
+    }
+
+    const supabase = createAdminClient();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanOrderId);
+
+    // 1. Fetch order details before deletion for audit logging & messages
+    let orderQuery = supabase
+      .from('orders')
+      .select('id, order_number, customer_name, customer_phone, total_amount');
+    
+    if (isUuid) {
+      orderQuery = orderQuery.eq('id', cleanOrderId);
+    } else {
+      orderQuery = orderQuery.eq('order_number', cleanOrderId);
+    }
+
+    const { data: order } = await orderQuery.maybeSingle();
+    const targetUuid = order?.id || (isUuid ? cleanOrderId : null);
+
+    // 2. Explicitly delete children to guarantee clean removal regardless of FK constraints
+    if (targetUuid) {
+      await supabase.from('order_items').delete().eq('order_id', targetUuid);
+      await supabase.from('order_status_history').delete().eq('order_id', targetUuid);
+      await supabase.from('order_notes').delete().eq('order_id', targetUuid);
+    }
+
+    // 3. Delete order record
+    const { error: deleteErr } = isUuid
+      ? await supabase.from('orders').delete().eq('id', cleanOrderId)
+      : await supabase.from('orders').delete().eq('order_number', cleanOrderId);
+
+    if (deleteErr) {
+      logger.error('Failed to delete order', { error: deleteErr.message, orderId: cleanOrderId });
+      return { success: false, error: `অর্ডার মুছে ফেলা যায়নি: ${deleteErr.message}` };
+    }
+
+    // 4. Audit log
+    try {
+      await supabase.from('audit_log').insert({
+        admin_email: session.email,
+        admin_role: session.role,
+        action: 'delete_order',
+        entity_type: 'orders',
+        entity_id: cleanOrderId,
+        details: {
+          order_number: order?.order_number || cleanOrderId,
+          customer_name: order?.customer_name,
+          customer_phone: order?.customer_phone,
+          total_amount: order?.total_amount,
+          deleted_at: new Date().toISOString(),
+        },
+      });
+    } catch {
+      // non-fatal
+    }
+
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
+    revalidatePath('/admin/production');
+
+    return {
+      success: true,
+      message: `অর্ডার ${order?.order_number || cleanOrderId} সফলভাবে মুছে ফেলা হয়েছে`,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'অর্ডার মুছতে সমস্যা হয়েছে';
+    logger.error('deleteOrderAction error', { error: msg });
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Permanently Bulk Delete Orders
+ */
+export async function bulkDeleteOrdersAction(orderIds: string[]): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+  deletedCount?: number;
+}> {
+  try {
+    const session = await requireAdmin('staff');
+
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+      return { success: false, error: 'কমপক্ষে একটি অর্ডার সিলেক্ট করুন' };
+    }
+
+    if (!isSupabaseConfigured()) {
+      return {
+        success: true,
+        message: `${orderIds.length}টি ডামি অর্ডার সফলভাবে মুছে ফেলা হয়েছে (Demo Mode)`,
+        deletedCount: orderIds.length,
+      };
+    }
+
+    const supabase = createAdminClient();
+
+    const uuidIds = orderIds.filter((id) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    );
+    const nonUuidIds = orderIds.filter((id) => !uuidIds.includes(id));
+
+    // 1. Delete associated children and orders for UUIDs
+    if (uuidIds.length > 0) {
+      await supabase.from('order_items').delete().in('order_id', uuidIds);
+      await supabase.from('order_status_history').delete().in('order_id', uuidIds);
+      await supabase.from('order_notes').delete().in('order_id', uuidIds);
+      const { error: uuidErr } = await supabase.from('orders').delete().in('id', uuidIds);
+      if (uuidErr) {
+        logger.error('Failed to bulk delete uuid orders', uuidErr);
+        return { success: false, error: uuidErr.message };
+      }
+    }
+
+    // 2. Delete non-UUID orders (by order_number)
+    if (nonUuidIds.length > 0) {
+      const { data: matched } = await supabase
+        .from('orders')
+        .select('id')
+        .in('order_number', nonUuidIds);
+
+      if (matched && matched.length > 0) {
+        const matchedIds = matched.map((m) => m.id);
+        await supabase.from('order_items').delete().in('order_id', matchedIds);
+        await supabase.from('order_status_history').delete().in('order_id', matchedIds);
+        await supabase.from('order_notes').delete().in('order_id', matchedIds);
+      }
+
+      const { error: nonUuidErr } = await supabase
+        .from('orders')
+        .delete()
+        .in('order_number', nonUuidIds);
+
+      if (nonUuidErr) {
+        logger.error('Failed to bulk delete non-uuid orders', nonUuidErr);
+        return { success: false, error: nonUuidErr.message };
+      }
+    }
+
+    // 3. Record in audit log
+    try {
+      await supabase.from('audit_log').insert({
+        admin_email: session.email,
+        admin_role: session.role,
+        action: 'bulk_delete_orders',
+        entity_type: 'orders',
+        details: {
+          count: orderIds.length,
+          order_ids: orderIds,
+          deleted_at: new Date().toISOString(),
+        },
+      });
+    } catch {
+      // non-fatal
+    }
+
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
+    revalidatePath('/admin/production');
+
+    return {
+      success: true,
+      message: `${orderIds.length}টি অর্ডার সফলভাবে মুছে ফেলা হয়েছে`,
+      deletedCount: orderIds.length,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'বাল্ক অর্ডার মুছতে সমস্যা হয়েছে';
+    logger.error('bulkDeleteOrdersAction error', { error: msg });
     return { success: false, error: msg };
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getPublicClient } from '@/lib/supabase/public';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
@@ -334,8 +335,12 @@ export async function trackOrderSecure(
         .eq('order_number', cleanOrderNum)
         .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
         return getMockOrder();
+      }
+
+      if (!data) {
+        return null;
       }
 
       // Verify that normalized phone matches the order record
@@ -472,16 +477,17 @@ export async function getAllOrdersAdmin(options?: {
       }
 
       const { data, error } = await q;
-      if (error || !data || data.length === 0) {
+      if (error) {
+        logger.error('Failed to fetch orders from Supabase', error);
         return getMockOrders();
       }
-      return data as Order[];
+      return (data || []) as Order[];
     } catch {
       return getMockOrders();
     }
   })();
 
-  return withTimeout(query, getMockOrders());
+  return withTimeout(query, isSupabaseConfigured() ? [] : getMockOrders());
 }
 
 export interface AdminDashboardStats {

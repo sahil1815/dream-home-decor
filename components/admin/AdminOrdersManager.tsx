@@ -16,6 +16,7 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle2,
+  Trash2,
 } from 'lucide-react';
 import { Order, OrderStatus, DeliveryZone, OrderNote } from '@/types/database';
 import { formatBDT, getStatusBadgeInfo, buildWhatsAppUrl } from '@/lib/utils';
@@ -27,6 +28,8 @@ import {
   editOrderDetailsAction,
   bulkUpdateOrderStatusAction,
   createCourierBookingAction,
+  deleteOrderAction,
+  bulkDeleteOrdersAction,
 } from '@/lib/actions';
 
 interface AdminOrdersManagerProps {
@@ -56,6 +59,12 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState<OrderStatus>('confirmed');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  // Deletion State for Single & Bulk Dummy Order Cleanups
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // Selected Order for Modal
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -190,6 +199,55 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
       showToast(err instanceof Error ? err.message : 'বাল্ক আপডেট ব্যর্থ হয়েছে', 'error');
     } finally {
       setIsBulkUpdating(false);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteOrderAction(orderToDelete.id);
+      if (res.success) {
+        setOrders((prev) =>
+          prev.filter((o) => o.id !== orderToDelete.id && o.order_number !== orderToDelete.order_number)
+        );
+        setSelectedIds((prev) => prev.filter((id) => id !== orderToDelete.id));
+        if (selectedOrder?.id === orderToDelete.id || selectedOrder?.order_number === orderToDelete.order_number) {
+          setSelectedOrder(null);
+        }
+        showToast(res.message || `✓ অর্ডার ${orderToDelete.order_number} সফলভাবে মুছে ফেলা হয়েছে`, 'success');
+        setOrderToDelete(null);
+      } else {
+        showToast(res.error || 'অর্ডার মুছতে ব্যর্থ হয়েছে', 'error');
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'অর্ডার মুছতে সমস্যা হয়েছে', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDeleting(true);
+    const count = selectedIds.length;
+    try {
+      const res = await bulkDeleteOrdersAction(selectedIds);
+      if (res.success) {
+        setOrders((prev) => prev.filter((o) => !selectedIds.includes(o.id)));
+        if (selectedOrder && selectedIds.includes(selectedOrder.id)) {
+          setSelectedOrder(null);
+        }
+        setSelectedIds([]);
+        setShowBulkDeleteModal(false);
+        showToast(res.message || `✓ ${count}টি অর্ডার সফলভাবে মুছে ফেলা হয়েছে`, 'success');
+      } else {
+        showToast(res.error || 'বাল্ক অর্ডার মুছতে ব্যর্থ হয়েছে', 'error');
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'বাল্ক অর্ডার মুছতে সমস্যা হয়েছে', 'error');
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -535,10 +593,21 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
               <button
                 type="button"
                 onClick={handleBulkStatusUpdate}
-                disabled={isBulkUpdating}
+                disabled={isBulkUpdating || isBulkDeleting}
                 className="px-3.5 py-1.5 bg-[#8B5A2B] hover:bg-[#6D431F] disabled:opacity-50 text-white font-bold rounded-lg cursor-pointer shadow-xs transition-colors"
               >
                 {isBulkUpdating ? 'আপডেট হচ্ছে...' : 'স্ট্যাটাস পরিবর্তন করুন'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowBulkDeleteModal(true)}
+                disabled={isBulkDeleting || isBulkUpdating}
+                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold rounded-lg cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+                title="নির্বাচিত অর্ডার স্থায়ীভাবে মুছে ফেলুন"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>ডিলিট করুন ({selectedIds.length})</span>
               </button>
 
               <button
@@ -737,6 +806,15 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
                         >
                           <Printer className="w-3.5 h-3.5" />
                         </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setOrderToDelete(order)}
+                          className="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bn font-bold transition-colors cursor-pointer"
+                          title="অর্ডার মুছে ফেলুন"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -776,6 +854,15 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>চালান প্রিন্ট</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderToDelete(selectedOrder)}
+                  className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl text-xs font-bn font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  title="অর্ডার মুছে ফেলুন"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>ডিলিট</span>
                 </button>
                 <button
                   type="button"
@@ -1306,6 +1393,133 @@ export function AdminOrdersManager({ initialOrders }: AdminOrdersManagerProps) {
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Single Order Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden p-6 space-y-4 font-bn">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-2.5 bg-rose-100 rounded-2xl">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base sm:text-lg text-stone-900">
+                  অর্ডার স্থায়ীভাবে মুছে ফেলুন
+                </h3>
+                <p className="text-xs text-stone-500 font-sans">
+                  Order ID: {orderToDelete.order_number}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-100 text-xs text-stone-700 space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-stone-500">গ্রাহকের নাম:</span>
+                <span className="font-bold text-stone-900">{orderToDelete.customer_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500">মোবাইল:</span>
+                <span className="font-sans font-semibold text-stone-900">{orderToDelete.customer_phone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500">অর্ডারের মূল্য:</span>
+                <span className="font-sans font-bold text-stone-900">{formatBDT(orderToDelete.total_amount)}</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] text-amber-900">
+              ⚠️ এটি মুছে ফেললে ডাটাবেজ থেকে এই অর্ডারের সমস্ত আইটেম ও ট্র্যাকিং হিস্ট্রি স্থায়ীভাবে ডিলিট হয়ে যাবে। পরবর্তীতে নতুন যেকোনো অর্ডার তৈরিতে কোনো সমস্যা হবে না।
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setOrderToDelete(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-stone-600 hover:text-stone-900 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                বাতিল
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteOrder}
+                disabled={isDeleting}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>মুছে ফেলা হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>হ্যাঁ, মুছে ফেলুন</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Bulk Orders Delete Confirmation Modal */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden p-6 space-y-4 font-bn">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-2.5 bg-rose-100 rounded-2xl">
+                <AlertTriangle className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base sm:text-lg text-stone-900">
+                  বাল্ক অর্ডার মুছে ফেলার নিশ্চিতকরণ
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  মোট {selectedIds.length}টি অর্ডার সিলেক্ট করা হয়েছে
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-stone-600">
+              আপনি কি নিশ্চিত যে নির্বাচিত <strong>{selectedIds.length}টি ডামি/টেস্ট অর্ডার</strong> স্থায়ীভাবে ডাটাবেজ থেকে মুছে ফেলতে চান?
+            </p>
+
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] text-amber-900">
+              ⚠️ এই অর্ডারগুলো এবং সংশ্লিষ্ট সমস্ত আইটেম ও হিস্ট্রি স্থায়ীভাবে ডিলিট হয়ে যাবে। পরবর্তীতে নতুন অর্ডার নম্বর তৈরিতে কোনো সংঘর্ষ (collision) হবে না।
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowBulkDeleteModal(false)}
+                disabled={isBulkDeleting}
+                className="px-4 py-2 text-stone-600 hover:text-stone-900 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                বাতিল
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                {isBulkDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>মুছে ফেলা হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>হ্যাঁ, সব মুছে ফেলুন</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
