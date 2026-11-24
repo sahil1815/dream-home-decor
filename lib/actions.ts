@@ -1054,6 +1054,7 @@ export async function saveWorkshopDataAction(payload: WorkshopData) {
     }
 
     const cleanData: WorkshopData = {
+      is_active: payload.is_active !== false,
       badge: payload.badge?.trim() || DEFAULT_WORKSHOP_DATA.badge,
       title: payload.title.trim(),
       description: payload.description?.trim() || '',
@@ -1073,7 +1074,9 @@ export async function saveWorkshopDataAction(payload: WorkshopData) {
           payload.videoCard?.buttonText?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.buttonText,
         buttonUrl:
           payload.videoCard?.buttonUrl?.trim() || DEFAULT_WORKSHOP_DATA.videoCard.buttonUrl,
-      },
+        // Also persist workshop_is_active in videoCard object for resilient Supabase JSON fallback
+        workshop_is_active: payload.is_active !== false,
+      } as any,
       updated_at: new Date().toISOString(),
     };
 
@@ -1081,16 +1084,27 @@ export async function saveWorkshopDataAction(payload: WorkshopData) {
     if (isSupabaseConfigured()) {
       try {
         const supabase = createAdminClient();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase.from('workshop_settings' as any) as any).upsert({
+        const rowPayload: Record<string, any> = {
           id: 1,
+          is_active: cleanData.is_active,
           badge: cleanData.badge,
           title: cleanData.title,
           description: cleanData.description,
           steps: cleanData.steps,
           video_card: cleanData.videoCard,
           updated_at: cleanData.updated_at,
-        });
+        };
+
+        const { error: sbErr } = await (supabase.from('workshop_settings' as any) as any).upsert(rowPayload);
+        if (sbErr) {
+          // If is_active column does not exist yet, retry without is_active column
+          if (String(sbErr.message || '').includes('is_active')) {
+            delete rowPayload.is_active;
+            await (supabase.from('workshop_settings' as any) as any).upsert(rowPayload);
+          } else {
+            logger.warn('Supabase workshop sync warning', { error: String(sbErr.message) });
+          }
+        }
       } catch (sbErr) {
         logger.warn('Supabase workshop sync warning', { error: String(sbErr) });
       }
@@ -1111,16 +1125,37 @@ export async function saveWorkshopDataAction(payload: WorkshopData) {
     }
 
     revalidatePath('/');
+    revalidatePath('/about');
     revalidatePath('/admin/workshop');
 
     return {
       success: true,
-      message: 'ওয়ার্কশপ সেকশন সফলভাবে সংরক্ষিত হয়েছে! হোমপেজে পরিবর্তন কার্যকর হয়েছে।',
+      message: cleanData.is_active
+        ? 'ওয়ার্কশপ সেকশন সফলভাবে সংরক্ষিত হয়েছে! হোমপেজে পরিবর্তন কার্যকর হয়েছে।'
+        : 'ওয়ার্কশপ সেকশন সফলভাবে বন্ধ (Turned Off) করা হয়েছে! হোমপেজে এটি আর প্রদর্শিত হবে না।',
       data: cleanData,
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: `সংরক্ষণ ব্যর্থ হয়েছে: ${msg}` };
+  }
+}
+
+/**
+ * Server Action: Toggle Workshop System Active Status (Admin - Manager / Owner)
+ */
+export async function toggleWorkshopStatusAction(isActive: boolean) {
+  try {
+    await requireAdmin('manager');
+    const { getWorkshopData } = await import('@/lib/data');
+    const current = await getWorkshopData();
+    return await saveWorkshopDataAction({
+      ...current,
+      is_active: isActive,
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: `স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে: ${msg}` };
   }
 }
 

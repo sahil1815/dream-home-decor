@@ -312,6 +312,7 @@ export interface WorkshopVideoCard {
 }
 
 export interface WorkshopData {
+  is_active?: boolean;
   badge: string;
   title: string;
   description: string;

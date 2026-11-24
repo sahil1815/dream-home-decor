@@ -24,9 +24,10 @@ import { buildWhatsAppUrl } from '@/lib/utils';
 interface NavbarProps {
   settings: SiteSettings;
   categories: Category[];
+  workshopActive?: boolean;
 }
 
-export function Navbar({ settings, categories }: NavbarProps) {
+export function Navbar({ settings, categories, workshopActive = true }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems, openCart } = useCart();
@@ -234,12 +235,14 @@ export function Navbar({ settings, categories }: NavbarProps) {
             </div>
 
             {/* ৬. আমাদের কারখানা */}
-            <Link
-              href="/#workshop"
-              className="text-xs xl:text-sm font-bn font-bold text-[#8B5A2B] hover:text-[#6D431F] transition-colors select-none"
-            >
-              আমাদের কারখানা
-            </Link>
+            {workshopActive && (
+              <Link
+                href="/#workshop"
+                className="text-xs xl:text-sm font-bn font-bold text-[#8B5A2B] hover:text-[#6D431F] transition-colors select-none"
+              >
+                আমাদের কারখানা
+              </Link>
+            )}
           </nav>
 
           {/* ========================================================= */}
@@ -398,14 +401,16 @@ export function Navbar({ settings, categories }: NavbarProps) {
                 </Link>
               ))}
 
-              <Link
-                href="/#workshop"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-[#8B5A2B] text-sm font-bold transition-colors"
-              >
-                <span>আমাদের কারখানা</span>
-                <ChevronRight className="w-4 h-4 text-[#8B5A2B]" />
-              </Link>
+              {workshopActive && (
+                <Link
+                  href="/#workshop"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-stone-100 text-[#8B5A2B] text-sm font-bold transition-colors"
+                >
+                  <span>আমাদের কারখানা</span>
+                  <ChevronRight className="w-4 h-4 text-[#8B5A2B]" />
+                </Link>
+              )}
 
               <Link
                 href="/custom-furniture"

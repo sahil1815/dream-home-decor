@@ -219,8 +219,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. Inside Our Workshop Section */}
-      <WorkshopShowcase workshopData={workshopData} facebookUrl={settings.facebook_url} />
+      {/* 7. Inside Our Workshop Section (Only displayed when turned ON) */}
+      {workshopData.is_active !== false && (
+        <WorkshopShowcase workshopData={workshopData} facebookUrl={settings.facebook_url} />
+      )}
 
       {/* 8. Factual Craftsmanship & Manufacturing Standards (Replaced Comparison Table) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

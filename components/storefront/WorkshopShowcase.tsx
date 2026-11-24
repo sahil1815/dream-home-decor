@@ -15,6 +15,12 @@ export function WorkshopShowcase({
   facebookUrl,
 }: WorkshopShowcaseProps) {
   const data = workshopData || DEFAULT_WORKSHOP_DATA;
+
+  // If the workshop system is turned off by admin, do not render on the frontend
+  if (data.is_active === false) {
+    return null;
+  }
+
   const steps = data.steps && data.steps.length > 0 ? data.steps : DEFAULT_WORKSHOP_DATA.steps;
   const videoCard = data.videoCard || DEFAULT_WORKSHOP_DATA.videoCard;
   const activeFacebookUrl = videoCard.buttonUrl || facebookUrl || DEFAULT_WORKSHOP_DATA.videoCard.buttonUrl;

@@ -22,6 +22,8 @@ import {
   Sliders,
   PlayCircle,
   UploadCloud,
+  Power,
+  EyeOff,
 } from 'lucide-react';
 import { WorkshopData, WorkshopStep } from '@/types/database';
 import { DEFAULT_WORKSHOP_DATA } from '@/lib/mock-data';
@@ -64,6 +66,11 @@ export function WorkshopManager({
   initialData,
   defaultFacebookUrl = 'https://www.facebook.com/profile.php?id=61584955311887',
 }: WorkshopManagerProps) {
+  // Workshop active/visibility state (Turned ON or OFF)
+  const [isActive, setIsActive] = useState<boolean>(
+    initialData.is_active !== undefined ? initialData.is_active : true
+  );
+
   // Main form state
   const [badge, setBadge] = useState(initialData.badge || DEFAULT_WORKSHOP_DATA.badge);
   const [title, setTitle] = useState(initialData.title || DEFAULT_WORKSHOP_DATA.title);
@@ -131,6 +138,7 @@ export function WorkshopManager({
 
   // Helper: Construct current data payload
   const currentPayload: WorkshopData = {
+    is_active: isActive,
     badge,
     title,
     description,
@@ -228,6 +236,7 @@ export function WorkshopManager({
     try {
       const res = await resetWorkshopDataAction();
       if (res.success) {
+        setIsActive(DEFAULT_WORKSHOP_DATA.is_active !== false);
         setBadge(DEFAULT_WORKSHOP_DATA.badge);
         setTitle(DEFAULT_WORKSHOP_DATA.title);
         setDescription(DEFAULT_WORKSHOP_DATA.description);
@@ -275,6 +284,20 @@ export function WorkshopManager({
               <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 font-bn">
                 সরাসরি কারখানা
               </span>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border font-bn ${
+                  isActive
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                  }`}
+                />
+                <span>{isActive ? 'হোমপেজে চালু (Active)' : 'হোমপেজে বন্ধ (Turned Off)'}</span>
+              </span>
             </div>
             <p className="text-xs font-bn text-stone-500 mt-0.5">
               হোমপেজের &ldquo;সরাসরি কারখানার অন্দরমহল&rdquo; সেকশনের হেডার, ৪-ধাপের উৎপাদন গ্যালারি ও ফেসবুক ভিডিও ব্যানার এডিট করুন
@@ -284,6 +307,21 @@ export function WorkshopManager({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Quick Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsActive(!isActive)}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bn font-bold transition-all cursor-pointer border ${
+              isActive
+                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
+                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+            }`}
+            title={isActive ? 'ওয়ার্কশপ সেকশন বন্ধ করুন' : 'ওয়ার্কশপ সেকশন চালু করুন'}
+          >
+            <Power className="w-3.5 h-3.5" />
+            <span>{isActive ? 'সেকশন বন্ধ করুন (Turn OFF)' : 'সেকশন চালু করুন (Turn ON)'}</span>
+          </button>
+
           <Link
             href="/#workshop"
             target="_blank"
@@ -324,6 +362,33 @@ export function WorkshopManager({
           </button>
         </div>
       </div>
+
+      {/* Turned OFF Inactive Notice Banner */}
+      {!isActive && (
+        <div className="bg-amber-50 border border-amber-300 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 shadow-2xs">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+              <EyeOff className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bn font-bold text-amber-950">
+                ওয়ার্কশপ সিস্টেম বর্তমানে বন্ধ (Turned Off) রাখা হয়েছে
+              </h4>
+              <p className="text-xs font-bn text-amber-800 mt-0.5 leading-relaxed">
+                হোমপেজ ও নেভিগেশন মেনু থেকে এই সেকশনটি সম্পূর্ণ হাইড রয়েছে। পুনরায় চালু করতে উপরের &ldquo;সেকশন চালু করুন&rdquo; এ ক্লিক করে &ldquo;পরিবর্তন সেভ করুন&rdquo; চাপুন।
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsActive(true)}
+            className="self-start sm:self-auto shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bn font-bold shadow-xs transition-colors cursor-pointer"
+          >
+            <Power className="w-3.5 h-3.5" />
+            <span>এখনই চালু করুন</span>
+          </button>
+        </div>
+      )}
 
       {/* Feedback Alert Toast */}
       {feedback && (
@@ -390,7 +455,55 @@ export function WorkshopManager({
       {activeTab === 'editor' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sub-menu / Section selector for the editor */}
-          <div className="lg:col-span-3 space-y-2">
+          <div className="lg:col-span-3 space-y-3">
+            {/* Master Visibility Status Card */}
+            <div
+              className={`p-3.5 rounded-2xl border transition-all ${
+                isActive
+                  ? 'bg-emerald-50/70 border-emerald-200'
+                  : 'bg-rose-50/80 border-rose-200'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bn font-bold text-stone-800 flex items-center gap-1.5">
+                  <Power
+                    className={`w-3.5 h-3.5 ${
+                      isActive ? 'text-emerald-600' : 'text-rose-600'
+                    }`}
+                  />
+                  <span>সিস্টেম স্ট্যাটাস</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bn font-bold px-2 py-0.5 rounded-full ${
+                    isActive
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-rose-100 text-rose-800'
+                  }`}
+                >
+                  {isActive ? 'সক্রিয় (ON)' : 'বন্ধ (OFF)'}
+                </span>
+              </div>
+              <p className="text-[10px] font-bn text-stone-600 mt-1 leading-snug">
+                {isActive
+                  ? 'হোমপেজে ওয়ার্কশপ সেকশন প্রদর্শিত হচ্ছে।'
+                  : 'হোমপেজ ও মেনু থেকে সম্পূর্ণ হাইড রয়েছে।'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsActive(!isActive)}
+                className={`w-full mt-2.5 py-1.5 px-3 rounded-xl text-[11px] font-bn font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                  isActive
+                    ? 'bg-rose-100 hover:bg-rose-200 text-rose-800'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                }`}
+              >
+                <Power className="w-3 h-3" />
+                <span>
+                  {isActive ? 'সেকশন বন্ধ করুন (OFF)' : 'সেকশন চালু করুন (ON)'}
+                </span>
+              </button>
+            </div>
+
             <div className="bg-white p-3 rounded-2xl border border-stone-200 space-y-1">
               <button
                 type="button"
@@ -477,8 +590,13 @@ export function WorkshopManager({
                 <p className="text-[11px] font-bn text-stone-400 line-clamp-2">
                   {description}
                 </p>
-                <div className="text-[10px] font-bn text-amber-300 pt-1">
-                  মোট কার্ড: {steps.length}টি ধাপ • ভিডিও ব্যানার: {videoCardEnabled ? 'অন' : 'অফ'}
+                <div className="text-[10px] font-bn pt-1 flex items-center justify-between">
+                  <span className="text-amber-300">
+                    মোট: {steps.length}টি ধাপ • ভিডিও: {videoCardEnabled ? 'অন' : 'অফ'}
+                  </span>
+                  <span className={isActive ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                    {isActive ? '● সক্রিয়' : '○ হাইড'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -489,6 +607,66 @@ export function WorkshopManager({
             {/* SUB-SECTION 1: HEADER & DESCRIPTION */}
             {editorSection === 'header' && (
               <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-2xs space-y-6">
+                {/* Master Visibility Switch Card */}
+                <div
+                  className={`p-5 rounded-2xl border transition-all ${
+                    isActive
+                      ? 'bg-emerald-50/70 border-emerald-200'
+                      : 'bg-rose-50/80 border-rose-200'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Power
+                          className={`w-5 h-5 ${
+                            isActive ? 'text-emerald-600' : 'text-rose-600'
+                          }`}
+                        />
+                        <h3 className="text-sm font-bold font-bn text-stone-900">
+                          হোমপেজে ওয়ার্কশপ সেকশন প্রদর্শন নিয়ন্ত্রণ (Master Switch)
+                        </h3>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold font-bn ${
+                            isActive
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {isActive ? 'বর্তমানে চালু (ON)' : 'বর্তমানে বন্ধ (OFF)'}
+                        </span>
+                      </div>
+                      <p className="text-xs font-bn text-stone-600 leading-relaxed">
+                        {isActive
+                          ? 'এই অপশনটি চালু থাকায় গ্রাহকরা স্টোরফ্রন্ট হোমপেজে "সরাসরি কারখানার অন্দরমহল" সেকশন ও ভিডিও গ্যালারি দেখতে পাবেন।'
+                          : 'এই অপশনটি বন্ধ থাকায় হোমপেজ ও হেডার মেনু থেকে কারখানা সম্পর্কিত সকল সেকশন সম্পূর্ণ হাইড থাকবে।'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bn font-bold text-stone-700">
+                        {isActive ? 'সক্রিয় (ON)' : 'বন্ধ (OFF)'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsActive(!isActive)}
+                        className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer focus:outline-none ${
+                          isActive ? 'bg-emerald-600' : 'bg-stone-300'
+                        }`}
+                        role="switch"
+                        aria-checked={isActive}
+                        title={isActive ? 'ওয়ার্কশপ বন্ধ করতে ক্লিক করুন' : 'ওয়ার্কশপ চালু করতে ক্লিক করুন'}
+                      >
+                        <span
+                          className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 shadow-md ${
+                            isActive ? 'translate-x-6' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="border-b border-stone-100 pb-4">
                   <h2 className="text-base font-bold font-bn text-stone-900 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-[#8B5A2B]" />
@@ -907,6 +1085,26 @@ export function WorkshopManager({
               ← এডিটরে ফিরে যান
             </button>
           </div>
+
+          {/* Alert when turned OFF */}
+          {!isActive && (
+            <div className="bg-amber-950/90 border border-amber-500/50 text-amber-200 p-4 sm:p-5 rounded-2xl text-xs font-bn flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-2.5">
+                <EyeOff className="w-5 h-5 text-amber-400 shrink-0" />
+                <span>
+                  <strong>সতর্কবার্তা:</strong> ওয়ার্কশপ সিস্টেম বর্তমানে <strong>বন্ধ (Turned Off)</strong> রয়েছে। হোমপেজের সাধারণ ভিজিটররা এই সেকশনটি দেখতে পাবেন না। নিচে শুধুমাত্র আপনার কাজের সুবিধার জন্য প্রিভিউ দেখানো হচ্ছে।
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsActive(true)}
+                className="self-start sm:self-auto shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bn font-bold cursor-pointer transition-colors shadow-xs"
+              >
+                <Power className="w-3.5 h-3.5" />
+                <span>সেকশন চালু করুন</span>
+              </button>
+            </div>
+          )}
 
           {/* Actual Workshop Showcase Section rendering with live state */}
           <section className="py-16 sm:py-20 bg-gradient-to-b from-[#F5EFE6] via-[#F2EAE0] to-[#EAE0D2] text-stone-900 rounded-3xl relative overflow-hidden shadow-xl border border-amber-900/10">

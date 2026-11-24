@@ -378,7 +378,10 @@ export async function getWorkshopData(): Promise<WorkshopData> {
       const content = await fs.readFile(filePath, 'utf-8');
       const parsed = JSON.parse(content);
       if (parsed && Array.isArray(parsed.steps) && parsed.steps.length > 0) {
-        return parsed as WorkshopData;
+        return {
+          ...parsed,
+          is_active: parsed.is_active !== undefined ? Boolean(parsed.is_active) : true,
+        } as WorkshopData;
       }
     } catch {
       // Fallback
@@ -405,7 +408,17 @@ export async function getWorkshopData(): Promise<WorkshopData> {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const row = data as any;
+      const isActive =
+        row.is_active !== undefined
+          ? Boolean(row.is_active)
+          : row.video_card &&
+            typeof row.video_card === 'object' &&
+            row.video_card.workshop_is_active !== undefined
+          ? Boolean(row.video_card.workshop_is_active)
+          : true;
+
       return {
+        is_active: isActive,
         badge: row.badge || DEFAULT_WORKSHOP_DATA.badge,
         title: row.title || DEFAULT_WORKSHOP_DATA.title,
         description: row.description || DEFAULT_WORKSHOP_DATA.description,

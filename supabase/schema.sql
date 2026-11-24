@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS campaigns_giveaways (
 -- 9. WORKSHOP SETTINGS TABLE (Factory Tour, Steps & Live Video Banner)
 CREATE TABLE IF NOT EXISTS workshop_settings (
   id INT PRIMARY KEY DEFAULT 1,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   badge TEXT NOT NULL DEFAULT 'সরাসরি কারখানার অন্দরমহল • Inside Our Workshop',
   title TEXT NOT NULL DEFAULT 'আমরা কীভাবে তৈরি করি আপনার পছন্দের ফার্নিচার?',
   description TEXT NOT NULL DEFAULT 'কোনো থার্ড-পার্টি বা মধ্যস্বত্বভোগী নয় — বোর্ড কেনা থেকে শুরু করে কাটিং, সাইজিং ও ডেলিভারি প্যাকেজিং পর্যন্ত সবকিছু সম্পন্ন হয় আমাদের নিজস্ব মিরপুরের ওয়ার্কশপে। তাই পাচ্ছেন সেরা ফিনিশিং ও অবিশ্বাস্য সাশ্রয়ী রেট।',

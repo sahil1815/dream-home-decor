@@ -333,6 +333,7 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_description TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS has_placeholder_images BOOLEAN DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE workshop_settings ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
 
 -- Site Settings Evolution
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS site_name_bn TEXT DEFAULT 'ড্রিম হোম ডেকোর';

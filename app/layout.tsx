@@ -3,7 +3,7 @@ import { Noto_Serif_Bengali, Hind_Siliguri, Inter } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { WishlistProvider } from '@/context/wishlist-context';
-import { getSiteSettings, getCategories, getSiteContentMap } from '@/lib/data';
+import { getSiteSettings, getCategories, getSiteContentMap, getWorkshopData } from '@/lib/data';
 import { AnnouncementBar } from '@/components/storefront/AnnouncementBar';
 import { Navbar } from '@/components/storefront/Navbar';
 import { Footer } from '@/components/storefront/Footer';
@@ -104,10 +104,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, categories, contentMap] = await Promise.all([
+  const [settings, categories, contentMap, workshopData] = await Promise.all([
     getSiteSettings(),
     getCategories(),
     getSiteContentMap(),
+    getWorkshopData(),
   ]);
 
   const organizationSchema = {
@@ -162,7 +163,11 @@ export default async function RootLayout({
             />
 
             {/* Sticky Navigation */}
-            <Navbar settings={settings} categories={categories} />
+            <Navbar
+              settings={settings}
+              categories={categories}
+              workshopActive={workshopData.is_active !== false}
+            />
 
             {/* Main Content */}
             <main className="flex-1 pb-16 lg:pb-0">{children}</main>

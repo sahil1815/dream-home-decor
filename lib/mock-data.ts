@@ -308,6 +308,7 @@ export const MOCK_SAMPLE_ORDERS: Order[] = [
 ];
 
 export const DEFAULT_WORKSHOP_DATA: WorkshopData = {
+  is_active: true,
   badge: 'আমাদের মিরপুর ওয়ার্কশপ',
   title: 'আমরা কীভাবে ফার্নিচার তৈরি করি?',
   description:
