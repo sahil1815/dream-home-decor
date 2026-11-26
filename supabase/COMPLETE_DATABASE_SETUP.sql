@@ -238,15 +238,21 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 3.16 Admin Users
+-- 3.16 Admin Users (Service-Role Only)
 CREATE TABLE IF NOT EXISTS admin_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
+  username TEXT,
   name TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'staff',
+  role TEXT UNIQUE NOT NULL DEFAULT 'staff',
   password_hash TEXT NOT NULL,
+  token_version INTEGER NOT NULL DEFAULT 1,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+  password_updated_at TIMESTAMPTZ,
+  updated_by TEXT,
+  last_login_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 -- 3.17 Campaigns & Giveaways
@@ -376,7 +382,7 @@ DECLARE
     'site_settings', 'categories', 'products', 'delivery_zones',
     'orders', 'order_items', 'order_status_history', 'order_notes',
     'customers', 'custom_requests', 'abandoned_checkouts', 'coupons',
-    'reviews', 'site_content', 'audit_log', 'admin_users',
+    'reviews', 'site_content', 'audit_log',
     'campaigns_giveaways', 'workshop_settings'
   ];
 BEGIN
@@ -389,6 +395,16 @@ BEGIN
       WHEN OTHERS THEN NULL;
     END;
   END LOOP;
+
+  -- Strictly lock down admin_users so only service_role can read/write credentials
+  BEGIN
+    ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "Public full access policy" ON admin_users;
+    DROP POLICY IF EXISTS "Admin manage admin users" ON admin_users;
+    REVOKE ALL ON TABLE admin_users FROM anon, authenticated;
+  EXCEPTION
+    WHEN OTHERS THEN NULL;
+  END;
 END $$;
 
 -- ==============================================================================

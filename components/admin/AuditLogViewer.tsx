@@ -60,6 +60,8 @@ export function AuditLogViewer({ initialLogs }: AuditLogViewerProps) {
     save_delivery_zone: 'ডেলিভারি চার্জ নির্ধারণ',
     save_site_content: 'সাইট পলিসি / কনটেন্ট এডিট',
     update_custom_request: 'কাস্টম ফার্নিচার কোটেশন আপডেট',
+    change_admin_password: 'অ্যাডমিন পাসওয়ার্ড পরিবর্তন',
+    clear_login_lockouts: 'লগইন লকআউট রিসেট',
   };
 
   return (

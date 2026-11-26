@@ -627,16 +627,21 @@ CREATE TABLE IF NOT EXISTS site_content (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Admin Users Table
+-- Admin Users Table (Service-Role Only)
 CREATE TABLE IF NOT EXISTS admin_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
+  username TEXT,
   name TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'staff',
+  role TEXT UNIQUE NOT NULL DEFAULT 'staff',
   password_hash TEXT NOT NULL,
+  token_version INTEGER NOT NULL DEFAULT 1,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  password_updated_at TIMESTAMPTZ,
+  updated_by TEXT,
   last_login_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Immutable Audit Log
@@ -744,7 +749,7 @@ CREATE POLICY "Admin manage product variants" ON product_variants FOR ALL TO aut
 CREATE POLICY "Admin manage delivery zones" ON delivery_zones FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Admin manage site media" ON site_media FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Admin manage site content" ON site_content FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin manage admin users" ON admin_users FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- admin_users has RLS enabled with zero policies so only service_role can access it
 CREATE POLICY "Admin manage audit log" ON audit_log FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Admin manage custom requests" ON custom_requests FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Admin manage reviews" ON reviews FOR ALL TO authenticated USING (true) WITH CHECK (true);

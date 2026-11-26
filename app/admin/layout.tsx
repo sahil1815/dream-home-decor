@@ -48,8 +48,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [session, setSession] = useState<AdminSession | null>(null);
 
   useEffect(() => {
-    getAdminSessionAction().then((s) => setSession(s));
-  }, [pathname]);
+    if (pathname === '/admin/login') return;
+    getAdminSessionAction().then((s) => {
+      if (!s) {
+        router.replace('/admin/login');
+        return;
+      }
+      setSession(s);
+    });
+  }, [pathname, router]);
 
   // If on login page, don't show the dashboard shell
   if (pathname === '/admin/login') {

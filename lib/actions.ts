@@ -22,8 +22,17 @@ import {
   logoutAdminSession,
   getAdminSession,
   requireAdmin,
+  clearAllLoginAttempts,
+  setAdminSessionCookie,
+  AdminRole,
   AdminSession,
 } from '@/lib/auth';
+import {
+  changeAdminPassword,
+  getAdminSecurityOverview,
+  AdminSecurityOverview,
+  ChangePasswordResult,
+} from '@/lib/admin-credentials';
 import {
   DEFAULT_WORKSHOP_DATA,
   MOCK_CAMPAIGNS,
@@ -2842,10 +2851,95 @@ export async function markAbandonedCheckoutRecoveredAction(id: string) {
  */
 export async function clearAllLoginLockoutsAction() {
   try {
-    await requireAdmin('owner');
+    const session = await requireAdmin('owner');
+    clearAllLoginAttempts();
+
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = createAdminClient();
+        await supabase.from('audit_log').insert({
+          admin_email: session.email,
+          admin_role: session.role,
+          action: 'clear_login_lockouts',
+          entity_type: 'admin_users',
+          details: { cleared_by: session.email },
+        });
+      } catch {
+        // Non-fatal
+      }
+    }
+
     return { success: true, message: 'সমস্ত অস্থায়ী লগইন রেট-লিমিট ও লকআউট সফলভাবে রিসেট করা হয়েছে।' };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Get Admin Credential & Sync Security Overview (Owner only)
+ */
+export async function getAdminSecurityOverviewAction(): Promise<{
+  success: boolean;
+  overview?: AdminSecurityOverview;
+  error?: string;
+}> {
+  try {
+    await requireAdmin('owner');
+    const overview = await getAdminSecurityOverview();
+    return { success: true, overview };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'তথ্য লোড করা যায়নি';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Securely Change Admin Password (Owner only)
+ */
+export async function changeAdminPasswordAction(payload: {
+  targetRole: AdminRole;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<ChangePasswordResult> {
+  try {
+    const session = await requireAdmin('owner', { bypassCache: true });
+
+    let clientIp = 'unknown';
+    try {
+      const { headers } = await import('next/headers');
+      const headerList = await headers();
+      clientIp = headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    } catch {
+      // Ignore outside request context
+    }
+
+    const result = await changeAdminPassword({
+      actorSession: session,
+      targetRole: payload.targetRole,
+      currentOwnerPassword: payload.currentPassword,
+      newPassword: payload.newPassword,
+      confirmPassword: payload.confirmPassword,
+      clientIp,
+    });
+
+    if (result.success) {
+      // Rotate owner's current browser cookie so they remain logged in with the new tokenVersion
+      if (payload.targetRole === 'owner' && result.updatedUser && result.newTokenVersion) {
+        await setAdminSessionCookie({
+          ...result.updatedUser,
+          tokenVersion: result.newTokenVersion,
+        });
+      }
+
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/audit');
+    }
+
+    return result;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে';
     return { success: false, error: msg };
   }
 }

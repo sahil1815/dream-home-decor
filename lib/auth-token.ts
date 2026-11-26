@@ -11,6 +11,7 @@ export interface AdminSession {
   email: string;
   name: string;
   role: AdminRole;
+  tokenVersion?: number;
   expiresAt: number;
 }
 
@@ -70,7 +71,7 @@ async function verifySignature(payloadStr: string, signatureBase64: string): Pro
 }
 
 export async function createSessionToken(
-  user: { id: string; email: string; name: string; role: AdminRole },
+  user: { id: string; email: string; name: string; role: AdminRole; tokenVersion?: number },
   durationSeconds = SESSION_DURATION_SECONDS
 ): Promise<string> {
   const expiresAt = Math.floor(Date.now() / 1000) + durationSeconds;
@@ -79,6 +80,7 @@ export async function createSessionToken(
     email: user.email,
     name: user.name,
     role: user.role,
+    tokenVersion: user.tokenVersion ?? 1,
     expiresAt,
   };
 
