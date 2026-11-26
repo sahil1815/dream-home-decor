@@ -98,6 +98,20 @@ export interface CreateOrderPayload {
  * ----------------------------------------------------
  */
 
+async function getClientIpFromHeaders(): Promise<string> {
+  try {
+    const { headers } = await import('next/headers');
+    const headerList = await headers();
+    return (
+      headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      headerList.get('x-real-ip')?.trim() ||
+      'unknown'
+    );
+  } catch {
+    return 'unknown';
+  }
+}
+
 export async function loginAdminAction(data: {
   email?: string;
   name?: string;
@@ -109,7 +123,8 @@ export async function loginAdminAction(data: {
   const identifier = (data.name ?? data.username ?? data.identifier ?? data.email ?? '').trim();
   try {
     const password = data.password ?? data.pass ?? '';
-    const result = await authenticateAdmin(identifier, password);
+    const clientIp = await getClientIpFromHeaders();
+    const result = await authenticateAdmin(identifier, password, clientIp);
     if (result.success && result.user) {
       logger.info('Admin login successful', { name: result.user.name, role: result.user.role });
     } else {
@@ -2905,15 +2920,7 @@ export async function changeAdminPasswordAction(payload: {
 }): Promise<ChangePasswordResult> {
   try {
     const session = await requireAdmin('owner', { bypassCache: true });
-
-    let clientIp = 'unknown';
-    try {
-      const { headers } = await import('next/headers');
-      const headerList = await headers();
-      clientIp = headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    } catch {
-      // Ignore outside request context
-    }
+    const clientIp = await getClientIpFromHeaders();
 
     const result = await changeAdminPassword({
       actorSession: session,

@@ -18,12 +18,20 @@ export interface AdminSession {
 export const ADMIN_SESSION_COOKIE = 'dhd_admin_session';
 export const SESSION_DURATION_SECONDS = 8 * 60 * 60; // 8 hours
 
+let warnedMissingAuthSecret = false;
+
 function getAuthSecret(): string {
-  return (
-    process.env.AUTH_SECRET ||
-    process.env.CRON_SECRET ||
-    'dhd_secure_fallback_signing_key_replace_in_env_2026'
-  );
+  const secret = process.env.AUTH_SECRET || process.env.CRON_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production' && !warnedMissingAuthSecret) {
+      warnedMissingAuthSecret = true;
+      console.error(
+        '[SECURITY WARNING] AUTH_SECRET (or CRON_SECRET) is not set in production! Set AUTH_SECRET in environment variables immediately.'
+      );
+    }
+    return 'dhd_secure_fallback_signing_key_replace_in_env_2026';
+  }
+  return secret;
 }
 
 async function signPayload(payloadStr: string): Promise<string> {

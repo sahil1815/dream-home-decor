@@ -86,8 +86,8 @@ async function fetchDbAdminByRole(role: AdminRole): Promise<DbAdminUserRow | nul
 
 async function fetchDbAdminByIdentifier(identifier: string): Promise<DbAdminUserRow | null> {
   if (!isSupabaseConfigured()) return null;
-  const clean = identifier.trim();
-  if (!clean) return null;
+  const needle = identifier.trim().toLowerCase();
+  if (!needle) return null;
 
   try {
     const supabase = createAdminClient();
@@ -96,12 +96,16 @@ async function fetchDbAdminByIdentifier(identifier: string): Promise<DbAdminUser
       .select(
         'id, email, username, name, role, password_hash, token_version, is_active, password_updated_at, updated_by, last_login_at'
       )
-      .or(`email.ilike.${clean},username.ilike.${clean},name.ilike.${clean}`)
-      .limit(1)
-      .maybeSingle();
+      .limit(20);
 
-    if (error || !data) return null;
-    return data as DbAdminUserRow;
+    if (error || !Array.isArray(data)) return null;
+    const match = (data as DbAdminUserRow[]).find(
+      (row) =>
+        row.email?.trim().toLowerCase() === needle ||
+        row.username?.trim().toLowerCase() === needle ||
+        row.name?.trim().toLowerCase() === needle
+    );
+    return match || null;
   } catch {
     return null;
   }
