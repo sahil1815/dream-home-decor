@@ -13,6 +13,7 @@ import {
   Camera,
   Eye,
   EyeOff,
+  Video,
 } from 'lucide-react';
 import { Product, Category } from '@/types/database';
 import { formatBDT } from '@/lib/utils';
@@ -271,6 +272,13 @@ export function ProductListManager({
                           <span className="inline-flex items-center gap-1 text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-bold">
                             <Camera className="w-2.5 h-2.5 text-amber-600" />
                             <span>নমুনা ছবি</span>
+                          </span>
+                        )}
+
+                        {product.video_urls && product.video_urls.length > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md font-bold">
+                            <Video className="w-2.5 h-2.5 text-blue-600" />
+                            <span>ভিডিও ({product.video_urls.length})</span>
                           </span>
                         )}
                       </td>

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Zap, MessageCircle, Ruler, Heart, Camera } from 'lucide-react';
+import { ShoppingCart, Zap, MessageCircle, Ruler, Heart, Camera, Play } from 'lucide-react';
 import { Product } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
@@ -46,6 +46,7 @@ export function ProductCard({
 
   const isOutOfStock = product.stock_status === 'out_of_stock';
   const isMadeToOrder = product.stock_status === 'made_to_order';
+  const hasVideos = Boolean(product.video_urls && product.video_urls.length > 0);
 
   const whatsappMessage = `আসসালামু আলাইকুম, আমি "${product.title_bn || product.title}" (মূল্য: ${formatBDT(currentPrice)}) অর্ডার করতে চাই।`;
   const whatsappUrl = buildWhatsAppUrl(whatsappNumber, whatsappMessage);
@@ -107,6 +108,20 @@ export function ProductCard({
                 </span>
               )}
             </div>
+          )}
+
+          {/* Product Video Available Badge */}
+          {hasVideos && (
+            <Link
+              href={`/products/${product.slug}`}
+              className={`absolute ${
+                isOutOfStock || isMadeToOrder ? 'top-9' : 'top-2.5'
+              } right-2.5 bg-[#2B1D14]/90 hover:bg-[#8A5A3B] backdrop-blur-xs text-[#FAF3E8] text-[10px] font-bn font-semibold px-2 py-0.5 rounded-md border border-[#B08D57]/40 flex items-center gap-1 shadow-xs transition-colors`}
+              title="প্রোডাক্টের বাস্তব ভিডিও দেখুন"
+            >
+              <Play className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
+              <span>ভিডিও</span>
+            </Link>
           )}
 
           {/* Dimensions tag */}

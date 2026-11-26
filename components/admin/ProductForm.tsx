@@ -14,9 +14,11 @@ import {
   Camera,
   Info,
   Check,
+  Video,
 } from 'lucide-react';
 import { Product, Category, StockStatus } from '@/types/database';
 import { ImageKitUrlManager } from '@/components/admin/ImageKitUrlManager';
+import { FacebookVideoManager } from '@/components/admin/FacebookVideoManager';
 import { saveProductAction, deleteProductAction, duplicateProductAction } from '@/lib/actions';
 import { formatBDT, getDiscountPercentage } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
@@ -53,6 +55,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
   const [seoTitle, setSeoTitle] = useState(initialProduct?.seo_title || '');
   const [seoDescription, setSeoDescription] = useState(initialProduct?.seo_description || '');
   const [images, setImages] = useState<string[]>(initialProduct?.images || []);
+  const [videoUrls, setVideoUrls] = useState<string[]>(initialProduct?.video_urls || []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,6 +97,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
         cost_price: costPrice ? Number(costPrice) : null,
         category_id: categoryId || null,
         images,
+        video_urls: videoUrls,
         dimensions,
         material,
         lead_time_days: Number(leadTimeDays) || null,
@@ -463,12 +467,13 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
             </div>
           </div>
 
-          {/* Section 4: Images Manager */}
-          <div className="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200 space-y-4 shadow-2xs">
+          {/* Section 4: Images & Facebook Video Manager */}
+          <div className="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200 space-y-5 shadow-2xs">
             <h2 className="text-sm font-bn font-bold text-stone-900 border-b border-stone-100 pb-2">
-              ৪. ছবির গ্যালারি ও ড্রাইভ অটো-আপলোড
+              ৪. ছবি ও ফেসবুক ভিডিও গ্যালারি (Images & Video)
             </h2>
             <ImageKitUrlManager images={images} onChange={setImages} />
+            <FacebookVideoManager videoUrls={videoUrls} onChange={setVideoUrls} />
           </div>
 
           {/* Section 5: SEO Meta & Visibility */}
@@ -566,6 +571,13 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
                     <div className="absolute bottom-2.5 left-2.5 bg-stone-900/85 backdrop-blur-xs text-amber-200 text-[10px] font-bn px-2 py-0.5 rounded-full border border-amber-400/30 flex items-center gap-1">
                       <Camera className="w-2.5 h-2.5 text-amber-300" />
                       <span>নমুনা ছবি</span>
+                    </div>
+                  )}
+
+                  {videoUrls.length > 0 && (
+                    <div className="absolute bottom-2.5 right-2.5 bg-[#2B1D14]/90 backdrop-blur-xs text-amber-200 text-[10px] font-bn px-2 py-0.5 rounded-full border border-[#B08D57]/40 flex items-center gap-1">
+                      <Video className="w-2.5 h-2.5 text-amber-300" />
+                      <span>ভিডিও ({videoUrls.length})</span>
                     </div>
                   )}
 

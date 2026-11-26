@@ -37,6 +37,11 @@ import { sendMetaConversionsApiEvent } from '@/lib/meta-capi';
 import { sendCustomerOrderSMS } from '@/lib/sms';
 import { createSteadfastParcel } from '@/lib/courier/steadfast';
 import { evaluateOrderRisk } from '@/lib/risk-engine';
+import {
+  parseFacebookVideoInput,
+  sanitizeFacebookVideoUrls,
+  isAllowedFacebookHost,
+} from '@/lib/facebook-video';
 
 // In-memory idempotency cache to protect against rapid double-clicks (5 min TTL)
 const idempotencyCache = new Map<
@@ -762,6 +767,7 @@ export async function saveProductAction(productData: {
   cost_price?: number | null;
   category_id?: string | null;
   images: string[];
+  video_urls?: string[];
   dimensions?: string;
   material?: string;
   color_options: string[];
@@ -779,6 +785,17 @@ export async function saveProductAction(productData: {
     if (!productData.title || !productData.slug || !productData.price) {
       return { success: false, error: 'Title, slug, and price are required' };
     }
+
+    const rawVideoUrls = Array.isArray(productData.video_urls) ? productData.video_urls : [];
+    for (const rawVideoUrl of rawVideoUrls) {
+      if (typeof rawVideoUrl === 'string' && rawVideoUrl.trim()) {
+        const parsedVideo = parseFacebookVideoInput(rawVideoUrl);
+        if (!parsedVideo.valid) {
+          return { success: false, error: parsedVideo.error };
+        }
+      }
+    }
+    const cleanVideoUrls = sanitizeFacebookVideoUrls(rawVideoUrls);
 
     if (!isSupabaseConfigured()) {
       return { success: true, message: 'Product saved successfully (Demo mode)' };
@@ -800,6 +817,7 @@ export async function saveProductAction(productData: {
       cost_price: productData.cost_price ? Number(productData.cost_price) : null,
       category_id: productData.category_id || null,
       images: productData.images.filter(Boolean),
+      video_urls: cleanVideoUrls,
       dimensions: productData.dimensions?.trim() || null,
       material: productData.material?.trim() || null,
       color_options: productData.color_options.filter(Boolean),
@@ -925,6 +943,98 @@ export async function deleteProductAction(productId: string) {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Validate and optionally resolve short/share Facebook video links (fb.watch, /share/v/)
+ * into canonical Facebook video/reel URLs so Facebook's iframe embed plugin plays reliably.
+ */
+export async function resolveFacebookVideoUrlAction(rawInput: string): Promise<{
+  success: boolean;
+  url?: string;
+  isReel?: boolean;
+  resolved?: boolean;
+  warning?: string;
+  error?: string;
+}> {
+  try {
+    await requireAdmin('manager');
+
+    const parsed = parseFacebookVideoInput(rawInput);
+    if (!parsed.valid) {
+      return { success: false, error: parsed.error };
+    }
+
+    if (!parsed.isShortLink) {
+      return {
+        success: true,
+        url: parsed.url,
+        isReel: parsed.isReel,
+        resolved: false,
+      };
+    }
+
+    // Safely follow redirects (up to 5 hops) only across allowlisted Facebook hosts
+    let currentUrl = parsed.url;
+    for (let hop = 0; hop < 5; hop++) {
+      const target = new URL(currentUrl);
+      if (!isAllowedFacebookHost(target.hostname)) {
+        break;
+      }
+
+      const response = await fetch(currentUrl, {
+        method: 'HEAD',
+        redirect: 'manual',
+        signal: AbortSignal.timeout(3500),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; DreamHomeDecor/1.0)',
+        },
+      });
+
+      const location = response.headers.get('location');
+      if (!location || response.status < 300 || response.status >= 400) {
+        break;
+      }
+
+      const nextUrl = new URL(location, currentUrl);
+      if (!isAllowedFacebookHost(nextUrl.hostname) || nextUrl.pathname.startsWith('/login')) {
+        break;
+      }
+      currentUrl = nextUrl.toString();
+    }
+
+    const resolvedParsed = parseFacebookVideoInput(currentUrl);
+    if (resolvedParsed.valid && !resolvedParsed.isShortLink) {
+      return {
+        success: true,
+        url: resolvedParsed.url,
+        isReel: resolvedParsed.isReel,
+        resolved: resolvedParsed.url !== parsed.url,
+      };
+    }
+
+    return {
+      success: true,
+      url: parsed.url,
+      isReel: parsed.isReel,
+      resolved: false,
+      warning:
+        'শর্ট লিঙ্ক যোগ করা হয়েছে। প্রিভিউ না চললে ফেসবুক থেকে সরাসরি ভিডিওর মূল (/videos/ বা /reel/) লিঙ্ক কপি করুন।',
+    };
+  } catch {
+    const fallback = parseFacebookVideoInput(rawInput);
+    if (!fallback.valid) {
+      return { success: false, error: fallback.error };
+    }
+    return {
+      success: true,
+      url: fallback.url,
+      isReel: fallback.isReel,
+      resolved: false,
+      warning:
+        'শর্ট লিঙ্ক যোগ করা হয়েছে। প্রিভিউ না চললে ফেসবুক থেকে সরাসরি ভিডিওর মূল (/videos/ বা /reel/) লিঙ্ক কপি করুন।',
+    };
   }
 }
 
@@ -2293,6 +2403,7 @@ export async function duplicateProductAction(productId: string) {
       cost_price: original.cost_price,
       category_id: original.category_id,
       images: original.images,
+      video_urls: Array.isArray(original.video_urls) ? original.video_urls : [],
       dimensions: original.dimensions,
       material: original.material,
       color_options: original.color_options,

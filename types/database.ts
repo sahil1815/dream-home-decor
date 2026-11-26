@@ -92,6 +92,7 @@ export interface Product {
   cost_price?: number | null;
   category_id: string | null;
   images: string[];
+  video_urls?: string[] | null;
   dimensions: string | null;
   material: string | null;
   color_options: string[];

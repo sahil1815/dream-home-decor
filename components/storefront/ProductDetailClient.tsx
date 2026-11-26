@@ -21,15 +21,19 @@ import {
   FileText,
   Sparkles,
   PhoneCall,
+  Play,
+  Video,
 } from 'lucide-react';
 import { Product, SiteSettings, DeliveryZone, PaymentMethod } from '@/types/database';
 import { formatBDT, getDiscountPercentage, buildWhatsAppUrl } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/imagekit';
+import { sanitizeFacebookVideoUrls } from '@/lib/facebook-video';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
 import { submitOrderAction } from '@/lib/actions';
 import { trackViewContent } from '@/lib/analytics';
 import { CallBackModal } from '@/components/storefront/CallBackModal';
+import { FacebookVideoPlayer } from '@/components/storefront/FacebookVideoPlayer';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -50,13 +54,20 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
     [product.images]
   );
 
+  const videos = useMemo(
+    () => sanitizeFacebookVideoUrls(product.video_urls),
+    [product.video_urls]
+  );
+
   const isPlaceholder = Boolean(
     settings.show_placeholder_tag !== false &&
     (product.has_placeholder_images ||
       images.some((img) => img.startsWith('/placeholders/') || img.includes('/placeholders/')))
   );
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeMedia, setActiveMedia] = useState<
+    { type: 'image'; index: number } | { type: 'video'; index: number }
+  >({ type: 'image', index: 0 });
   const [selectedColor, setSelectedColor] = useState(
     product.color_options?.[0] || 'Standard'
   );
@@ -221,43 +232,74 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-      {/* Left Column: Image Gallery */}
+      {/* Left Column: Image & Video Gallery */}
       <div className="lg:col-span-7 space-y-4">
-        {/* Main Display Image */}
-        <div className="relative aspect-4/3 sm:aspect-square bg-white rounded-3xl overflow-hidden border border-stone-200 shadow-sm">
-          <Image
-            src={getOptimizedImageUrl(images[activeImageIndex], 900)}
-            alt={product.title}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 55vw"
-            className="object-cover"
-          />
+        {/* Main Display Image or Facebook Video */}
+        <div
+          className={`relative rounded-3xl overflow-hidden border border-stone-200 shadow-sm ${
+            activeMedia.type === 'video'
+              ? 'bg-[#1C1612] sm:aspect-square'
+              : 'aspect-4/3 sm:aspect-square bg-white'
+          }`}
+        >
+          {activeMedia.type === 'video' && videos[activeMedia.index] ? (
+            <FacebookVideoPlayer
+              url={videos[activeMedia.index]}
+              title={`${product.title_bn || product.title} - বাস্তব ভিডিও ${activeMedia.index + 1}`}
+              className="w-full h-full rounded-none"
+            />
+          ) : (
+            <>
+              <Image
+                src={getOptimizedImageUrl(
+                  images[activeMedia.type === 'image' ? activeMedia.index : 0] || images[0],
+                  900
+                )}
+                alt={product.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="object-cover"
+              />
 
-          {discountPercent > 0 && (
-            <div className="absolute top-4 left-4 bg-rose-600 text-white font-bold text-xs px-3 py-1 rounded-full shadow-md">
-              -{discountPercent}% ছাড়
-            </div>
-          )}
+              {discountPercent > 0 && (
+                <div className="absolute top-4 left-4 bg-rose-600 text-white font-bold text-xs px-3 py-1 rounded-full shadow-md">
+                  -{discountPercent}% ছাড়
+                </div>
+              )}
 
-          {/* Stock Status Badge (Shown only when out of stock or made to order) */}
-          {(product.stock_status === 'out_of_stock' || product.stock_status === 'made_to_order') && (
-            <div className="absolute top-4 right-4 bg-[#2B1D14]/80 backdrop-blur-xs text-[#FAF3E8] text-xs font-bn font-medium px-3 py-1 rounded-full border border-white/10">
-              {product.stock_status === 'out_of_stock'
-                ? 'স্টক শেষ'
-                : 'অর্ডারে তৈরি'}
-            </div>
-          )}
+              {/* Stock Status Badge (Shown only when out of stock or made to order) */}
+              {(product.stock_status === 'out_of_stock' || product.stock_status === 'made_to_order') && (
+                <div className="absolute top-4 right-4 bg-[#2B1D14]/80 backdrop-blur-xs text-[#FAF3E8] text-xs font-bn font-medium px-3 py-1 rounded-full border border-white/10">
+                  {product.stock_status === 'out_of_stock'
+                    ? 'স্টক শেষ'
+                    : 'অর্ডারে তৈরি'}
+                </div>
+              )}
 
-          {/* Sample Photo (নমুনা ছবি) Tag */}
-          {isPlaceholder && (
-            <div
-              className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-xs text-amber-200 text-xs font-bn px-3 py-1 rounded-xl border border-amber-400/30 flex items-center gap-1.5 shadow-md"
-              title="আসল পণ্যের ছবি শীঘ্রই যুক্ত হবে"
-            >
-              <Camera className="w-3.5 h-3.5 text-amber-300" />
-              <span>নমুনা ছবি • আসল ছবি শীঘ্রই আসছে</span>
-            </div>
+              {/* Sample Photo (নমুনা ছবি) Tag */}
+              {isPlaceholder && (
+                <div
+                  className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-xs text-amber-200 text-xs font-bn px-3 py-1 rounded-xl border border-amber-400/30 flex items-center gap-1.5 shadow-md"
+                  title="আসল পণ্যের ছবি শীঘ্রই যুক্ত হবে"
+                >
+                  <Camera className="w-3.5 h-3.5 text-amber-300" />
+                  <span>নমুনা ছবি • আসল ছবি শীঘ্রই আসছে</span>
+                </div>
+              )}
+
+              {/* Watch Real Video Quick Button */}
+              {videos.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setActiveMedia({ type: 'video', index: 0 })}
+                  className="absolute bottom-4 right-4 bg-[#2B1D14]/90 hover:bg-[#8B5A2B] backdrop-blur-xs text-white text-xs font-bn font-bold px-3.5 py-2 rounded-xl border border-[#B08D57]/40 flex items-center gap-1.5 shadow-lg transition-colors cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                  <span>বাস্তব ভিডিও দেখুন</span>
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -268,45 +310,97 @@ export function ProductDetailClient({ product, settings }: ProductDetailClientPr
               <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <div className="text-xs font-bn">
                 <p className="font-bold">কারখানায় তৈরি আসল পণ্যের ছবি দ্রুত যুক্ত করা হচ্ছে</p>
-                <p className="text-amber-800 text-[11px] mt-0.5">আপনার কাস্টম সাইজ বা কালারের বাস্তব ছবি ও ভিডিও দেখতে WhatsApp-এ সরাসরি মেসেজ দিন।</p>
+                <p className="text-amber-800 text-[11px] mt-0.5">
+                  {videos.length > 0
+                    ? 'বাস্তব মাপ ও ফিনিশিং বুঝতে উপরের "বাস্তব ভিডিও" প্লে করুন অথবা WhatsApp-এ মেসেজ দিন।'
+                    : 'আপনার কাস্টম সাইজ বা কালারের বাস্তব ছবি ও ভিডিও দেখতে WhatsApp-এ সরাসরি মেসেজ দিন।'}
+                </p>
               </div>
             </div>
-            <a
-              href={`https://wa.me/${settings.whatsapp_number || '8801712345678'}?text=${encodeURIComponent(
-                `আসসালামু আলাইকুম, "${product.title_bn || product.title}" পণ্যের কারখানা তৈরির আসল ছবি ও ভিডিও দেখতে চাই।`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bn font-bold rounded-xl shrink-0 transition-colors shadow-xs"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>আসল ছবি দেখতে চান?</span>
-            </a>
+            <div className="flex items-center gap-2 shrink-0">
+              {videos.length > 0 && activeMedia.type !== 'video' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveMedia({ type: 'video', index: 0 })}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#8B5A2B] hover:bg-[#6D431F] text-white text-xs font-bn font-bold rounded-xl transition-colors shadow-xs cursor-pointer"
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  <span>ভিডিও দেখুন</span>
+                </button>
+              )}
+              <a
+                href={`https://wa.me/${settings.whatsapp_number || '8801712345678'}?text=${encodeURIComponent(
+                  `আসসালামু আলাইকুম, "${product.title_bn || product.title}" পণ্যের কারখানা তৈরির আসল ছবি ও ভিডিও দেখতে চাই।`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bn font-bold rounded-xl shrink-0 transition-colors shadow-xs"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>আসল ছবি দেখতে চান?</span>
+              </a>
+            </div>
           </div>
         )}
 
-        {/* Thumbnail Carousel / Grid */}
-        {images.length > 1 && (
+        {/* Thumbnail Carousel / Grid (Images + Facebook Videos) */}
+        {(images.length > 1 || videos.length > 0) && (
           <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto pb-2">
-            {images.map((img, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActiveImageIndex(idx)}
-                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                  activeImageIndex === idx
-                    ? 'border-[#8B5A2B] scale-105 shadow-md'
-                    : 'border-stone-200 hover:border-stone-400 opacity-70 hover:opacity-100'
-                }`}
-              >
-                <Image
-                  src={getOptimizedImageUrl(img, 150)}
-                  alt={`Thumbnail ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
+            {images.map((img, idx) => {
+              const isSelected = activeMedia.type === 'image' && activeMedia.index === idx;
+              return (
+                <button
+                  key={`img-${idx}`}
+                  type="button"
+                  onClick={() => setActiveMedia({ type: 'image', index: idx })}
+                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                    isSelected
+                      ? 'border-[#8B5A2B] scale-105 shadow-md'
+                      : 'border-stone-200 hover:border-stone-400 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <Image
+                    src={getOptimizedImageUrl(img, 150)}
+                    alt={`Thumbnail ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              );
+            })}
+
+            {videos.map((videoUrl, vIdx) => {
+              const isSelected = activeMedia.type === 'video' && activeMedia.index === vIdx;
+              return (
+                <button
+                  key={`vid-${vIdx}-${videoUrl}`}
+                  type="button"
+                  onClick={() => setActiveMedia({ type: 'video', index: vIdx })}
+                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border-2 bg-[#2B1D14] transition-all cursor-pointer group ${
+                    isSelected
+                      ? 'border-[#8B5A2B] scale-105 shadow-md ring-2 ring-[#8B5A2B]/30'
+                      : 'border-stone-300 hover:border-[#8B5A2B]/70 opacity-90 hover:opacity-100'
+                  }`}
+                  aria-label={`পণ্যের বাস্তব ভিডিও ${vIdx + 1} দেখুন`}
+                  title="বাস্তব ভিডিও দেখুন"
+                >
+                  <Image
+                    src={getOptimizedImageUrl(images[0], 150)}
+                    alt={`Video thumbnail ${vIdx + 1}`}
+                    fill
+                    className="object-cover opacity-40 group-hover:opacity-50 transition-opacity"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/35">
+                    <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#8B5A2B] text-white flex items-center justify-center shadow-md">
+                      <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                    </span>
+                    <span className="text-[9px] sm:text-[10px] font-bn font-bold text-amber-100 leading-none">
+                      {videos.length > 1 ? `ভিডিও ${vIdx + 1}` : 'বাস্তব ভিডিও'}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 

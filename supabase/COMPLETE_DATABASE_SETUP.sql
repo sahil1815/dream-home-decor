@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS products (
   discount_price NUMERIC,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   images TEXT[] DEFAULT '{}'::TEXT[],
+  video_urls TEXT[] DEFAULT '{}'::TEXT[],
   dimensions TEXT,
   material TEXT DEFAULT 'উন্নত মেলামাইন বোর্ড (১৬ মিমি) ও ১ মিমি পিভিসি এজ ব্যান্ডিং',
   color_options TEXT[] DEFAULT ARRAY['Walnut Brown', 'Teak Wood', 'Classic White'],
@@ -322,6 +323,7 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS title_bn TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price NUMERIC;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}'::TEXT[];
+ALTER TABLE products ADD COLUMN IF NOT EXISTS video_urls TEXT[] DEFAULT '{}'::TEXT[];
 ALTER TABLE products ADD COLUMN IF NOT EXISTS dimensions TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS material TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS color_options TEXT[] DEFAULT ARRAY['Walnut Brown', 'Teak Wood', 'Classic White'];

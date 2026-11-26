@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS products (
   discount_price NUMERIC,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   images TEXT[] DEFAULT '{}'::TEXT[],
+  video_urls TEXT[] DEFAULT '{}'::TEXT[],
   dimensions TEXT,
   material TEXT DEFAULT 'Melamine Board / Malaysian Wood Processed Board',
   color_options TEXT[] DEFAULT ARRAY['Walnut Brown', 'Teak Wood', 'Antique Pine', 'Classic White'],
